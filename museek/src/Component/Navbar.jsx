@@ -3,11 +3,20 @@ import LogoFinalDarkModeFrameResized from "../Images/LogoFinalDarkModeFrameResiz
 import CircularLogoFinalDarkMode from "../Images/CircularLogoFinalDarkMode.png"
 import home_white_variant from "../Images/Icons/home_white_variant.png"
 import home_outlined from "../Images/Icons/home_outlined.png"
+import Login from "./Login";
+import Signup from "./Signup";
+import { Navigate } from 'react-router-dom';
 
 const Navbar = () => {
 
+  const navigate = useNavigate();
     // const location = useLocation();
     // const isHome = location.pathname === '/'; 
+
+    const handleRedirect = () => {
+    // Redirects to the '/componentB' path
+    navigate('/Login');
+  };
 
     return (
     <nav className="h-[60px] flex items-center justify-between px-5 py-3 text-white">
@@ -42,9 +51,9 @@ const Navbar = () => {
       {/* Right - Profile */}
       <div>
         <img
-          src="https://via.placeholder.com/40"
           alt="Profile"
           className="w-10 h-10 rounded-full object-cover cursor-pointer border-2 border-[#ffd180]"
+          onClick={handleRedirect}
         />
       </div>
     </nav>
