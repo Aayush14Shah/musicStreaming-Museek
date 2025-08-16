@@ -10,6 +10,7 @@ function App() {
           <Route path="/about" element={<div>About Page</div>} />
       </Routes> */}
       <Home />
+      
     </div>
   );
 }

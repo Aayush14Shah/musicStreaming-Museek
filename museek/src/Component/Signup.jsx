@@ -1,7 +1,12 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import Login from './Login';
 
 const Signup = ({}) => {
+  const navigate = useNavigate();
+  const handleLogin = () => {
+    navigate('/Login');
+  };
   return (
     <div className="bg-[#242527] p-8 rounded-lg shadow-2xl w-full max-w-md border border-[#ffd180]">
       <h2 className="text-3xl font-bold text-center text-[#f5f5f5] mb-6">Create Account</h2>
@@ -50,7 +55,7 @@ const Signup = ({}) => {
         <p className="text-sm text-[#f5f5f5]">
           Already have an account?{' '}
           <button
-            onClick={() => onPageChange('login')}
+            onClick={handleLogin}
             className="text-[#ffd180] hover:underline focus:outline-none"
           >
             Log In

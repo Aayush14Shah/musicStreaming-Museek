@@ -3,10 +3,10 @@ import { Navigate } from 'react-router-dom';
 import './Signup'; 
 
 const Login = ({}) => {
-    const shouldRedirect = false; 
-    if (shouldRedirect) {
-    return <Navigate to="/Signup" replace />;
-  }
+    const navigate = useNavigate(); 
+    const handleRedirect = () => {
+      navigate('/Signup');
+    };
   return (
     <div className="bg-[#1c2b2e] p-8 rounded-lg shadow-2xl w-full max-w-md border border-[#ffd180]">
       <h2 className="text-3xl font-bold text-center text-[#f5f5f5] mb-6">Login</h2>
@@ -44,7 +44,7 @@ const Login = ({}) => {
         <p className="text-sm text-[#f5f5f5]">
           Don't have an account?{' '}
           <button
-            onClick={(shouldRedirect = true) => onPageChange('signup')}
+            onClick={handleRedirect}
             className="text-[#ffd180] hover:underline focus:outline-none"
           >
             Sign Up
