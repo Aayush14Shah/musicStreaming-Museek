@@ -15,6 +15,10 @@ app.use(express.json()); // parse JSON bodies if you send POST/PUT later
 console.log("CLIENT ID:", process.env.SPOTIFY_CLIENT_ID);
 console.log("CLIENT SECRET:", process.env.SPOTIFY_CLIENT_SECRET);
 
+app.get('/', (req, res) => {
+  res.json({ message: 'Welcome to Museek API. Use /api endpoints like /api/new-releases.' });
+});
+
 /**
  * getAppToken()
  * - Gets an app-level access token from Spotify (Client Credentials Flow).
