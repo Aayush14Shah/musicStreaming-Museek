@@ -5,8 +5,14 @@ import SearchIcon from '@mui/icons-material/Search';
 // Assume images are imported as in the original
 import CircularLogoFinalDarkMode from '../../Images/CircularLogoFinalDarkMode.png';
 import home_white_variant from '../../Images/Icons/home_white_variant.png';
+import { Navigate,useNavigate } from 'react-router-dom';
+import Login from '../Login';
 
 const Navbar = () => {
+  const navigate = useNavigate(); 
+    const handleRedirect = () => {
+      navigate('/Login');
+    };
   return (
     <div className="fixed top-0 left-0 right-0 h-[60px] flex items-center justify-between px-4 md:px-6 py-3 text-[#F5F5F5] bg-[#121212] border-b border-[#1C2B2D] z-50">
       {/* Left - Brand Logo */}
@@ -48,7 +54,9 @@ const Navbar = () => {
             src="https://placehold.co/40?text=Profile"
             alt="Profile"
             className="w-10 h-10 rounded-full object-cover cursor-pointer border-2 border-[#CD7F32]"
+            onClick={handleRedirect}
           />
+          
         </Tooltip>
       </div>
     </div>
