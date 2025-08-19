@@ -8,16 +8,16 @@ import Signup from './Component/Signup';
 function App() {
   return (
     // Added 'min-h-screen' and 'flex items-center justify-center'
-//     bg-[#121212]
-    <div className='bg-[#1c2b2d] min-h-screen flex items-center justify-center'>
-    <Router>
-      <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/Login" element={<Login />} />
-          <Route path="/Signup" element={<Signup />} />
-          <Route path="/about" element={<About />} />
-      </Routes>
-    </Router>
+    // bg-[#121212]
+    // flex items-center justify-center
+    <div className='bg-[#1c2b2d] min-h-screen'>
+        <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/Login" element={<Login />} />
+            <Route path="/Signup" element={<Signup />} />
+            <Route path="/about" element={<About />} />
+        </Routes>
+    </div>
   ); 
 }
 
