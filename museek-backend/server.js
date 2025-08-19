@@ -1,7 +1,8 @@
 // backend/server.js
-import express from "express";
+import express, { request } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+const os = require('os')
 
 dotenv.config();
 const app = express();
