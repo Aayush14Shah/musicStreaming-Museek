@@ -3,7 +3,6 @@ import { Navigate,useNavigate } from 'react-router-dom';
 import Login from './Login';
 import Logo from '../Images/LogoFinalDarkModeFrameResized.png';
 
-
 const Signup = ({}) => {
   const navigate = useNavigate();
   const handleLogin = () => {
