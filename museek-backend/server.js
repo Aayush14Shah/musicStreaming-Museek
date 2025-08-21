@@ -2,7 +2,7 @@
 import express, { request } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-const os = require('os')
+import os from "os";
 
 dotenv.config();
 const app = express();
