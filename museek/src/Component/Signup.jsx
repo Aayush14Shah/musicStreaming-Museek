@@ -1,6 +1,8 @@
 import React from 'react';
 import { Navigate,useNavigate } from 'react-router-dom';
 import Login from './Login';
+import Logo from '../Images/LogoFinalDarkModeFrameResized.png';
+
 
 const Signup = ({}) => {
   const navigate = useNavigate();
@@ -10,6 +12,13 @@ const Signup = ({}) => {
   return (
     <div className="bg-[#243537] p-8 rounded-3xl shadow-2xl w-full max-w-md border" style={{ borderColor: '#b06f2d', borderWidth: '2px' }}>
       {/* Page Title */}
+      <div className="flex justify-center items-center">
+            <img
+              src={Logo}
+              alt="Brand Logo"
+              className="w-[160px] object-cover"
+            />
+            </div>
       <h1 className="text-3xl font-semibold text-center mb-6 text-[#f5f5f5]">Sign Up</h1>
 
       {/* Sign Up Form */}
