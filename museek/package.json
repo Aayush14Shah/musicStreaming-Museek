@@ -13,7 +13,11 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.11.0",
     "dotenv": "^17.2.1",
+<<<<<<< HEAD
     "package.json": "^2.0.1",
+=======
+    "lightswind": "^3.1.15",
+>>>>>>> 389daeddbf971d7a7b7346e968a02e22f388b40c
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.8.0",
