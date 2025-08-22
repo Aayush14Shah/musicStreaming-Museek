@@ -20,6 +20,7 @@ const Login = () => {
       });
       // store user name for navbar
       localStorage.setItem('userName', data.user.name);
+      localStorage.setItem('userEmail', data.user.email);
       alert('Login successful');
       navigate('/');
     } catch (err) {
@@ -29,7 +30,8 @@ const Login = () => {
 
   const handleRedirect = () => navigate('/Signup');
   return (
-  <div className="bg-[#243537] p-8 rounded-3xl shadow-2xl w-full max-w-md border " style={{ borderColor: '#b06f2d', borderWidth: '2px' }}>
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="bg-[#243537] p-8 rounded-3xl shadow-2xl w-full max-w-md border " style={{ borderColor: '#b06f2d', borderWidth: '2px' }}>
       {/* Page Title */}
       <div className="flex justify-center items-center">
       <img
@@ -57,7 +59,8 @@ const Login = () => {
       <p className="text-sm text-center mt-6 text-[#f5f5f5]">
         Don't have an account? <button onClick={handleRedirect} className="text-[#cd7f34] hover:underline focus:outline-none">Sign Up</button>
       </p>
-    </div>
+        </div>
+  </div>
   );
 };
 

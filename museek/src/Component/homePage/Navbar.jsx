@@ -10,12 +10,15 @@ import Login from '../Login';
 
 const Navbar = () => {
   const [userInitial, setUserInitial] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const name = localStorage.getItem('userName');
     if (name) setUserInitial(name.charAt(0).toUpperCase());
+    const email = localStorage.getItem('userEmail');
+    if (email) setUserEmail(email);
   }, []);
     const handleRedirect = () => {
     navigate('/Login');
@@ -23,7 +26,9 @@ const Navbar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('userName');
+    localStorage.removeItem('userEmail');
     setUserInitial(null);
+    setUserEmail(null);
     setOpen(false);
     navigate('/');
   };
@@ -74,7 +79,16 @@ const Navbar = () => {
             <span className="font-semibold text-lg">{userInitial}</span>
           </div>
           {open && (
-            <div className="absolute right-0 mt-2 w-28 bg-[#1C2B2D] border border-[#CD7F32] rounded-md shadow-lg z-50">
+            <div className="absolute right-0 mt-2 w-40 bg-[#1C2B2D] border border-[#CD7F32] rounded-md shadow-lg z-50 p-2 dropdownMenu">
+              {userEmail && (
+                <div className="px-2 py-1 text-xs text-[#CD7F32] truncate max-w-[140px]" title={userEmail}>{userEmail}</div>
+              )}
+              <button
+                onClick={() => { setOpen(false); navigate('/profile'); }}
+                className="block w-full text-left px-4 py-2 text-sm text-[#F5F5F5] hover:bg-[#2a2a2a]"
+              >
+                Profile
+              </button>
               <button
                 onClick={handleLogout}
                 className="block w-full text-left px-4 py-2 text-sm text-[#F5F5F5] hover:bg-[#2a2a2a]"

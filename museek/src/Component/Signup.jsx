@@ -30,7 +30,8 @@ const Signup = () => {
   const handleLogin = () => navigate('/Login');
 
   return (
-    <div className="bg-[#243537] p-8 rounded-3xl shadow-2xl w-full max-w-md border" style={{ borderColor: '#b06f2d', borderWidth: '2px' }}>
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="bg-[#243537] p-8 rounded-3xl shadow-2xl w-full max-w-md border" style={{ borderColor: '#b06f2d', borderWidth: '2px' }}>
       {/* Page Title */}
       <div className="flex justify-center items-center">
             <img
@@ -66,6 +67,7 @@ const Signup = () => {
       <p className="text-sm text-center mt-6 text-[#f5f5f5]">
         Already have an account? <button onClick={handleLogin} className="text-[#cd7f34] hover:underline focus:outline-none">Login</button>
       </p>
+      </div>
     </div>
   );
 };
