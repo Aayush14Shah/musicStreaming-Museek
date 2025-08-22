@@ -82,7 +82,7 @@
       <div className="relative flex size-full min-h-screen flex-col bg-[#121212] dark group/design-root overflow-x-hidden" style={{ fontFamily: 'Inter, \"Noto Sans\", sans-serif' }}>
         <Navbar />
         <LeftSidebar />
-        <div className={`layout-container flex h-full grow flex-col min-h-screen w-full transition-all duration-300 ease-in-out pt-[60px] pb-16 md:pb-20 md:pl-[17rem] lg:pl-[18.5rem] ${isPlaying ? 'md:pr-[20.5rem]' : 'md:pr-2'}`}>
+        <div className={`layout-container flex h-full grow flex-col min-h-screen w-full transition-all duration-300 ease-in-out pt-[60px] pb-16 md:pb-20 md:pl-[16.5rem] lg:pl-[18rem] ${isPlaying ? 'pr-[18.5rem] md:pr-[20.5rem] lg:pr-[22.5rem]' : 'pr-2'}`}>
           {/* Outer card for middle content */}
           <div className="m-1.5 md:mx-2 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.45)] bg-[#0e0e0e] p-2">
             {/* Inner card */}
@@ -109,7 +109,7 @@
             onClick={() => setIsPlaying(true)}
             className="hidden md:flex fixed right-1.5 bottom-24 items-center gap-2 px-4 py-2 rounded-full bg-[#0e0e0e]/95 text-[#F5F5F5] shadow-[0_8px_20px_rgba(0,0,0,0.35)] z-40 hover:bg-[#151515]/95 transition-colors"
           >
-            <span className="inline-block w-2 h-2 rounded-full bg-[#4ade80]"></span>
+            <span className="inline-block w-2 h-2 rounded-full bg-[#CD7F32]"></span>
             Show Now Playing
           </button>
         )}
