@@ -20,6 +20,7 @@ const Login = () => {
       });
       // store user name for navbar
       localStorage.setItem('userName', data.user.name);
+      localStorage.setItem('userId', data.user._id);
       localStorage.setItem('userEmail', data.user.email);
       alert('Login successful');
       navigate('/');
