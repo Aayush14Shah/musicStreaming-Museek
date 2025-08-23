@@ -44,23 +44,23 @@ const LeftSidebar = () => {
       <div className="m-1.5 w-full h-[calc(100%-12px)] rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.45)] bg-[#0e0e0e] p-2">
         {/* Inner card */}
         <div className="w-full h-full rounded-2xl bg-[#181818] overflow-hidden">
-          <div className="flex flex-col h-full overflow-y-auto p-4 gap-4 group scrollbar-thin scrollbar-thumb-transparent hover:scrollbar-thumb-[#1C2B2D] scrollbar-track-transparent scrollbar-thumb-rounded-full">
+          <div className="flex flex-col h-full overflow-y-auto p-4 gap-4 group scrollbar-thin scrollbar-thumb-transparent hover:scrollbar-thumb-[#CD7F32] scrollbar-track-transparent scrollbar-thumb-rounded-full">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold text-sm uppercase tracking-wide text-[#F5F5F5]/80">Your Library</h2>
               <button 
                 onClick={() => setShowCreate(v => !v)} 
-                className="bg-[#1C2B2D] text-[#F5F5F5] text-sm font-medium px-2 py-1 rounded-md transition-colors hover:bg-[#1C2B2D]/80"
+                className="bg-[#CD7F32] text-[#121212] text-sm font-medium px-2 py-1 rounded-md transition-colors hover:bg-[#CD7F32]/90"
               >
                 + New
               </button>
             </div>
 
             {showCreate && (
-              <div className="bg-[#1f1f1f] rounded-lg p-4 border border-[#1C2B2D]/30">
+              <div className="bg-[#1f1f1f] rounded-lg p-4 border border-[#CD7F32]/30">
                 <h3 className="text-sm font-medium text-[#F5F5F5] mb-3">Create New Playlist</h3>
                 <div className="space-y-3">
                   <input
-                    className="w-full bg-[#242424] border border-[#1C2B2D]/40 rounded-md px-3 py-2 outline-none text-sm placeholder-[#8ea5a8] focus:border-[#1C2B2D]/70 transition-colors"
+                    className="w-full bg-[#242424] border border-[#CD7F32]/40 rounded-md px-3 py-2 outline-none text-sm placeholder-[#8ea5a8] focus:border-[#CD7F32]/60 transition-colors"
                     placeholder="Playlist name"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
@@ -70,14 +70,14 @@ const LeftSidebar = () => {
                   <div className="flex gap-2">
                     <button 
                       onClick={addPlaylist} 
-                      className="px-4 py-2 text-sm bg-[#1C2B2D] text-[#F5F5F5] rounded-md hover:bg-[#1C2B2D]/80 transition-colors font-medium disabled:opacity-60"
+                      className="px-4 py-2 text-sm bg-[#CD7F32] text-[#121212] rounded-md hover:bg-[#CD7F32]/90 transition-colors font-medium disabled:opacity-60"
                       disabled={!newName.trim()}
                     >
                       Create
                     </button>
                     <button 
                       onClick={() => {setShowCreate(false); setNewName('');}} 
-                      className="px-4 py-2 text-sm bg-transparent border border-[#1C2B2D]/40 text-[#F5F5F5] rounded-md hover:bg-[#1C2B2D]/10 transition-colors"
+                      className="px-4 py-2 text-sm bg-transparent border border-[#CD7F32]/40 text-[#F5F5F5] rounded-md hover:bg-[#CD7F32]/10 transition-colors"
                     >
                       Cancel
                     </button>
@@ -112,7 +112,7 @@ const LeftSidebar = () => {
             </div>
 
             <div className="mt-auto">
-              <div className="bg-[#1f1f1f] rounded-lg p-3 text-xs text-[#8ea5a8] border border-[#1C2B2D]/20">
+              <div className="bg-[#1f1f1f] rounded-lg p-3 text-xs text-[#8ea5a8] border border-[#CD7F32]/20">
                 Tip: Playlists are saved locally on this device.
               </div>
             </div>

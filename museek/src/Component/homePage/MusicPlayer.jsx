@@ -45,7 +45,7 @@ const MusicPlayer = ({ onPlay }) => {
           <div className="text-[#CD7F32] truncate">{currentTrack.artist}</div>
         </div>
         <Tooltip title="Add to Liked Songs" arrow>
-          <button onClick={addToLiked} className="text-[#F5F5F5] hover:text-[#1C2B2D] hidden sm:block">
+          <button onClick={addToLiked} className="text-[#F5F5F5] hover:text-[#CD7F32] hidden sm:block">
             <AddIcon fontSize="small" />
           </button>
         </Tooltip>
@@ -55,27 +55,27 @@ const MusicPlayer = ({ onPlay }) => {
       <div className="flex flex-col items-center flex-1 max-w-[600px]">
         <div className="flex items-center space-x-2 md:space-x-4 mb-1 md:mb-2">
           <Tooltip title="Shuffle" arrow>
-            <button onClick={toggleShuffle} className={`text-[#F5F5F5] hover:text-[#1C2B2D] ${isShuffling ? 'text-[#1C2B2D]' : ''}`}>
+            <button onClick={toggleShuffle} className={`text-[#F5F5F5] hover:text-[#CD7F32] ${isShuffling ? 'text-[#CD7F32]' : ''}`}>
               <ShuffleIcon fontSize="small" />
             </button>
           </Tooltip>
           <Tooltip title="Previous" arrow>
-            <button className="text-[#F5F5F5] hover:text-[#1C2B2D]">
+            <button className="text-[#F5F5F5] hover:text-[#CD7F32]">
               <SkipPreviousIcon fontSize="small" />
             </button>
           </Tooltip>
           <Tooltip title="Play/Pause" arrow>
-            <button onClick={togglePlay} className="text-[#F5F5F5] hover:text-[#1C2B2D] bg-[#1a1a1a] rounded-full p-1 md:p-2">
+            <button onClick={togglePlay} className="text-[#F5F5F5] hover:text-[#CD7F32] bg-[#1a1a1a] rounded-full p-1 md:p-2">
               <PlayArrowIcon fontSize="medium" />
             </button>
           </Tooltip>
           <Tooltip title="Next" arrow>
-            <button className="text-[#F5F5F5] hover:text-[#1C2B2D]">
+            <button className="text-[#F5F5F5] hover:text-[#CD7F32]">
               <SkipNextIcon fontSize="small" />
             </button>
           </Tooltip>
           <Tooltip title="Repeat" arrow>
-            <button onClick={toggleRepeat} className={`text-[#F5F5F5] hover:text-[#1C2B2D] ${isRepeating ? 'text-[#1C2B2D]' : ''}`}>
+            <button onClick={toggleRepeat} className={`text-[#F5F5F5] hover:text-[#CD7F32] ${isRepeating ? 'text-[#CD7F32]' : ''}`}>
               <RepeatIcon fontSize="small" />
             </button>
           </Tooltip>
@@ -83,7 +83,7 @@ const MusicPlayer = ({ onPlay }) => {
         <div className="flex items-center space-x-2 w-full">
           <span className="text-xs md:text-sm hidden sm:block">{Math.floor(progress / 60)}:{(progress % 60).toString().padStart(2, '0')}</span>
           <div className="flex-1 h-1 md:h-2 bg-[#1a1a1a] rounded-full">
-            <div className="h-full bg-[#1C2B2D] rounded-full" style={{ width: `${(progress / currentTrack.duration) * 100}%` }}></div>
+            <div className="h-full bg-[#CD7F32] rounded-full" style={{ width: `${(progress / currentTrack.duration) * 100}%` }}></div>
           </div>
           <span className="text-xs md:text-sm hidden sm:block">6:22</span>
         </div>
@@ -92,22 +92,22 @@ const MusicPlayer = ({ onPlay }) => {
       {/* Right: Icons and Volume */}
       <div className="flex items-center space-x-2 md:space-x-4 justify-end min-w-[200px] md:min-w-[300px]">
         <Tooltip title="Queue" arrow>
-          <button className="text-[#F5F5F5] hover:text-[#1C2B2D] hidden sm:block">
+          <button className="text-[#F5F5F5] hover:text-[#CD7F32] hidden sm:block">
             <QueueMusicIcon fontSize="small" />
           </button>
         </Tooltip>
         <Tooltip title="Lyrics" arrow>
-          <button className="text-[#F5F5F5] hover:text-[#1C2B2D] hidden sm:block">
+          <button className="text-[#F5F5F5] hover:text-[#CD7F32] hidden sm:block">
             <LyricsIcon fontSize="small" />
           </button>
         </Tooltip>
         <Tooltip title="Devices" arrow>
-          <button className="text-[#F5F5F5] hover:text-[#1C2B2D] hidden md:block">
+          <button className="text-[#F5F5F5] hover:text-[#CD7F32] hidden md:block">
             <DevicesIcon fontSize="small" />
           </button>
         </Tooltip>
         <Tooltip title="Volume" arrow>
-          <button className="text-[#F5F5F5] hover:text-[#1C2B2D]">
+          <button className="text-[#F5F5F5] hover:text-[#CD7F32]">
             <VolumeUpIcon fontSize="small" />
           </button>
         </Tooltip>
@@ -119,7 +119,7 @@ const MusicPlayer = ({ onPlay }) => {
           className="w-16 md:w-24 h-1 md:h-2 bg-[#1a1a1a] appearance-none rounded-full hidden sm:block"
         />
         <Tooltip title="Fullscreen" arrow>
-          <button className="text-[#F5F5F5] hover:text-[#1C2B2D] hidden md:block">
+          <button className="text-[#F5F5F5] hover:text-[#CD7F32] hidden md:block">
             <FullscreenIcon fontSize="small" />
           </button>
         </Tooltip>
