@@ -2,6 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { Tooltip } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import PersonIcon from '@mui/icons-material/Person';
+import LogoutIcon from '@mui/icons-material/Logout';
+import SettingsIcon from '@mui/icons-material/Settings';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 // Assume images are imported as in the original
 import CircularLogoFinalDarkMode from '../../Images/CircularLogoFinalDarkMode.png';
 import home_white_variant from '../../Images/Icons/home_white_variant.png';
@@ -72,27 +76,38 @@ const Navbar = () => {
           <div className="relative">
           <div
             onClick={() => setOpen(!open)}
-            className="w-10 h-10 flex items-center justify-center rounded-full cursor-pointer border-2 border-[#CD7F32] text-[#F5F5F5]"
+            className="w-10 h-10 flex items-center justify-center rounded-full cursor-pointer border-2 border-[#CD7F32] text-[#F5F5F5] hover:border-[#b06f2d] hover:scale-105 transition-all duration-200"
             style={{ backgroundColor: '#1C2B2D' }}
             title={userInitial}
           >
             <span className="font-semibold text-lg">{userInitial}</span>
           </div>
           {open && (
-            <div className="absolute right-0 mt-2 w-40 bg-[#1C2B2D] border border-[#CD7F32] rounded-md shadow-lg z-50 p-2 dropdownMenu">
+            <div className="absolute right-0 mt-3 w-48 bg-[#1a1a1a] border border-[#333] rounded-xl shadow-2xl z-50 p-3 dropdownMenu backdrop-blur-sm">
               {userEmail && (
-                <div className="px-2 py-1 text-xs text-[#CD7F32] truncate max-w-[140px]" title={userEmail}>{userEmail}</div>
+                <div className="px-3 py-2 text-xs text-[#CD7F32] truncate max-w-[180px] border-b border-[#333] mb-2" title={userEmail}>
+                  {userEmail}
+                </div>
               )}
               <button
                 onClick={() => { setOpen(false); navigate('/profile'); }}
-                className="block w-full text-left px-4 py-2 text-sm text-[#F5F5F5] hover:bg-[#2a2a2a]"
+                className="flex items-center w-full text-left px-3 py-3 text-sm text-[#F5F5F5] hover:bg-[#CD7F32]/10 hover:text-[#CD7F32] rounded-lg transition-all duration-200 group"
               >
+                <PersonIcon className="w-4 h-4 mr-3 text-gray-400 group-hover:text-[#CD7F32] transition-colors duration-200" />
                 Profile
               </button>
               <button
-                onClick={handleLogout}
-                className="block w-full text-left px-4 py-2 text-sm text-[#F5F5F5] hover:bg-[#2a2a2a]"
+                onClick={() => { setOpen(false); navigate('/settings'); }}
+                className="flex items-center w-full text-left px-3 py-3 text-sm text-[#F5F5F5] hover:bg-[#CD7F32]/10 hover:text-[#CD7F32] rounded-lg transition-all duration-200 group"
               >
+                <SettingsIcon className="w-4 h-4 mr-3 text-gray-400 group-hover:text-[#CD7F32] transition-colors duration-200" />
+                Settings
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex items-center w-full text-left px-3 py-3 text-sm text-[#F5F5F5] hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-all duration-200 group"
+              >
+                <LogoutIcon className="w-4 h-4 mr-3 text-gray-400 group-hover:text-red-400 transition-colors duration-200" />
                 Logout
               </button>
             </div>
@@ -101,7 +116,7 @@ const Navbar = () => {
         ) : (
           <button
             onClick={handleRedirect}
-            className="px-4 py-2 bg-[#CD7F32] hover:bg-[#b06f2d] text-[#F5F5F5] rounded-full font-medium transition"
+            className="px-4 py-2 bg-[#CD7F32] hover:bg-[#b06f2d] text-[#F5F5F5] rounded-full font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg"
           >
             Login
           </button>
