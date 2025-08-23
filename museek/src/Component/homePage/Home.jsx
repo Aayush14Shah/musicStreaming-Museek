@@ -10,6 +10,8 @@
   import LeftSidebar from './LeftSidebar';
   
   const Home = () => {
+  const userId = localStorage.getItem('userId');
+  console.log('Home.jsx userId from localStorage:', userId);
     const [isPlaying, setIsPlaying] = useState(true); // right sidebar open by default
     const [newReleases, setNewReleases] = useState([]);
     const [featuredPlaylists, setFeaturedPlaylists] = useState([]);
@@ -41,6 +43,8 @@
             { url: 'http://localhost:5000/api/mood-booster?limit=12', setter: setMoodBooster, path: 'playlists.items' },
             { url: 'http://localhost:5000/api/popular-playlists?limit=12', setter: setPopularPlaylists, path: 'playlists.items' },
             { url: 'http://localhost:5000/api/genres?country=IN&limit=12', setter: setGenres, path: 'categories.items' },
+            // personalized playlists
+            ...(userId ? [{ url: `http://localhost:5000/api/user-playlists?userId=${userId}`, setter: setUserPlaylists, path: 'playlists' }] : []),
             { url: 'http://localhost:5000/api/recommended-tracks?seed_genres=pop,rock&limit=12', setter: setRecommendedTracks, path: 'tracks' },
           ];
   
@@ -51,6 +55,7 @@
               const data = await res.json();
               const items = path.split('.').reduce((obj, key) => obj?.[key], data) || [];
               const filteredItems = items.filter(item => item !== null);
+              if(url.includes('/api/user-playlists')) console.log('User artist playlists fetched:', filteredItems.map(p=>p.name));
               setter(filteredItems);
               if (url.includes('featured-playlists')) setHeroFeatured(filteredItems[0] || null);
             } catch (err) {
@@ -68,7 +73,7 @@
         }
       };
       fetchData();
-    }, []);
+    }, [userId]);
   
     const handlePlay = () => {
       setIsPlaying(true);
@@ -85,17 +90,16 @@
         <div className={`layout-container flex h-full grow flex-col min-h-screen w-full transition-all duration-300 ease-in-out pt-[60px] pb-16 md:pb-20 md:pl-[16.5rem] lg:pl-[18rem] ${isPlaying ? 'pr-[18.5rem] md:pr-[20.5rem] lg:pr-[22.5rem]' : 'pr-2'}`}>
           {/* Outer card for middle content */}
           <div className="m-1.5 md:mx-2 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.45)] bg-[#0e0e0e] p-2">
-            {/* Inner card */}
             <div className="rounded-2xl bg-[#181818] p-4 md:p-6">
               {isLoading && <p className="text-[#F5F5F5] text-center py-8 text-lg">Loading...</p>}
               {error && <p className="text-red-500 text-center py-8 text-lg">{error}</p>}
               <HeroBanner featured={heroFeatured} />
               <PlaylistRow title="New Releases" items={newReleases} />
+              <PlaylistRow title="Artist Playlists" items={userPlaylists} />
               <PlaylistRow title="Featured Playlists" items={featuredPlaylists} />
               <TrackList items={recommendedTracks} />
               <PlaylistRow title="Top Tracks" items={topTracks} />
               <PlaylistRow title="Recently Played" items={recentlyPlayed} />
-              <PlaylistRow title="Made for You" items={userPlaylists} />
               <PlaylistRow title="Popular Playlists" items={popularPlaylists} />
               <PlaylistRow title="Mood Booster" items={moodBooster} />
               <Genres items={genres} />

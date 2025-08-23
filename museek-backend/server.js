@@ -4,9 +4,12 @@ import axios from "axios";
 import cors from "cors";
 import dotenv from "dotenv";
 import os from "os";
-
+import { connectDB } from "./config/db.js";
+import authRoutes from "./routes/auth.js";
+import User from "./models/Register_user.js";
 
 dotenv.config();
+await connectDB();
 
 // Initializing app
 const app = express();
@@ -75,6 +78,49 @@ let tokenCache = {
  * Calls Spotify's "Browse New Releases" with an app token.
  * Query params supported: ?country=IN&limit=12
  */
+// Personalized playlists by user
+app.get("/api/user-playlists", async (req, res) => {
+  try {
+    const userId = req.query.userId;
+    if (!userId) return res.status(400).json({ error: "userId query required" });
+    const user = await User.findById(userId).lean();
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const { favoriteArtists = [], languages = [] } = user;
+    if (!favoriteArtists.length) return res.json({ playlists: [] });
+
+    const { access_token } = await getAppToken();
+
+    const playlists = [];
+    for (const artist of favoriteArtists) {
+      const { data } = await axios.get("https://api.spotify.com/v1/search", {
+        headers: { Authorization: `Bearer ${access_token}` },
+        params: {
+          q: artist,
+          type: "playlist",
+          limit: parseInt(req.query.limit || "5", 10),
+        },
+      });
+      (data.playlists?.items || []).forEach((pl) => {
+        if (pl && pl.id) playlists.push(pl);
+      });
+    }
+    // deduplicate by id
+    const unique = Object.values(
+      playlists.reduce((acc, p) => {
+        acc[p.id] = p;
+        return acc;
+      }, {})
+    );
+
+    res.json({ playlists: unique });
+  } catch (error) {
+    const status = error.response?.status || 500;
+    const payload = error.response?.data || { message: error.message };
+    res.status(status).json({ error: payload });
+  }
+});
+
 // app.get(path, handler)
 app.get("/api/new-releases", async(req, res) => {
   try {
@@ -233,6 +279,26 @@ app.get("/api/popular-playlists", async (req, res) => {
 });
 
 // My comment: Endpoint for recommended tracks, using recommendations with seed genres/artists. Frontend can pass seed_genres or seed_artists as query params. For "Recommended Tracks" section.
+app.get("/api/top-artists", async (req, res) => {
+  try {
+    const { access_token } = await getAppToken();
+    const limit = parseInt(req.query.limit || "15", 10);
+    // Using a broad search query 'a' to get popular artists list as Spotify lacks a direct top-artists endpoint in client-credential scope.
+    const { data } = await axios.get(
+      "https://api.spotify.com/v1/search",
+      {
+        headers: { Authorization: `Bearer ${access_token}` },
+        params: { q: "a", type: "artist", limit },
+      }
+    );
+    res.json(data.artists.items);
+  } catch (error) {
+    const status = error.response?.status || 500;
+    const payload = error.response?.data || { message: error.message };
+    res.status(status).json({ error: payload });
+  }
+});
+
 app.get("/api/recommended-tracks", async (req, res) => {
   try {
     const { access_token } = await getAppToken();
@@ -335,11 +401,10 @@ app.get("/api/user-playlists", async (req, res) => {
   }
 });
 
+app.use("/auth", authRoutes);
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`API running on http://localhost:${PORT}`));
-
-
-
 
 /*
 URLSearchParams (why we used it)
