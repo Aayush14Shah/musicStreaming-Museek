@@ -1,5 +1,5 @@
 // Updated Navbar.jsx (minor improvements for responsiveness)
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Tooltip } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 // Assume images are imported as in the original
@@ -9,10 +9,29 @@ import { Navigate,useNavigate } from 'react-router-dom';
 import Login from '../Login';
 
 const Navbar = () => {
-  const navigate = useNavigate(); 
+  const [userInitial, setUserInitial] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const name = localStorage.getItem('userName');
+    if (name) setUserInitial(name.charAt(0).toUpperCase());
+    const email = localStorage.getItem('userEmail');
+    if (email) setUserEmail(email);
+  }, []);
     const handleRedirect = () => {
-      navigate('/Login');
-    };
+    navigate('/Login');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userEmail');
+    setUserInitial(null);
+    setUserEmail(null);
+    setOpen(false);
+    navigate('/');
+  };
   return (
     <div className="fixed top-0 left-0 right-0 h-[60px] flex items-center justify-between px-4 md:px-6 py-3 text-[#F5F5F5] bg-[#121212] border-b border-[#1C2B2D] z-50">
       {/* Left - Brand Logo */}
@@ -49,15 +68,44 @@ const Navbar = () => {
 
       {/* Right - Profile */}
       <div className="flex-shrink-0">
-        <Tooltip title="Profile" arrow>
-          <img
-            src="https://placehold.co/40?text=Profile"
-            alt="Profile"
-            className="w-10 h-10 rounded-full object-cover cursor-pointer border-2 border-[#CD7F32]"
+        {userInitial ? (
+          <div className="relative">
+          <div
+            onClick={() => setOpen(!open)}
+            className="w-10 h-10 flex items-center justify-center rounded-full cursor-pointer border-2 border-[#CD7F32] text-[#F5F5F5]"
+            style={{ backgroundColor: '#1C2B2D' }}
+            title={userInitial}
+          >
+            <span className="font-semibold text-lg">{userInitial}</span>
+          </div>
+          {open && (
+            <div className="absolute right-0 mt-2 w-40 bg-[#1C2B2D] border border-[#CD7F32] rounded-md shadow-lg z-50 p-2 dropdownMenu">
+              {userEmail && (
+                <div className="px-2 py-1 text-xs text-[#CD7F32] truncate max-w-[140px]" title={userEmail}>{userEmail}</div>
+              )}
+              <button
+                onClick={() => { setOpen(false); navigate('/profile'); }}
+                className="block w-full text-left px-4 py-2 text-sm text-[#F5F5F5] hover:bg-[#2a2a2a]"
+              >
+                Profile
+              </button>
+              <button
+                onClick={handleLogout}
+                className="block w-full text-left px-4 py-2 text-sm text-[#F5F5F5] hover:bg-[#2a2a2a]"
+              >
+                Logout
+              </button>
+            </div>
+          )}
+        </div>
+        ) : (
+          <button
             onClick={handleRedirect}
-          />
-          
-        </Tooltip>
+            className="px-4 py-2 bg-[#CD7F32] hover:bg-[#b06f2d] text-[#F5F5F5] rounded-full font-medium transition"
+          >
+            Login
+          </button>
+        )}
       </div>
     </div>
   );
