@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import os from "os";
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/auth.js";
+import spotifyRoutes from "./routes/spotify.js";
 import User from "./models/Register_user.js";
 
 dotenv.config();
@@ -402,6 +403,7 @@ app.get("/api/user-playlists", async (req, res) => {
 });
 
 app.use("/auth", authRoutes);
+app.use("/api/spotify", spotifyRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`API running on http://localhost:${PORT}`));
