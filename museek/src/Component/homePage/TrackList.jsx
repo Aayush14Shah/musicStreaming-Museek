@@ -7,8 +7,15 @@ const formatDuration = (ms = 0) => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
 
-const TrackList = ({ items = [] }) => {
+const TrackList = ({ items = [], onTrackClick }) => {
   const tracks = items.filter(Boolean);
+
+  const handleTrackPlay = (track) => {
+    console.log('Playing track from list:', track);
+    if (onTrackClick) {
+      onTrackClick(track);
+    }
+  };
 
   return (
     <section className="w-full py-8 md:py-12 bg-[#121212]">
@@ -44,6 +51,7 @@ const TrackList = ({ items = [] }) => {
                 </div>
                 <div className="text-[#F5F5F5]/70 text-xs shrink-0">{formatDuration(track?.duration_ms)}</div>
                 <button
+                  onClick={() => handleTrackPlay(track)}
                   className="ml-2 px-3 py-1 rounded-full bg-[#CD7F32] text-[#121212] text-sm hover:bg-[#F5F5F5] hover:text-[#1C2B2D] transition-colors"
                 >
                   Play
@@ -119,7 +127,10 @@ const TrackList = ({ items = [] }) => {
                       </td>
 
                       <td className="py-3 px-6">
-                        <button className="px-5 py-2 bg-[#CD7F32] text-[#121212] rounded-full hover:bg-[#F5F5F5] hover:text-[#1C2B2D] transition-colors text-sm md:text-base focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CD7F32]">
+                        <button 
+                          onClick={() => handleTrackPlay(track)}
+                          className="px-5 py-2 bg-[#CD7F32] text-[#121212] rounded-full hover:bg-[#F5F5F5] hover:text-[#1C2B2D] transition-colors text-sm md:text-base focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CD7F32]"
+                        >
                           Play
                         </button>
                       </td>
