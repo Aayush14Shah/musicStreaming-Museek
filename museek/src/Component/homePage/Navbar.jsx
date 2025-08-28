@@ -29,11 +29,20 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
+    // Clear all user-related data from localStorage
     localStorage.removeItem('userName');
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('lastPlayedTrack');
+    localStorage.removeItem('recentlyPlayed');
+    localStorage.removeItem('museek.playlists');
+    
+    // Reset component state
     setUserInitial(null);
     setUserEmail(null);
     setOpen(false);
+    
+    // Navigate to home page
     navigate('/');
   };
   return (
