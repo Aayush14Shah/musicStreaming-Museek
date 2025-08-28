@@ -24,8 +24,8 @@ const Signup = () => {
   const handleLogin = () => navigate('/Login');
 
   return (
-    <div className="w-screen h-screen bg-gradient-to-br from-[#121212] via-[#1a1a1a] to-[#0e0e0e] flex items-center justify-center overflow-hidden">
-      <div className="flex w-full h-full bg-[#F5F5F5] overflow-hidden">
+    <div className="w-screen h-screen bg-[#121212] flex items-center justify-center overflow-hidden">
+      <div className="flex w-full h-full bg-gradient-to-br from-[#121212] via-[#1a1a1a] to-[#0e0e0e] overflow-hidden">
         {/* Left Panel - Visual/Marketing */}
         <div className="hidden lg:flex lg:w-1/2 relative">
           {/* Black shadow overlay for better text readability */}
@@ -48,14 +48,14 @@ const Signup = () => {
         </div>
 
         {/* Right Panel - Sign Up Form */}
-        <div className="w-full lg:w-1/2 bg-[#E5E5E5] p-8 lg:p-16 flex flex-col justify-center relative">
+        <div className="w-full lg:w-1/2 bg-[#181818] p-8 lg:p-16 flex flex-col justify-center relative">
           <div className="max-w-lg mx-auto w-full">
             {/* Logo positioned above Sign Up text */}
             <div className="flex justify-center mb-8">
               <img src={Logo} alt="Brand Logo" className="w-40" />
             </div>
             
-            <h2 className="text-4xl font-bold text-center mb-10 text-gray-900">Sign Up</h2>
+            <h2 className="text-4xl font-bold text-center mb-10 text-[#F5F5F5]">Sign Up</h2>
             
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -66,7 +66,7 @@ const Signup = () => {
                     type="text"
                     value={form.firstName}
                     onChange={handleChange}
-                    className="w-full px-5 py-4 bg-[#F5F5F5] border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#CD7F32]/20 focus:border-[#CD7F32] transition-all duration-300 shadow-sm hover:shadow-md"
+                    className="w-full px-5 py-4 bg-[#0e0e0e] border-2 border-gray-600 rounded-xl text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#CD7F32]/20 focus:border-[#CD7F32] transition-all duration-300 shadow-sm hover:shadow-md"
                     placeholder="First name"
                     required
                   />
@@ -79,7 +79,7 @@ const Signup = () => {
                     type="text"
                     value={form.lastName}
                     onChange={handleChange}
-                    className="w-full px-5 py-4 bg-[#F5F5F5] border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#CD7F32]/20 focus:border-[#CD7F32] transition-all duration-300 shadow-sm hover:shadow-md"
+                    className="w-full px-5 py-4 bg-[#0e0e0e] border-2 border-gray-600 rounded-xl text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#CD7F32]/20 focus:border-[#CD7F32] transition-all duration-300 shadow-sm hover:shadow-md"
                     placeholder="Last name"
                     required
                   />
@@ -94,7 +94,7 @@ const Signup = () => {
                   type="email"
                   value={form.email}
                   onChange={handleChange}
-                  className="w-full px-5 py-4 bg-[#F5F5F5] border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#CD7F32]/20 focus:border-[#CD7F32] transition-all duration-300 shadow-sm hover:shadow-md"
+                  className="w-full px-5 py-4 bg-[#0e0e0e] border-2 border-gray-600 rounded-xl text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#CD7F32]/20 focus:border-[#CD7F32] transition-all duration-300 shadow-sm hover:shadow-md"
                   placeholder="Email address"
                   required
                 />
@@ -108,14 +108,14 @@ const Signup = () => {
                   type={showPassword ? "text" : "password"}
                   value={form.password}
                   onChange={handleChange}
-                  className="w-full px-5 py-4 pr-12 bg-[#F5F5F5] border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#CD7F32]/20 focus:border-[#CD7F32] transition-all duration-300 shadow-sm hover:shadow-md"
+                  className="w-full px-5 py-4 pr-12 bg-[#0e0e0e] border-2 border-gray-600 rounded-xl text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#CD7F32]/20 focus:border-[#CD7F32] transition-all duration-300 shadow-sm hover:shadow-md"
                   placeholder="Password"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-gray-500 hover:text-[#CD7F32] transition-colors duration-200"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-[#CD7F32] transition-colors duration-200"
                 >
                   {showPassword ? (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,7 +140,7 @@ const Signup = () => {
                   onChange={(e) => setRememberMe(e.target.checked)}
                   className="w-5 h-5 text-[#CD7F32] border-2 border-gray-300 rounded-lg focus:ring-4 focus:ring-[#CD7F32]/20 focus:ring-offset-0 transition-all duration-200"
                 />
-                <label htmlFor="rememberMe" className="ml-3 text-base text-gray-700 font-medium">
+                <label htmlFor="rememberMe" className="ml-3 text-base text-[#F5F5F5] font-medium">
                   Remember me
                 </label>
               </div>
@@ -154,7 +154,7 @@ const Signup = () => {
             </form>
             
             <div className="mt-10 text-center">
-              <p className="text-base text-gray-600">
+              <p className="text-base text-gray-300">
                 Already have an account?{' '}
                 <button 
                   onClick={handleLogin} 
