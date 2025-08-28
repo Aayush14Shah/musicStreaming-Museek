@@ -12,12 +12,25 @@ import LyricsIcon from '@mui/icons-material/Lyrics';
 import DevicesIcon from '@mui/icons-material/Devices';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Slider from '@mui/material/Slider';
+import VolumeDown from '@mui/icons-material/VolumeDown';
+import VolumeUp from '@mui/icons-material/VolumeUp';
 
 const MusicPlayer = ({ onPlay, currentTrack }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isShuffling, setIsShuffling] = useState(false);
   const [isRepeating, setIsRepeating] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [value, setValue] = React.useState(30);
+  const duration = 200; // seconds
+  const [position, setPosition] = React.useState(32);
+  const [paused, setPaused] = React.useState(false);
+  
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
 
   const togglePlay = () => {
     if (!currentTrack) {
@@ -132,14 +145,43 @@ const MusicPlayer = ({ onPlay, currentTrack }) => {
           <span className="text-xs md:text-sm hidden sm:block">
             {currentTrack ? `${Math.floor(progress / 60)}:${(progress % 60).toString().padStart(2, '0')}` : '0:00'}
           </span>
-          <div className="flex-1 h-1 md:h-2 bg-[#1a1a1a] rounded-full">
-            <div 
-              className="h-full bg-[#CD7F32] rounded-full transition-all duration-300" 
-              style={{ 
-                width: currentTrack ? `${(progress / currentTrack.duration) * 100}%` : '0%' 
-              }}
-            ></div>
-          </div>
+          <Slider
+          aria-label="time-indicator"
+          size="small"
+          value={position}
+          min={0}
+          step={1}
+          max={duration}
+          onChange={(_, value) => setPosition(value)}
+          sx={(t) => ({
+            color: '#CD7F32',
+            height: 4,
+            '& .MuiSlider-thumb': {
+              width: 8,
+              height: 8,
+              transition: '0.3s cubic-bezier(.47,1.64,.41,.8)',
+              '&::before': {
+                boxShadow: '0 2px 12px 0 rgba(0,0,0,0.4)',
+              },
+              '&:hover, &.Mui-focusVisible': {
+                boxShadow: `0px 0px 0px 8px ${'rgb(0 0 0 / 16%)'}`,
+                ...t.applyStyles('dark', {
+                  boxShadow: `0px 0px 0px 8px ${'rgb(255 255 255 / 16%)'}`,
+                }),
+              },
+              '&.Mui-active': {
+                width: 20,
+                height: 20,
+              },
+            },
+            '& .MuiSlider-rail': {
+              opacity: 0.28,
+            },
+            ...t.applyStyles('dark', {
+              color: '#fff',
+            }),
+          })}
+        />
           <span className="text-xs md:text-sm hidden sm:block">
             {currentTrack ? `${Math.floor(currentTrack.duration / 60)}:${(currentTrack.duration % 60).toString().padStart(2, '0')}` : '0:00'}
           </span>
@@ -180,6 +222,7 @@ const MusicPlayer = ({ onPlay, currentTrack }) => {
             <VolumeUpIcon fontSize="small" />
           </button>
         </Tooltip>
+        {/* Old Slider
         <input
           type="range"
           min="0"
@@ -189,7 +232,14 @@ const MusicPlayer = ({ onPlay, currentTrack }) => {
             currentTrack ? 'bg-[#1a1a1a]' : 'bg-[#1a1a1a] opacity-50 cursor-not-allowed'
           }`}
           disabled={!currentTrack}
-        />
+        /> */}
+        <Box sx={{ width: 200 }}>
+        <Stack spacing={2} direction="row" sx={{ alignItems: 'center', mb: 1 }}>
+          <VolumeDown />
+          <Slider size="small" aria-label="Volume" value={value} onChange={handleChange} color="white"/>
+          <VolumeUp />
+        </Stack>
+        </Box>
         <Tooltip title="Fullscreen" arrow>
           <button 
             className={`${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32]' : 'text-[#888] cursor-not-allowed'} hidden md:block`}
