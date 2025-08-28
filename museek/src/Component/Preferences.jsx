@@ -88,7 +88,10 @@ const Preferences = () => {
     setLoading(true);
     try {
       await axios.post('http://localhost:5000/auth/register', {
-        ...signupData,
+        name: `${signupData.firstName} ${signupData.lastName}`,
+        email: signupData.email,
+        password: signupData.password,
+        mobile: signupData.mobile || '',
         favoriteArtists: selectedArtists.map(a => a.name),
         languages: selectedLanguages,
       });
@@ -101,48 +104,25 @@ const Preferences = () => {
     }
   };
 
-  return (
-    <div className="w-screen h-screen bg-gradient-to-br from-[#121212] via-[#1a1a1a] to-[#0e0e0e] flex items-center justify-center overflow-hidden">
-      <div className="flex w-full h-full bg-[#F5F5F5] overflow-hidden">
-        {/* Left Panel - Visual/Marketing */}
-        <div className="hidden lg:flex lg:w-1/2 relative">
-          {/* Black shadow overlay for better text readability */}
-          <div className="absolute inset-0 bg-black/40 z-10"></div>
-          
-          <img 
-            src={loginSideImage} 
-            alt="Music Background" 
-            className="w-full h-full object-cover object-center"
-            style={{ objectFit: 'cover', objectPosition: 'center' }}
-          />
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-white px-16 text-center">
-            <h1 className="text-5xl font-bold mb-6 leading-tight">
-              Tell us your Preferences
-            </h1>
-            <p className="text-2xl text-gray-200 leading-relaxed font-light">
-              Help us personalize your musical journey
-            </p>
-          </div>
-        </div>
 
-        {/* Right Panel - Preferences Form */}
-        <div className="w-full lg:w-1/2 bg-[#E5E5E5] p-4 lg:p-8 flex flex-col justify-center relative overflow-y-auto">
+  return (
+    <div className="w-screen h-screen bg-[#121212] flex items-center justify-center overflow-hidden">
+      <div className="flex w-full h-full bg-gradient-to-br from-[#121212] via-[#1a1a1a] to-[#0e0e0e] overflow-hidden">
+
+        {/* Preferences Form */}
+        <div className="w-full bg-[#181818] p-4 lg:p-8 flex flex-col justify-center relative overflow-y-auto">
           <div className="max-w-2xl mx-auto w-full">
             {/* Logo positioned above preferences text */}
             <div className="flex justify-center mb-6">
               <img src={Logo} alt="Brand Logo" className="w-32" />
             </div>
             
-            <h2 className="text-3xl font-bold text-center mb-8 text-gray-900">Your Preferences</h2>
+            <h2 className="text-3xl font-bold text-center mb-8 text-[#F5F5F5]">Your Preferences</h2>
 
             {/* Two Column Layout */}
             <div className="grid lg:grid-cols-2 gap-6 mb-6">
               {/* Left Section - Artists */}
-              <div className="bg-[#F5F5F5] p-6 rounded-2xl border-2 border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
-                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                  <span className="mr-2">🎤</span>
-                  Select Your Favourite Artists
-                </h3>
+              <div className="bg-[#0e0e0e] p-6 rounded-2xl border-2 border-gray-600 shadow-lg hover:shadow-xl transition-all duration-300">
             
                 {/* Search Bar */}
                 <div className="mb-4">
@@ -151,7 +131,7 @@ const Preferences = () => {
                     placeholder="Search artists..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#CD7F32]/20 focus:border-[#CD7F32] transition-all duration-300 shadow-sm hover:shadow-md"
+                    className="w-full px-4 py-3 bg-[#181818] border-2 border-gray-600 rounded-xl text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#CD7F32]/20 focus:border-[#CD7F32] transition-all duration-300 shadow-sm hover:shadow-md"
                   />
                 </div>
 
@@ -172,8 +152,8 @@ const Preferences = () => {
                         onClick={() => handleArtistSelect(artist)}
                         className={`cursor-pointer p-3 rounded-xl border-2 transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md ${
                           isSelected 
-                            ? 'border-[#CD7F32] bg-[#CD7F32]/10 shadow-lg' 
-                            : 'border-gray-200 bg-white hover:border-[#CD7F32]'
+                            ? 'border-[#CD7F32] bg-[#CD7F32]/20 shadow-lg' 
+                            : 'border-gray-600 bg-[#181818] hover:border-[#CD7F32]'
                         }`}
                       >
                         <div className="text-center">
@@ -188,9 +168,9 @@ const Preferences = () => {
                               <span className="text-xl">🎵</span>
                             </div>
                           )}
-                          <p className="text-gray-900 text-sm font-semibold truncate">{artist.name}</p>
+                          <p className="text-[#F5F5F5] text-sm font-semibold truncate">{artist.name}</p>
                           {artist.genres && artist.genres.length > 0 && (
-                            <p className="text-gray-500 text-xs truncate">{artist.genres[0]}</p>
+                            <p className="text-gray-400 text-xs truncate">{artist.genres[0]}</p>
                           )}
                         </div>
                       </div>
@@ -200,11 +180,7 @@ const Preferences = () => {
               </div>
 
               {/* Right Section - Languages */}
-              <div className="bg-[#F5F5F5] p-6 rounded-2xl border-2 border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
-                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                  <span className="mr-2">🌍</span>
-                  Preferred Languages
-                </h3>
+              <div className="bg-[#0e0e0e] p-6 rounded-2xl border-2 border-gray-600 shadow-lg hover:shadow-xl transition-all duration-300">
             
                 {/* Selected Languages Count */}
                 <div className="mb-4">
@@ -223,14 +199,14 @@ const Preferences = () => {
                         onClick={() => handleLanguageSelect(langOption.value)}
                         className={`cursor-pointer p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md ${
                           isSelected 
-                            ? 'border-[#CD7F32] bg-[#CD7F32]/10 shadow-lg' 
-                            : 'border-gray-200 bg-white hover:border-[#CD7F32]'
+                            ? 'border-[#CD7F32] bg-[#CD7F32]/20 shadow-lg' 
+                            : 'border-gray-600 bg-[#181818] hover:border-[#CD7F32]'
                         }`}
                       >
                         <div className="text-center">
                           <div className="text-2xl mb-2">🎶</div>
-                          <p className="text-gray-900 font-bold text-lg">{langOption.native}</p>
-                          <p className="text-gray-500 text-sm">{langOption.label}</p>
+                          <p className="text-[#F5F5F5] font-bold text-lg">{langOption.native}</p>
+                          <p className="text-gray-400 text-sm">{langOption.label}</p>
                         </div>
                       </div>
                     );
@@ -242,14 +218,14 @@ const Preferences = () => {
             {/* Register Button */}
             <div className="text-center mt-8">
               <button
-                disabled={loading || (selectedArtists.length === 0 && selectedLanguages.length === 0)}
+                disabled={loading}
                 onClick={handleRegister}
                 className="w-full py-4 bg-gradient-to-r from-[#CD7F32] to-[#b06f2d] text-white rounded-xl font-bold text-lg hover:from-[#b06f2d] hover:to-[#CD7F32] transform hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {loading ? 'Registering...' : 'Complete Registration'}
               </button>
-              <p className="text-gray-600 text-sm mt-3">
-                Select at least one artist or language to continue
+              <p className="text-gray-400 text-sm mt-3">
+                You can complete registration without selecting preferences
               </p>
             </div>
           </div>
