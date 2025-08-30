@@ -9,6 +9,7 @@ import TrackList from './TrackList';
 import MusicPlayer from './MusicPlayer';
 import NowPlayingSidebar from './NowPlayingSidebar';
 import LeftSidebar from './LeftSidebar';
+import { PlaylistView } from '../PlaylistView';
 
 const Home = () => {
   const userId = localStorage.getItem('userId');
@@ -32,6 +33,15 @@ const Home = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Add new states
+  const [throwbackPlaylists, setThrowbackPlaylists] = useState([]);
+  const [editorsPicks, setEditorsPicks] = useState([]);
+  const [chillPlaylists, setChillPlaylists] = useState([]);
+  const [partyPlaylists, setPartyPlaylists] = useState([]);
+  const [topMixes, setTopMixes] = useState([]);
+  const [popularRadio, setPopularRadio] = useState([]);
+  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+  const [playlistTracks, setPlaylistTracks] = useState([]);
 
   useEffect(() => {
     const savedRecentlyPlayed = localStorage.getItem('recentlyPlayed');
@@ -98,57 +108,57 @@ const Home = () => {
                   { id: 'tt7', name: 'Born Again', artists: [{ name: 'LISA, Doja Cat, RAYE' }], album: { name: 'Album7', images: [{ url: 'https://placehold.co/300x300?text=Born+Again' }] }, duration_ms: 190000 },
                   { id: 'tt8', name: 'ExtraL', artists: [{ name: 'JENNIE, Doechii' }], album: { name: 'Album8', images: [{ url: 'https://placehold.co/300x300?text=ExtraL' }] }, duration_ms: 240000 }
                 ];
+              } else if (url.includes('mood-booster')) {
+                items = [
+                  { id: 'mb1', name: 'Mood Booster', description: 'Happy vibes', images: [{ url: 'https://placehold.co/300x300?text=Mood+Booster' }] },
+                  { id: 'mb2', name: 'Positive Energy', description: 'Uplifting tracks', images: [{ url: 'https://placehold.co/300x300?text=Positive+Energy' }] },
+                  { id: 'mb3', name: 'Feel Good', description: 'Good mood playlist', images: [{ url: 'https://placehold.co/300x300?text=Feel+Good' }] },
+                  { id: 'mb4', name: 'Happy Hits', description: 'Happy songs', images: [{ url: 'https://placehold.co/300x300?text=Happy+Hits' }] },
+                  { id: 'mb5', name: 'Uplift', description: 'Motivational music', images: [{ url: 'https://placehold.co/300x300?text=Uplift' }] },
+                  { id: 'mb6', name: 'Joyful Tunes', description: 'Joyful playlist', images: [{ url: 'https://placehold.co/300x300?text=Joyful+Tunes' }] },
+                  { id: 'mb7', name: 'Smile Songs', description: 'Songs to make you smile', images: [{ url: 'https://placehold.co/300x300?text=Smile+Songs' }] },
+                  { id: 'mb8', name: 'Good Vibes', description: 'Positive vibes only', images: [{ url: 'https://placehold.co/300x300?text=Good+Vibes' }] }
+                ];
+              } else if (url.includes('popular-playlists')) {
+                items = [
+                  { id: 'pp1', name: 'Popular Hits', description: 'Trending now', images: [{ url: 'https://placehold.co/300x300?text=Popular+Hits' }] },
+                  { id: 'pp2', name: 'Viral 50', description: 'Viral tracks', images: [{ url: 'https://placehold.co/300x300?text=Viral+50' }] },
+                  { id: 'pp3', name: 'Top Global', description: 'Global top songs', images: [{ url: 'https://placehold.co/300x300?text=Top+Global' }] },
+                  { id: 'pp4', name: 'Hot Hits USA', description: 'US hits', images: [{ url: 'https://placehold.co/300x300?text=Hot+Hits+USA' }] },
+                  { id: 'pp5', name: 'Today\'s Top Hits', description: 'Current top', images: [{ url: 'https://placehold.co/300x300?text=Today\'s+Top+Hits' }] },
+                  { id: 'pp6', name: 'RapCaviar', description: 'Rap playlist', images: [{ url: 'https://placehold.co/300x300?text=RapCaviar' }] },
+                  { id: 'pp7', name: 'Rock This', description: 'Rock hits', images: [{ url: 'https://placehold.co/300x300?text=Rock+This' }] },
+                  { id: 'pp8', name: 'Viva Latino', description: 'Latin hits', images: [{ url: 'https://placehold.co/300x300?text=Viva+Latino' }] }
+                ];
+              } else if (url.includes('new-releases')) {
+                items = [
+                  { id: 'nr1', name: 'New Album 1', description: 'Fresh release', images: [{ url: 'https://placehold.co/300x300?text=New+Album+1' }] },
+                  { id: 'nr2', name: 'New Album 2', description: 'Latest drop', images: [{ url: 'https://placehold.co/300x300?text=New+Album+2' }] },
+                  { id: 'nr3', name: 'New Album 3', description: 'Brand new', images: [{ url: 'https://placehold.co/300x300?text=New+Album+3' }] },
+                  { id: 'nr4', name: 'New Album 4', description: 'Recent release', images: [{ url: 'https://placehold.co/300x300?text=New+Album+4' }] },
+                  { id: 'nr5', name: 'New Album 5', description: 'New music', images: [{ url: 'https://placehold.co/300x300?text=New+Album+5' }] },
+                  { id: 'nr6', name: 'New Album 6', description: 'Fresh tracks', images: [{ url: 'https://placehold.co/300x300?text=New+Album+6' }] },
+                  { id: 'nr7', name: 'New Album 7', description: 'Latest album', images: [{ url: 'https://placehold.co/300x300?text=New+Album+7' }] },
+                  { id: 'nr8', name: 'New Album 8', description: 'New release', images: [{ url: 'https://placehold.co/300x300?text=New+Album+8' }] }
+                ];
               }
             }
-            const filteredItems = items
+
+            // Ensure images fallback
+            items = items
               .filter(item => item !== null)
               .map(item => ({
                 ...item,
                 images: item.images && item.images.length > 0 
                   ? item.images 
                   : [{ url: `https://placehold.co/300x300?text=${encodeURIComponent(item.name || 'Placeholder')}` }],
-                album: item.album ? {
-                  ...item.album,
-                  images: item.album.images && item.album.images.length > 0 
-                    ? item.album.images 
-                    : [{ url: `https://placehold.co/300x300?text=${encodeURIComponent(item.album?.name || 'Album')}` }]
-                } : item.album
+                album: item.album ? { ...item.album, images: item.album.images || [{ url: `https://placehold.co/300x300?text=${encodeURIComponent(item.album?.name || 'Album')}` }] } : item.album
               }));
-            if (url.includes('/api/user-playlists')) console.log('User artist playlists fetched:', filteredItems.map(p => p.name));
-            setter(filteredItems);
+
+            setter(items);
           } catch (err) {
             console.error(`Error fetching ${url}:`, err);
-            let fallbackItems = [];
-            if (url.includes('featured-playlists')) {
-              fallbackItems = [
-                { id: 'fp1', name: 'AUGUST 2025 TOP HITS', description: 'Always updated weekly', images: [{ url: 'https://placehold.co/300x300?text=Top+Hits' }] },
-                { id: 'fp2', name: 'Top 50 Pop Hits of August 2025', description: 'Pop Songs Playlist', images: [{ url: 'https://placehold.co/300x300?text=Pop+Hits' }] },
-                { id: 'fp3', name: 'AUGUST 2025 CHARTS', description: 'Top Hits 2025', images: [{ url: 'https://placehold.co/300x300?text=Charts' }] },
-                { id: 'fp4', name: 'US Top 40 Chart Hits August 2025', description: 'Trending and viral songs', images: [{ url: 'https://placehold.co/300x300?text=US+Top+40' }] },
-                { id: 'fp5', name: 'Top New Songs August 2025', description: 'New releases', images: [{ url: 'https://placehold.co/300x300?text=New+Songs' }] },
-                { id: 'fp6', name: 'Summer Vibes 2025', description: 'Summer playlist', images: [{ url: 'https://placehold.co/300x300?text=Summer+Vibes' }] },
-                { id: 'fp7', name: 'Chill Hits', description: 'Relaxing tunes', images: [{ url: 'https://placehold.co/300x300?text=Chill+Hits' }] },
-                { id: 'fp8', name: 'Workout Motivation', description: 'Gym playlist', images: [{ url: 'https://placehold.co/300x300?text=Workout' }] }
-              ];
-            } else if (url.includes('top-tracks')) {
-              fallbackItems = [
-                { id: 'tt1', name: 'APT', artists: [{ name: 'ROSÉ, Bruno Mars' }], album: { name: 'Album1', images: [{ url: 'https://placehold.co/300x300?text=APT' }] }, duration_ms: 180000 },
-                { id: 'tt2', name: 'Die With A Smile', artists: [{ name: 'Lady Gaga, Bruno Mars' }], album: { name: 'Album2', images: [{ url: 'https://placehold.co/300x300?text=Die+With+A+Smile' }] }, duration_ms: 210000 },
-                { id: 'tt3', name: 'Sapphire', artists: [{ name: 'Ed Sheeran' }], album: { name: 'Album3', images: [{ url: 'https://placehold.co/300x300?text=Sapphire' }] }, duration_ms: 233000 },
-                { id: 'tt4', name: 'BIRDS OF A FEATHER', artists: [{ name: 'Billie Eilish' }], album: { name: 'Album4', images: [{ url: 'https://placehold.co/300x300?text=Birds' }] }, duration_ms: 270000 },
-                { id: 'tt5', name: 'Beautiful Things', artists: [{ name: 'Benson Boone' }], album: { name: 'Album5', images: [{ url: 'https://placehold.co/300x300?text=Beautiful+Things' }] }, duration_ms: 200000 },
-                { id: 'tt6', name: 'Abracadabra', artists: [{ name: 'Lady Gaga' }], album: { name: 'Album6', images: [{ url: 'https://placehold.co/300x300?text=Abracadabra' }] }, duration_ms: 220000 },
-                { id: 'tt7', name: 'Born Again', artists: [{ name: 'LISA, Doja Cat, RAYE' }], album: { name: 'Album7', images: [{ url: 'https://placehold.co/300x300?text=Born+Again' }] }, duration_ms: 190000 },
-                { id: 'tt8', name: 'ExtraL', artists: [{ name: 'JENNIE, Doechii' }], album: { name: 'Album8', images: [{ url: 'https://placehold.co/300x300?text=ExtraL' }] }, duration_ms: 240000 }
-              ];
-            }
-            setter(fallbackItems);
-            if (!preserveSampleData) {
-              setter([]);
-            }
-            if (url.includes('/api/user-playlists')) {
-              console.log('Keeping sample user playlists data due to API failure');
-            }
+            setter([]);
           }
         });
 
@@ -163,7 +173,7 @@ const Home = () => {
     fetchData();
   }, [userId]);
 
-  const handlePlay = (item = null) => {
+  const handleTrackClick = (item = null) => {
     if (item) {
       const playableTrack = {
         id: item.id,
@@ -196,77 +206,62 @@ const Home = () => {
     setIsPlaying(false);
   };
 
+  const handlePlaylistClick = async (playlist) => {
+    setSelectedPlaylist(playlist);
+    try {
+      const res = await fetch(`http://localhost:5000/api/playlist-tracks?playlistId=${playlist.id}&market=IN`);
+      if (res.ok) {
+        const data = await res.json();
+        setPlaylistTracks(data.items?.map(item => item.track) || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch playlist tracks:', err);
+      setPlaylistTracks([]);
+    }
+  };
+
   return (
-    <div className="relative flex size-full min-h-screen flex-col bg-gradient-to-br from-[#121212] via-[#1a1a1a] to-[#0e0e0e] dark group/design-root overflow-x-hidden" style={{ fontFamily: 'Inter, \"Noto Sans\", sans-serif' }}>
+    <div className="relative flex size-full min-h-screen flex-col bg-gradient-to-br from-[#121212] via-[#1a1a1a] to-[#0e0e0e] dark group/design-root overflow-x-hidden" style={{ fontFamily: 'Inter, "Noto Sans", sans-serif' }}>
       <Navbar />
       <LeftSidebar />
       <div className={`layout-container flex h-full grow flex-col min-h-screen w-full transition-all duration-300 ease-in-out pt-[60px] pb-16 md:pb-20 md:pl-[16.5rem] lg:pl-[18rem] ${isPlaying ? 'md:pr-[20.5rem] lg:pr-[22.5rem]' : 'pr-0'}`}>
         <div className="m-1.5 md:mx-2 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.45)] bg-[#0e0e0e] p-2">
           <div className="rounded-2xl bg-[#181818] p-4 md:p-6">
-            {isLoading && <p className="text-[#F5F5F5] text-center py-8 text-lg">Loading...</p>}
-            {error && <p className="text-red-500 text-center py-8 text-lg">{error}</p>}
-            <HeroBanner featured={heroFeatured} />
             
-            <CarouselPlaylistRow 
-              title="New Releases" 
-              items={newReleases} 
-              onPlaylistClick={handlePlay}
-            />
-            
-            <CarouselPlaylistRow 
-              title="Artist Playlists" 
-              items={userPlaylists} 
-              onPlaylistClick={handlePlay}
-            />
-            
-            <CarouselPlaylistRow 
-              title="Featured Playlists" 
-              items={featuredPlaylists} 
-              onPlaylistClick={handlePlay}
-            />
-            
-            <CarouselTrackRow 
-              title="Top Tracks" 
-              items={topTracks} 
-              onTrackClick={handlePlay}
-            />
-            
-            <CarouselPlaylistRow 
-              title="Recently Played" 
-              items={recentlyPlayed} 
-              onPlaylistClick={handlePlay}
-            />
-            
-            <CarouselPlaylistRow 
-              title="Popular Playlists" 
-              items={popularPlaylists} 
-              onPlaylistClick={handlePlay}
-            />
-            
-            <CarouselPlaylistRow 
-              title="Mood Booster" 
-              items={moodBooster} 
-              onPlaylistClick={handlePlay}
-            />
-            
-            <TrackList 
-              items={recommendedTracks} 
-              onTrackClick={handlePlay}
-            />
-            
-            <Genres items={genres} />
+            {/* 👇 CONDITIONAL RENDER */}
+            {selectedPlaylist ? (
+              <PlaylistView
+                playlist={selectedPlaylist}
+                tracks={playlistTracks}
+                onTrackClick={handleTrackClick}
+                onBack={() => {
+                  setSelectedPlaylist(null);
+                }}
+              />
+            ) : (
+              <>
+                {isLoading && <p className="text-[#F5F5F5] text-center py-8 text-lg">Loading...</p>}
+                {error && <p className="text-red-500 text-center py-8 text-lg">{error}</p>}
+
+                <HeroBanner featured={heroFeatured} />
+
+                <CarouselPlaylistRow title="New Releases" items={newReleases} onPlaylistClick={handlePlaylistClick} />
+                <CarouselPlaylistRow title="Artist Playlists" items={userPlaylists} onPlaylistClick={handlePlaylistClick} />
+                <CarouselPlaylistRow title="Featured Playlists" items={featuredPlaylists} onPlaylistClick={handlePlaylistClick} />
+                <CarouselTrackRow title="Top Tracks" items={topTracks} onTrackClick={handleTrackClick} />
+                <CarouselPlaylistRow title="Recently Played" items={recentlyPlayed} onPlaylistClick={handlePlaylistClick} />
+                <CarouselPlaylistRow title="Popular Playlists" items={popularPlaylists} onPlaylistClick={handlePlaylistClick} />
+                <CarouselPlaylistRow title="Mood Booster" items={moodBooster} onPlaylistClick={handlePlaylistClick} />
+                <TrackList items={recommendedTracks} onTrackClick={handleTrackClick} />
+                <Genres items={genres} />
+              </>
+            )}
           </div>
         </div>
       </div>
-      <MusicPlayer 
-        onPlay={() => handlePlay()} 
-        currentTrack={currentTrack}
-      />
-      <NowPlayingSidebar 
-        currentTrack={currentTrack} 
-        onClose={handleCloseSidebar} 
-        isOpen={isPlaying} 
-      />
+      <MusicPlayer onPlay={() => handleTrackClick()} currentTrack={currentTrack} />
+      <NowPlayingSidebar currentTrack={currentTrack} onClose={handleCloseSidebar} isOpen={isPlaying} />
+
       {!isPlaying && (
         <button
           onClick={() => setIsPlaying(true)}

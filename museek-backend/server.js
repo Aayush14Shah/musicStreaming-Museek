@@ -402,6 +402,30 @@ app.get("/api/user-playlists", async (req, res) => {
   }
 });
 
+app.get("/api/playlist-tracks", async (req, res) => {
+  try {
+    const { access_token } = await getAppToken();
+    const playlistId = req.query.playlistId;
+    if (!playlistId) return res.status(400).json({ error: 'playlistId required' });
+    const market = req.query.market || "IN";
+    const limit = parseInt(req.query.limit || "50", 10);
+
+    const { data } = await axios.get(
+      `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+      {
+        headers: { Authorization: `Bearer ${access_token}` },
+        params: { market, limit },
+      }
+    );
+
+    res.json(data);
+  } catch (error) {
+    const status = error.response?.status || 500;
+    const payload = error.response?.data || { message: error.message };
+    res.status(status).json({ error: payload });
+  }
+});
+
 app.use("/auth", authRoutes);
 app.use("/api/spotify", spotifyRoutes);
 
