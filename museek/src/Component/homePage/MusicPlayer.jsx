@@ -48,6 +48,17 @@ const MusicPlayer = ({ onPlay, currentTrack }) => {
     }
     togglePlay();
   };
+  const toggleFullScreen = () => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.error(`Error enabling full-screen: ${err.message} (${err.name})`);
+                    });
+                } else {
+                    document.exitFullscreen().catch(err => {
+                        console.error(`Error exiting full-screen: ${err.message} (${err.name})`);
+                    });
+                }
+            };
 
   const toggleShuffle = () => setIsShuffling(!isShuffling);
   const toggleRepeat = () => setIsRepeating(!isRepeating);
@@ -233,7 +244,7 @@ const MusicPlayer = ({ onPlay, currentTrack }) => {
           }`}
           disabled={!currentTrack}
         /> */}
-        <Box sx={{ width: 200 }}>
+        <Box sx={{ width: 200, height:25}}>
         <Stack spacing={2} direction="row" sx={{ alignItems: 'center', mb: 1 }}>
           <VolumeDown />
           <Slider size="small" aria-label="Volume" value={value} onChange={handleChange} color="white"/>
@@ -245,7 +256,7 @@ const MusicPlayer = ({ onPlay, currentTrack }) => {
             className={`${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32]' : 'text-[#888] cursor-not-allowed'} hidden md:block`}
             disabled={!currentTrack}
           >
-            <FullscreenIcon fontSize="small" />
+            <FullscreenIcon fontSize="small" onClick={toggleFullScreen} />
           </button>
         </Tooltip>
       </div>
