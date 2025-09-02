@@ -49,16 +49,16 @@ const MusicPlayer = ({ onPlay, currentTrack }) => {
     togglePlay();
   };
   const toggleFullScreen = () => {
-                if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen().catch(err => {
-                        console.error(`Error enabling full-screen: ${err.message} (${err.name})`);
-                    });
-                } else {
-                    document.exitFullscreen().catch(err => {
-                        console.error(`Error exiting full-screen: ${err.message} (${err.name})`);
-                    });
-                }
-            };
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.error(`Error enabling full-screen: ${err.message} (${err.name})`);
+        });
+      } else {
+        document.exitFullscreen().catch(err => {
+          console.error(`Error exiting full-screen: ${err.message} (${err.name})`);
+      });
+    }
+    };
 
   const toggleShuffle = () => setIsShuffling(!isShuffling);
   const toggleRepeat = () => setIsRepeating(!isRepeating);
