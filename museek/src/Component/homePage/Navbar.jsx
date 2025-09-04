@@ -3,9 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { Tooltip } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import PersonIcon from '@mui/icons-material/Person';
-import LogoutIcon from '@mui/icons-material/Logout';
-import SettingsIcon from '@mui/icons-material/Settings';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import SettingsIcon from "@mui/icons-material/Settings";
+import LogoutIcon from "@mui/icons-material/Logout";
 // Assume images are imported as in the original
 import CircularLogoFinalDarkMode from '../../Images/CircularLogoFinalDarkMode.png';
 import home_white_variant from '../../Images/Icons/home_white_variant.png';
@@ -92,35 +92,50 @@ const Navbar = () => {
             <span className="font-semibold text-lg">{userInitial}</span>
           </div>
           {open && (
-            <div className="absolute right-0 mt-3 w-48 bg-[#1a1a1a] border border-[#333] rounded-xl shadow-2xl z-50 p-3 dropdownMenu backdrop-blur-sm">
-              {userEmail && (
-                <div className="px-3 py-2 text-xs text-[#CD7F32] truncate max-w-[180px] border-b border-[#333] mb-2" title={userEmail}>
-                  {userEmail}
-                </div>
-              )}
-              <button
-                onClick={() => { setOpen(false); navigate('/profile'); }}
-                className="flex items-center w-full text-left px-3 py-3 text-sm text-[#F5F5F5] hover:bg-[#CD7F32]/10 hover:text-[#CD7F32] rounded-lg transition-all duration-200 group"
-              >
-                <PersonIcon className="w-4 h-4 mr-3 text-gray-400 group-hover:text-[#CD7F32] transition-colors duration-200" />
-                Profile
-              </button>
-              <button
-                onClick={() => { setOpen(false); navigate('/settings'); }}
-                className="flex items-center w-full text-left px-3 py-3 text-sm text-[#F5F5F5] hover:bg-[#CD7F32]/10 hover:text-[#CD7F32] rounded-lg transition-all duration-200 group"
-              >
-                <SettingsIcon className="w-4 h-4 mr-3 text-gray-400 group-hover:text-[#CD7F32] transition-colors duration-200" />
-                Settings
-              </button>
-              <button
-                onClick={handleLogout}
-                className="flex items-center w-full text-left px-3 py-3 text-sm text-[#F5F5F5] hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-all duration-200 group"
-              >
-                <LogoutIcon className="w-4 h-4 mr-3 text-gray-400 group-hover:text-red-400 transition-colors duration-200" />
-                Logout
-              </button>
-            </div>
-          )}
+  <div className="absolute right-0 mt-3 w-56 bg-[#1C1C1C]/95 backdrop-blur-md border border-[#2a2a2a] rounded-xl shadow-lg z-50 overflow-hidden">
+    {/* Arrow */}
+    <div className="absolute -top-2 right-4 w-4 h-4 bg-[#1C1C1C]/95 border-l border-t border-[#2a2a2a] rotate-45"></div>
+
+    {/* User Info */}
+    {userEmail && (
+      <div className="px-4 py-3 border-b border-[#2a2a2a]">
+        <div className="text-sm font-semibold text-[#F5F5F5]">
+          {userInitial}
+        </div>
+        <div className="text-xs text-[#CD7F32] truncate" title={userEmail}>
+          {userEmail}
+        </div>
+      </div>
+    )}
+
+    {/* Menu */}
+    <div className="flex flex-col py-1">
+      <button
+        onClick={() => { setOpen(false); navigate('/profile'); }}
+        className="flex items-center gap-3 px-4 py-2 text-sm text-[#F5F5F5] hover:bg-[#CD7F32]/10 hover:text-[#CD7F32] transition-colors"
+      >
+        <AccountCircleIcon fontSize="small" className="text-[#CD7F32]/70" />
+        Profile
+      </button>
+
+      <button
+        onClick={() => { setOpen(false); navigate('/settings'); }}
+        className="flex items-center gap-3 px-4 py-2 text-sm text-[#F5F5F5] hover:bg-[#CD7F32]/10 hover:text-[#CD7F32] transition-colors"
+      >
+        <SettingsIcon fontSize="small" className="text-[#CD7F32]/70" />
+        Settings
+      </button>
+
+      <button
+        onClick={handleLogout}
+        className="flex items-center gap-3 px-4 py-2 text-sm text-[#F5F5F5] hover:bg-[#CD7F32]/10 hover:text-[#CD7F32] transition-colors"
+      >
+        <LogoutIcon fontSize="small" className="text-[#CD7F32]/70" />
+        Logout
+      </button>
+    </div>
+  </div>
+)}
         </div>
         ) : (
           <button
