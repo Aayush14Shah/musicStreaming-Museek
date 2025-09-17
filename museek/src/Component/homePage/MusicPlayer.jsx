@@ -38,71 +38,21 @@ const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
     }
     onTogglePlay();
   };
-
-  // Initialize / update audio element when track changes
-  useEffect(() => {
-    if (currentTrack && currentTrack.audioUrl) {
-      // Pause and replace previous audio
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-
-      setProgress(0); // reset progress for new track
-
-      const audio = new Audio(currentTrack.audioUrl);
-      audioRef.current = audio;
-
-      const handleTimeUpdate = () => setProgress(audio.currentTime);
-      const handleEnded = () => {
-        if (isRepeating) {
-          audio.currentTime = 0;
-          audio.play();
-        } else {
-          if (isPlaying) onTogglePlay();
-        }
-      };
-
-      audio.addEventListener('timeupdate', handleTimeUpdate);
-      audio.addEventListener('ended', handleEnded);
-
-      if (isPlaying) {
-        audio.play();
-      }
-
-      return () => {
-        audio.removeEventListener('timeupdate', handleTimeUpdate);
-        audio.removeEventListener('ended', handleEnded);
-        audio.pause();
-      };
-    }
-  }, [currentTrack]);
-
-  // Play / pause when isPlaying prop changes
-  useEffect(() => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.play();
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.error(`Error enabling full-screen: ${err.message} (${err.name})`);
+        });
       } else {
-        audioRef.current.pause();
-      }
+        document.exitFullscreen().catch(err => {
+          console.error(`Error exiting full-screen: ${err.message} (${err.name})`);
+      });
     }
-  }, [isPlaying]);
+    };
 
-  // Update volume when slider changes
-  const handleVolumeChange = (event, newValue) => {
-    setValue(newValue);
-    if (audioRef.current) {
-      audioRef.current.volume = newValue / 100;
-    }
-  };
-
-  // Seek when progress bar changes
-  const handleSeek = (_, newValue) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = newValue;
-      setProgress(newValue);
-    }
-  };
+  const toggleShuffle = () => setIsShuffling(!isShuffling);
+  const toggleRepeat = () => setIsRepeating(!isRepeating);
+  const addToLiked = () => console.log("Added to liked songs");
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-[#121212]/95 backdrop-blur-sm text-[#F5F5F5] p-2 md:p-4 z-40 h-16 md:h-20 flex items-center justify-between gap-4 md:gap-6">
@@ -274,7 +224,18 @@ const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
             <VolumeUpIcon fontSize="small" />
           </button>
         </Tooltip>
-        <Box sx={{ width: 200 }}>
+        {/* Old Slider
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value="50"
+          className={`w-16 md:w-24 h-1 md:h-2 appearance-none rounded-full hidden sm:block ${
+            currentTrack ? 'bg-[#1a1a1a]' : 'bg-[#1a1a1a] opacity-50 cursor-not-allowed'
+          }`}
+          disabled={!currentTrack}
+        /> */}
+        <Box sx={{ width: 200, height:25}}>
         <Stack spacing={2} direction="row" sx={{ alignItems: 'center', mb: 1 }}>
           <VolumeDown />
           <Slider size="small" aria-label="Volume" value={value} onChange={handleVolumeChange} color="white"/>
@@ -286,7 +247,7 @@ const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
             className={`${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32]' : 'text-[#888] cursor-not-allowed'} hidden md:block`}
             disabled={!currentTrack}
           >
-            <FullscreenIcon fontSize="small" />
+            <FullscreenIcon fontSize="small" onClick={toggleFullScreen} />
           </button>
         </Tooltip>
       </div>
