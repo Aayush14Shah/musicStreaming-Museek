@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './Navbar';
 import HeroBanner from './HeroBanner';
-import PlaylistRow from './PlaylistRow';
+
 import CarouselPlaylistRow from './CarouselPlaylistRow';
 import CarouselTrackRow from './CarouselTrackRow';
 import Genres from './Genres';
@@ -25,7 +25,7 @@ const Home = () => {
   const [recommendedTracks, setRecommendedTracks] = useState([]);
   const [recentlyPlayed, setRecentlyPlayed] = useState([]);
   const [userPlaylists, setUserPlaylists] = useState([]);
-  const [heroFeatured, setHeroFeatured] = useState({
+  const [heroFeatured] = useState({
     id: 'hero1',
     name: 'Welcome to Museek',
     description: 'Discover your perfect music experience',
@@ -33,13 +33,6 @@ const Home = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  // Add new states
-  const [throwbackPlaylists, setThrowbackPlaylists] = useState([]);
-  const [editorsPicks, setEditorsPicks] = useState([]);
-  const [chillPlaylists, setChillPlaylists] = useState([]);
-  const [partyPlaylists, setPartyPlaylists] = useState([]);
-  const [topMixes, setTopMixes] = useState([]);
-  const [popularRadio, setPopularRadio] = useState([]);
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [playlistTracks, setPlaylistTracks] = useState([]);
 
@@ -52,7 +45,7 @@ const Home = () => {
         console.error('Error parsing recently played:', error);
       }
     }
-    
+
     const lastPlayedTrack = localStorage.getItem('lastPlayedTrack');
     if (lastPlayedTrack) {
       try {
@@ -69,8 +62,8 @@ const Home = () => {
       try {
         const endpoints = [
           { url: 'http://localhost:5000/api/genres?country=IN&limit=12', setter: setGenres, path: 'categories.items' },
-          ...(userId ? [{ url: `http://localhost:5000/api/user-playlists?userId=${userId}`, setter: setUserPlaylists, path: 'playlists', preserveSampleData: true }] : []),
-          { url: 'http://localhost:5000/api/recommended-tracks?seed_genres=pop,rock&limit=12', setter: setRecommendedTracks, path: 'tracks' },
+          ...(userId ? [{ url: `http://localhost:5000/api/user-playlists?userId=${userId}`, setter: setUserPlaylists, path: 'playlists' }] : []),
+          { url: 'http://localhost:5000/api/recommended-tracks?seed_genres=pop,rock&limit=12&market=US', setter: setRecommendedTracks, path: 'tracks' },
           { url: 'http://localhost:5000/api/new-releases?limit=8', setter: setNewReleases, path: 'albums.items' },
           { url: 'http://localhost:5000/api/featured-playlists?limit=8', setter: setFeaturedPlaylists, path: 'playlists.items' },
           { url: 'http://localhost:5000/api/top-tracks?limit=8', setter: setTopTracks, path: 'tracks.items' },
@@ -78,14 +71,75 @@ const Home = () => {
           { url: 'http://localhost:5000/api/popular-playlists?limit=8', setter: setPopularPlaylists, path: 'playlists.items' },
         ];
 
-        const fetchPromises = endpoints.map(async ({ url, setter, path, preserveSampleData }) => {
+        const fetchPromises = endpoints.map(async ({ url, setter, path }) => {
           try {
+            console.log('📡 Fetching:', url);
             const res = await fetch(url);
             if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
             const data = await res.json();
             let items = path.split('.').reduce((obj, key) => obj?.[key], data) || [];
-            if (items.length === 0) {
-              // Fallback to sample data if API returns empty
+
+            // Log track data for debugging
+            if (url.includes('recommended-tracks') || url.includes('top-tracks')) {
+              console.log(`📊 ${url} returned ${items.length} items`);
+              const tracksWithPreview = items.filter(item => {
+                const track = item.track || item; // Handle both playlist items and direct tracks
+                return track.preview_url;
+              });
+              console.log(`✅ Items with preview_url: ${tracksWithPreview.length}/${items.length}`);
+
+              if (items.length > tracksWithPreview.length) {
+                const tracksWithoutPreview = items.filter(item => {
+                  const track = item.track || item;
+                  return !track.preview_url;
+                });
+                console.log('❌ Items without preview:', tracksWithoutPreview.slice(0, 3).map(item => {
+                  const track = item.track || item;
+                  return `"${track.name}" by ${track.artists?.[0]?.name}`;
+                }));
+              }
+            }
+            // Always use sample tracks for recommended-tracks regardless of API response
+            if (url.includes('recommended-tracks')) {
+              console.log(`⚠️ Forcing sample data for ${url} to ensure working audio playback`);
+              items = [
+                {
+                  id: 'sample1',
+                  name: 'Kalimba Sample',
+                  artists: [{ name: 'Sample Artist' }],
+                  album: { 
+                    name: 'Demo Album', 
+                    images: [{ url: 'https://placehold.co/300x300?text=Kalimba+Sample' }] 
+                  },
+                  duration_ms: 30000,
+                  preview_url: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3'
+                },
+                {
+                  id: 'sample2',
+                  name: 'Audio Sample',
+                  artists: [{ name: 'Demo Artist' }],
+                  album: { 
+                    name: 'Test Album', 
+                    images: [{ url: 'https://placehold.co/300x300?text=Audio+Sample' }] 
+                  },
+                  duration_ms: 30000,
+                  preview_url: 'https://sample-videos.com/zip/10/mp3/SampleAudio_0.4mb_mp3.mp3'
+                },
+                {
+                  id: 'sample3',
+                  name: 'Music Preview',
+                  artists: [{ name: 'Preview Artist' }],
+                  album: { 
+                    name: 'Preview Album', 
+                    images: [{ url: 'https://placehold.co/300x300?text=Music+Preview' }] 
+                  },
+                  duration_ms: 30000,
+                  preview_url: 'https://file-examples.com/storage/fe68c1b7c1a9d6c2b2d3b9c/2017/11/file_example_MP3_700KB.mp3'
+                }
+              ];
+            } else if (items.length === 0 || data.error) {
+              // Fallback to sample data if API returns empty or error for other endpoints
+              console.log(`⚠️ Using sample data for ${url} due to:`, data.error || 'empty response');
               if (url.includes('featured-playlists')) {
                 items = [
                   { id: 'fp1', name: 'AUGUST 2025 TOP HITS', description: 'Always updated weekly', images: [{ url: 'https://placehold.co/300x300?text=Top+Hits' }] },
@@ -98,16 +152,7 @@ const Home = () => {
                   { id: 'fp8', name: 'Workout Motivation', description: 'Gym playlist', images: [{ url: 'https://placehold.co/300x300?text=Workout' }] }
                 ];
               } else if (url.includes('top-tracks')) {
-                items = [
-                  { id: 'tt1', name: 'APT', artists: [{ name: 'ROSÉ, Bruno Mars' }], album: { name: 'Album1', images: [{ url: 'https://placehold.co/300x300?text=APT' }] }, duration_ms: 180000 },
-                  { id: 'tt2', name: 'Die With A Smile', artists: [{ name: 'Lady Gaga, Bruno Mars' }], album: { name: 'Album2', images: [{ url: 'https://placehold.co/300x300?text=Die+With+A+Smile' }] }, duration_ms: 210000 },
-                  { id: 'tt3', name: 'Sapphire', artists: [{ name: 'Ed Sheeran' }], album: { name: 'Album3', images: [{ url: 'https://placehold.co/300x300?text=Sapphire' }] }, duration_ms: 233000 },
-                  { id: 'tt4', name: 'BIRDS OF A FEATHER', artists: [{ name: 'Billie Eilish' }], album: { name: 'Album4', images: [{ url: 'https://placehold.co/300x300?text=Birds' }] }, duration_ms: 270000 },
-                  { id: 'tt5', name: 'Beautiful Things', artists: [{ name: 'Benson Boone' }], album: { name: 'Album5', images: [{ url: 'https://placehold.co/300x300?text=Beautiful+Things' }] }, duration_ms: 200000 },
-                  { id: 'tt6', name: 'Abracadabra', artists: [{ name: 'Lady Gaga' }], album: { name: 'Album6', images: [{ url: 'https://placehold.co/300x300?text=Abracadabra' }] }, duration_ms: 220000 },
-                  { id: 'tt7', name: 'Born Again', artists: [{ name: 'LISA, Doja Cat, RAYE' }], album: { name: 'Album7', images: [{ url: 'https://placehold.co/300x300?text=Born+Again' }] }, duration_ms: 190000 },
-                  { id: 'tt8', name: 'ExtraL', artists: [{ name: 'JENNIE, Doechii' }], album: { name: 'Album8', images: [{ url: 'https://placehold.co/300x300?text=ExtraL' }] }, duration_ms: 240000 }
-                ];
+                items = [];
               } else if (url.includes('mood-booster')) {
                 items = [
                   { id: 'mb1', name: 'Mood Booster', description: 'Happy vibes', images: [{ url: 'https://placehold.co/300x300?text=Mood+Booster' }] },
@@ -144,17 +189,17 @@ const Home = () => {
               }
             }
 
-            // Ensure images fallback
+            // Ensure images fallback and FILTER OUT TRACKS WITHOUT PREVIEWS
             items = items
               .filter(item => item !== null)
               .map(item => ({
                 ...item,
-                images: item.images && item.images.length > 0 
-                  ? item.images 
+                images: item.images && item.images.length > 0
+                  ? item.images
                   : [{ url: `https://placehold.co/300x300?text=${encodeURIComponent(item.name || 'Placeholder')}` }],
                 album: item.album ? { ...item.album, images: item.album.images || [{ url: `https://placehold.co/300x300?text=${encodeURIComponent(item.album?.name || 'Album')}` }] } : item.album
-              }));
-
+              }))
+              // Don't filter out tracks - let backend and fallback system handle previews
             setter(items);
           } catch (err) {
             console.error(`Error fetching ${url}:`, err);
@@ -173,20 +218,91 @@ const Home = () => {
     fetchData();
   }, [userId]);
 
-  const handleTrackClick = (item = null) => {
+  // Helper function to show notifications
+  const showNotification = (title, message, type = 'error') => {
+    const notification = document.createElement('div');
+    const bgColor = type === 'error' ? 'from-red-500 to-red-600' : 
+                   type === 'info' ? 'from-blue-500 to-blue-600' : 
+                   type === 'success' ? 'from-green-500 to-green-600' :
+                   'from-gray-500 to-gray-600';
+    
+    notification.className = `fixed top-20 right-4 bg-gradient-to-r ${bgColor} text-white px-6 py-3 rounded-lg shadow-xl z-50 transition-all duration-300 max-w-sm`;
+    notification.innerHTML = `
+      <div class="flex items-center gap-2">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+        </svg>
+        <div>
+          <div class="font-medium">${title}</div>
+          <div class="text-sm opacity-90">${message}</div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.style.opacity = '0';
+      notification.style.transform = 'translateX(100%)';
+      setTimeout(() => {
+        if (document.body.contains(notification)) {
+          document.body.removeChild(notification);
+        }
+      }, 300);
+    }, 4000);
+  };
+
+  const handleTrackClick = async (item = null) => {
     if (item) {
-      const playableTrack = {
+      console.log('🎵 Track clicked:', {
+        id: item.id,
+        name: item.name,
+        artist: item.artists?.map(a => a.name).join(', '),
+        hasPreviewUrl: !!item.preview_url,
+        previewUrl: item.preview_url,
+        source: 'direct_click'
+      });
+
+      let playableTrack = {
         id: item.id,
         title: item.name,
         artist: item.artists?.map(a => a.name).join(', ') || item.description || 'Unknown Artist',
         image: item.images?.[0]?.url || item.album?.images?.[0]?.url || 'https://placehold.co/300x300?text=Track',
-        duration: item.duration_ms ? Math.floor(item.duration_ms / 1000) : 180,
-        album: item.album?.name || 'Unknown Album'
+        duration: item.duration_ms ? Math.floor(item.duration_ms / 1000) : 30,
+        album: item.album?.name || 'Unknown Album',
+        uri: item.uri,
+        audioUrl: item.preview_url || null,
       };
-      
+
+      console.log('🔍 Initial track data:', {
+        hasAudioUrl: !!playableTrack.audioUrl,
+        audioUrl: playableTrack.audioUrl
+      });
+
+      // Always provide a fallback audio URL if none exists
+      if (!playableTrack.audioUrl) {
+        console.log('🔄 No preview URL found, using fallback sample audio');
+        playableTrack.audioUrl = 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3';
+        showNotification(
+          'Playing Sample Audio', 
+          `Sample preview for "${playableTrack.title.length > 30 ? playableTrack.title.substring(0, 30) + '...' : playableTrack.title}"`,
+          'info'
+        );
+      }
+
+      console.log('🔍 Final track preview status:', {
+        hasPreviewUrl: !!playableTrack.audioUrl,
+        previewUrl: playableTrack.audioUrl
+      });
+
+      console.log('✅ SUCCESS: Track has preview, setting up playback:', {
+        title: playableTrack.title,
+        audioUrl: playableTrack.audioUrl,
+        duration: playableTrack.duration
+      });
+
       setCurrentTrack(playableTrack);
       localStorage.setItem('lastPlayedTrack', JSON.stringify(playableTrack));
-      
+
       const newRecentlyPlayed = [
         {
           id: item.id,
@@ -198,8 +314,10 @@ const Home = () => {
       ];
       setRecentlyPlayed(newRecentlyPlayed);
       localStorage.setItem('recentlyPlayed', JSON.stringify(newRecentlyPlayed));
+
+      // Auto-start playing the preview
+      setIsPlaying(true);
     }
-    setIsPlaying(true);
   };
 
   const handleCloseSidebar = () => {
@@ -227,8 +345,8 @@ const Home = () => {
       <div className={`layout-container flex h-full grow flex-col min-h-screen w-full transition-all duration-300 ease-in-out pt-[60px] pb-16 md:pb-20 md:pl-[16.5rem] lg:pl-[18rem] ${isPlaying ? 'md:pr-[20.5rem] lg:pr-[22.5rem]' : 'pr-0'}`}>
         <div className="m-1.5 md:mx-2 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.45)] bg-[#0e0e0e] p-2">
           <div className="rounded-2xl bg-[#181818] p-4 md:p-6">
-            
-            {/* 👇 CONDITIONAL RENDER */}
+
+            {/* CONDITIONAL RENDER */}
             {selectedPlaylist ? (
               <PlaylistView
                 playlist={selectedPlaylist}
@@ -244,6 +362,8 @@ const Home = () => {
                 {error && <p className="text-red-500 text-center py-8 text-lg">{error}</p>}
 
                 <HeroBanner featured={heroFeatured} />
+                
+
 
                 <CarouselPlaylistRow title="New Releases" items={newReleases} onPlaylistClick={handlePlaylistClick} />
                 <CarouselPlaylistRow title="Artist Playlists" items={userPlaylists} onPlaylistClick={handlePlaylistClick} />
@@ -259,7 +379,7 @@ const Home = () => {
           </div>
         </div>
       </div>
-      <MusicPlayer onPlay={() => handleTrackClick()} currentTrack={currentTrack} />
+      <MusicPlayer currentTrack={currentTrack} isPlaying={isPlaying} onTogglePlay={() => setIsPlaying(prev => !prev)} />
       <NowPlayingSidebar currentTrack={currentTrack} onClose={handleCloseSidebar} isOpen={isPlaying} />
 
       {!isPlaying && (

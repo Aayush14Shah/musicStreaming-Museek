@@ -13,6 +13,12 @@ const TrackCard = ({ title, artist, image, album, duration, onClick }) => (
         className="w-full h-full object-cover transition-transform duration-300" 
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      
+      {/* 30s Preview Badge */}
+      <div className="absolute top-2 right-2 bg-[#CD7F32] text-white text-xs px-2 py-1 rounded-full font-semibold shadow-lg">
+        30s
+      </div>
+      
       <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
         <div className="w-12 h-12 bg-[#CD7F32] rounded-full flex items-center justify-center opacity-90 shadow-lg transform scale-90 group-hover:scale-100 transition-transform duration-300">
           <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
@@ -35,7 +41,15 @@ const TrackCard = ({ title, artist, image, album, duration, onClick }) => (
 );
 
 const CarouselTrackRow = ({ title, items, showArrows = true, onTrackClick }) => {
-  const filteredItems = (items || []).filter(item => item !== null);
+  const filteredItems = (items || []).filter(item => {
+    if (!item) return false;
+    const track = item.track || item; // Handle both playlist items and direct tracks
+    const hasPreview = !!track.preview_url;
+    if (!hasPreview) {
+      console.log(`🚫 CarouselTrackRow: Filtering out track without preview: "${track?.name}"`);
+    }
+    return hasPreview;
+  });
 
   const handleTrackClick = (track) => {
     console.log('Track clicked:', track);

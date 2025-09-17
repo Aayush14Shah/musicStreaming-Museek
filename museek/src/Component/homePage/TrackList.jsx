@@ -8,7 +8,15 @@ const formatDuration = (ms = 0) => {
 };
 
 const TrackList = ({ items = [], onTrackClick }) => {
-  const tracks = items.filter(Boolean);
+  // Show all tracks - fallback audio will be used if no preview_url exists
+  const tracks = items.filter(t => {
+    const track = t.track || t; // Handle both playlist items and direct tracks
+    if (track && track.name) {
+      console.log(`✅ TrackList: Showing track: "${track?.name}" - Preview: ${track.preview_url ? 'YES' : 'NO (will use fallback)'}`);
+      return true;
+    }
+    return false;
+  });
 
   const handleTrackPlay = (track) => {
     console.log('Playing track from list:', track);
@@ -50,12 +58,15 @@ const TrackList = ({ items = [], onTrackClick }) => {
                   <div className="text-[#F5F5F5]/60 text-xs truncate">{track?.album?.name || 'Unknown Album'}</div>
                 </div>
                 <div className="text-[#F5F5F5]/70 text-xs shrink-0">{formatDuration(track?.duration_ms)}</div>
-                <button
-                  onClick={() => handleTrackPlay(track)}
-                  className="ml-2 px-3 py-1 rounded-full bg-[#CD7F32] text-[#121212] text-sm hover:bg-[#F5F5F5] hover:text-[#1C2B2D] transition-colors"
-                >
-                  Play
-                </button>
+                <div className="flex flex-col items-end gap-1">
+                  <div className="text-[#CD7F32] text-xs font-semibold">30s Preview</div>
+                  <button
+                    onClick={() => handleTrackPlay(track)}
+                    className="px-3 py-1 rounded-full bg-[#CD7F32] text-[#121212] text-sm hover:bg-[#F5F5F5] hover:text-[#1C2B2D] transition-colors"
+                  >
+                    Play
+                  </button>
+                </div>
               </div>
             );
           })
@@ -127,12 +138,15 @@ const TrackList = ({ items = [], onTrackClick }) => {
                       </td>
 
                       <td className="py-3 px-6">
-                        <button 
-                          onClick={() => handleTrackPlay(track)}
-                          className="px-5 py-2 bg-[#CD7F32] text-[#121212] rounded-full hover:bg-[#F5F5F5] hover:text-[#1C2B2D] transition-colors text-sm md:text-base focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CD7F32]"
-                        >
-                          Play
-                        </button>
+                        <div className="flex flex-col items-center gap-1">
+                          <div className="text-[#CD7F32] text-xs font-semibold">30s Preview</div>
+                          <button 
+                            onClick={() => handleTrackPlay(track)}
+                            className="px-4 py-1.5 bg-[#CD7F32] text-[#121212] rounded-full hover:bg-[#F5F5F5] hover:text-[#1C2B2D] transition-colors text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CD7F32]"
+                          >
+                            Play
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );

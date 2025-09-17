@@ -93,4 +93,30 @@ router.get('/search-artists/:query', async (req, res) => {
   }
 });
 
+// Get single track details (including preview_url)
+router.get('/track', async (req, res) => {
+  try {
+    const { trackId, market } = req.query;
+    if (!trackId) {
+      return res.status(400).json({ error: 'trackId query param missing' });
+    }
+    
+    console.log(`🎵 Fetching track details for ID: ${trackId}, market: ${market}`);
+    
+    await getAccessToken();
+    const options = market ? { market } : {};
+    const data = await spotifyApi.getTrack(trackId, options);
+    
+    console.log(`✅ Track fetched: "${data.body.name}" - Preview available: ${!!data.body.preview_url}`);
+    
+    res.json(data.body);
+  } catch (error) {
+    console.error('❌ Error fetching track:', error);
+    if (error.statusCode === 404) {
+      return res.status(404).json({ error: 'Track not found' });
+    }
+    res.status(500).json({ error: 'Failed to fetch track details' });
+  }
+});
+
 export default router;

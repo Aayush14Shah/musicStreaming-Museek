@@ -24,7 +24,8 @@ const Navbar = () => {
     const email = localStorage.getItem('userEmail');
     if (email) setUserEmail(email);
   }, []);
-    const handleRedirect = () => {
+
+  const handleRedirect = () => {
     navigate('/Login');
   };
 
@@ -78,6 +79,7 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+
 
       {/* Right - Profile */}
       <div className="flex-shrink-0">

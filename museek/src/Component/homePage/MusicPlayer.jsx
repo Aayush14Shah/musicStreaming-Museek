@@ -1,10 +1,11 @@
 // Updated MusicPlayer.jsx (improved responsiveness)
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Tooltip } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import ShuffleIcon from '@mui/icons-material/Shuffle';
 import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PauseIcon from '@mui/icons-material/Pause';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
 import RepeatIcon from '@mui/icons-material/Repeat';
 import QueueMusicIcon from '@mui/icons-material/QueueMusic';
@@ -18,40 +19,90 @@ import Slider from '@mui/material/Slider';
 import VolumeDown from '@mui/icons-material/VolumeDown';
 import VolumeUp from '@mui/icons-material/VolumeUp';
 
-const MusicPlayer = ({ onPlay, currentTrack }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
+const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
   const [isShuffling, setIsShuffling] = useState(false);
   const [isRepeating, setIsRepeating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [value, setValue] = React.useState(30);
-  const duration = 200; // seconds
-  const [position, setPosition] = React.useState(32);
-  const [paused, setPaused] = React.useState(false);
-  
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
-
-  const togglePlay = () => {
-    if (!currentTrack) {
-      console.log('No track loaded. Please select a track to play.');
-      return;
-    }
-    setIsPlaying(!isPlaying);
-    onPlay();
-  };
+  const audioRef = useRef(null);
+  const duration = audioRef.current?.duration || currentTrack?.duration || 0;
 
   const handlePlayButtonClick = () => {
     if (!currentTrack) {
-      alert('Please select a track from the playlists above to start listening!');
+      alert('Please select a track from the playlists above to start listening to 30-second previews!');
       return;
     }
-    togglePlay();
+    if (!currentTrack.audioUrl) {
+      alert('30-second preview not available for this track. Please choose another track.');
+      return;
+    }
+    onTogglePlay();
   };
 
-  const toggleShuffle = () => setIsShuffling(!isShuffling);
-  const toggleRepeat = () => setIsRepeating(!isRepeating);
-  const addToLiked = () => console.log("Added to liked songs");
+  // Initialize / update audio element when track changes
+  useEffect(() => {
+    if (currentTrack && currentTrack.audioUrl) {
+      // Pause and replace previous audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+
+      setProgress(0); // reset progress for new track
+
+      const audio = new Audio(currentTrack.audioUrl);
+      audioRef.current = audio;
+
+      const handleTimeUpdate = () => setProgress(audio.currentTime);
+      const handleEnded = () => {
+        if (isRepeating) {
+          audio.currentTime = 0;
+          audio.play();
+        } else {
+          if (isPlaying) onTogglePlay();
+        }
+      };
+
+      audio.addEventListener('timeupdate', handleTimeUpdate);
+      audio.addEventListener('ended', handleEnded);
+
+      if (isPlaying) {
+        audio.play();
+      }
+
+      return () => {
+        audio.removeEventListener('timeupdate', handleTimeUpdate);
+        audio.removeEventListener('ended', handleEnded);
+        audio.pause();
+      };
+    }
+  }, [currentTrack]);
+
+  // Play / pause when isPlaying prop changes
+  useEffect(() => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.play();
+      } else {
+        audioRef.current.pause();
+      }
+    }
+  }, [isPlaying]);
+
+  // Update volume when slider changes
+  const handleVolumeChange = (event, newValue) => {
+    setValue(newValue);
+    if (audioRef.current) {
+      audioRef.current.volume = newValue / 100;
+    }
+  };
+
+  // Seek when progress bar changes
+  const handleSeek = (_, newValue) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = newValue;
+      setProgress(newValue);
+    }
+  };
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-[#121212]/95 backdrop-blur-sm text-[#F5F5F5] p-2 md:p-4 z-40 h-16 md:h-20 flex items-center justify-between gap-4 md:gap-6">
@@ -65,10 +116,11 @@ const MusicPlayer = ({ onPlay, currentTrack }) => {
               <div className="text-[#CD7F32] truncate max-w-[150px] md:max-w-[200px]" title={currentTrack.artist}>
                 {currentTrack.artist}
               </div>
+              <div className="text-[#888] text-xs">30s Preview</div>
             </div>
             <Tooltip title="Add to Liked Songs" arrow>
               <button 
-                onClick={addToLiked} 
+                onClick={() => console.log("Added to liked songs")} 
                 className="text-[#F5F5F5] hover:text-[#CD7F32] hidden sm:block"
               >
                 <AddIcon fontSize="small" />
@@ -84,7 +136,7 @@ const MusicPlayer = ({ onPlay, currentTrack }) => {
             </div>
             <div className="text-xs md:text-sm overflow-hidden">
               <div className="font-medium text-[#888]">No track selected</div>
-              <div className="text-[#CD7F32]">Choose a track to start listening</div>
+              <div className="text-[#CD7F32]">Choose a track for 30s preview</div>
             </div>
           </>
         )}
@@ -95,7 +147,7 @@ const MusicPlayer = ({ onPlay, currentTrack }) => {
         <div className="flex items-center space-x-2 md:space-x-4 mb-1 md:mb-2">
           <Tooltip title="Shuffle" arrow>
             <button 
-              onClick={toggleShuffle} 
+              onClick={() => setIsShuffling(!isShuffling)} 
               className={`${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32]' : 'text-[#888] cursor-not-allowed'} ${isShuffling ? 'text-[#CD7F32]' : ''}`}
               disabled={!currentTrack}
             >
@@ -110,17 +162,17 @@ const MusicPlayer = ({ onPlay, currentTrack }) => {
               <SkipPreviousIcon fontSize="small" />
             </button>
           </Tooltip>
-          <Tooltip title={currentTrack ? "Play/Pause" : "Select a track first"} arrow>
+          <Tooltip title={currentTrack ? "Play/Pause 30s Preview" : "Select a track for 30s preview"} arrow>
             <button 
               onClick={handlePlayButtonClick} 
               className={`rounded-full p-1 md:p-2 transition-colors ${
-                currentTrack 
+                currentTrack
                   ? 'text-[#F5F5F5] hover:text-[#CD7F32] bg-[#1a1a1a]' 
                   : 'text-[#888] bg-[#1a1a1a] cursor-not-allowed'
               }`}
               disabled={!currentTrack}
             >
-              <PlayArrowIcon fontSize="medium" />
+              {isPlaying ? <PauseIcon fontSize="medium" /> : <PlayArrowIcon fontSize="medium" />}
             </button>
           </Tooltip>
           <Tooltip title="Next" arrow>
@@ -133,7 +185,7 @@ const MusicPlayer = ({ onPlay, currentTrack }) => {
           </Tooltip>
           <Tooltip title="Repeat" arrow>
             <button 
-              onClick={toggleRepeat} 
+              onClick={() => setIsRepeating(!isRepeating)} 
               className={`${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32]' : 'text-[#888] cursor-not-allowed'} ${isRepeating ? 'text-[#CD7F32]' : ''}`}
               disabled={!currentTrack}
             >
@@ -148,11 +200,11 @@ const MusicPlayer = ({ onPlay, currentTrack }) => {
           <Slider
           aria-label="time-indicator"
           size="small"
-          value={position}
+          value={progress}
           min={0}
           step={1}
           max={duration}
-          onChange={(_, value) => setPosition(value)}
+          onChange={handleSeek}
           sx={(t) => ({
             color: '#CD7F32',
             height: 4,
@@ -183,7 +235,7 @@ const MusicPlayer = ({ onPlay, currentTrack }) => {
           })}
         />
           <span className="text-xs md:text-sm hidden sm:block">
-            {currentTrack ? `${Math.floor(currentTrack.duration / 60)}:${(currentTrack.duration % 60).toString().padStart(2, '0')}` : '0:00'}
+            {duration ? `${Math.floor(duration / 60)}:${Math.floor(duration % 60).toString().padStart(2, '0')}` : '0:00'}
           </span>
         </div>
       </div>
@@ -222,21 +274,10 @@ const MusicPlayer = ({ onPlay, currentTrack }) => {
             <VolumeUpIcon fontSize="small" />
           </button>
         </Tooltip>
-        {/* Old Slider
-        <input
-          type="range"
-          min="0"
-          max="100"
-          value="50"
-          className={`w-16 md:w-24 h-1 md:h-2 appearance-none rounded-full hidden sm:block ${
-            currentTrack ? 'bg-[#1a1a1a]' : 'bg-[#1a1a1a] opacity-50 cursor-not-allowed'
-          }`}
-          disabled={!currentTrack}
-        /> */}
         <Box sx={{ width: 200 }}>
         <Stack spacing={2} direction="row" sx={{ alignItems: 'center', mb: 1 }}>
           <VolumeDown />
-          <Slider size="small" aria-label="Volume" value={value} onChange={handleChange} color="white"/>
+          <Slider size="small" aria-label="Volume" value={value} onChange={handleVolumeChange} color="white"/>
           <VolumeUp />
         </Stack>
         </Box>

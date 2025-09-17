@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Login from './Component/Login';
 import Preferences from './Component/Preferences';
 import Signup from './Component/Signup';
+import SpotifyAuthSuccess from './Component/SpotifyAuthSuccess';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="/Signup" element={<Signup />} />
             <Route path="/preferences" element={<Preferences />} />
             <Route path="/about" element={<About />} />
+            <Route path="/spotify-auth-success" element={<SpotifyAuthSuccess />} />
         </Routes>
     </div>
   ); 

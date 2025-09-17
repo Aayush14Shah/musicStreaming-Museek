@@ -199,7 +199,7 @@ export const PlaylistView = ({ playlist, tracks, onTrackClick, onBack }) => {
       <div className="px-6 space-y-2">
         {tracks.map((track, index) => (
           <div 
-            key={track.id || index}
+            key={`${track.id}-${index}` || `track-${index}`}
             className="group grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_1fr_1fr_auto] items-center gap-4 p-2 rounded-lg hover:bg-[#181818] cursor-pointer transition-all duration-300"
             onClick={() => onTrackClick(track)}
           >
