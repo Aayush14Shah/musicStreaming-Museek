@@ -278,15 +278,82 @@ const Home = () => {
         audioUrl: playableTrack.audioUrl
       });
 
-      // Always provide a fallback audio URL if none exists
+      // All tracks from backend now have preview URLs, but double-check
       if (!playableTrack.audioUrl) {
-        console.log('🔄 No preview URL found, using fallback sample audio');
-        playableTrack.audioUrl = 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3';
-        showNotification(
-          'Playing Sample Audio', 
-          `Sample preview for "${playableTrack.title.length > 30 ? playableTrack.title.substring(0, 30) + '...' : playableTrack.title}"`,
-          'info'
-        );
+        console.log('⚠️ Unexpected: Track without preview URL (should be filtered by backend)');
+        console.log('🔄 Trying backend API as fallback...');
+        
+        try {
+          const response = await fetch(`http://localhost:5000/api/spotify/track?trackId=${playableTrack.id}`);
+          const trackData = await response.json();
+          
+          if (trackData.preview_url) {
+            console.log('✅ Got preview URL from backend API:', trackData.preview_url);
+            playableTrack.audioUrl = trackData.preview_url;
+            
+            if (trackData.alternative_version) {
+              showNotification(
+                'Playing Alternative Version', 
+                `Found preview for "${trackData.alternative_track_name || playableTrack.title}"`,
+                'info'
+              );
+            } else if (trackData.alternative_market) {
+              showNotification(
+                'Playing Regional Version', 
+                `Found preview from ${trackData.alternative_market} region`,
+                'info'
+              );
+            }
+          } else {
+            // Try Deezer preview as additional fallback
+            console.log('🔍 Trying Deezer preview...');
+            try {
+              const dzResp = await fetch(`http://localhost:5000/api/deezer/preview?trackName=${encodeURIComponent(playableTrack.title)}&artistName=${encodeURIComponent(playableTrack.artist)}`);
+              const dzData = await dzResp.json();
+              if (dzData.found && dzData.preview_url) {
+                playableTrack.audioUrl = dzData.preview_url;
+                showNotification('Playing Deezer Preview', `Preview found on Deezer for "${dzData.title}"`, 'info');
+              }
+            } catch (dzErr) {
+              console.log('❌ Deezer preview failed:', dzErr);
+            }
+
+            // Try YouTube preview as last-resort before sample audio
+            if (!playableTrack.audioUrl) {
+              console.log('🔍 Trying YouTube preview...');
+              try {
+                const ytResp = await fetch(`http://localhost:5000/api/youtube/preview?trackName=${encodeURIComponent(playableTrack.title)}&artistName=${encodeURIComponent(playableTrack.artist)}`);
+                const ytData = await ytResp.json();
+                if (ytData.found && ytData.preview_url) {
+                  playableTrack.audioUrl = ytData.preview_url;
+                  showNotification('Playing YouTube Preview', ytData.title || playableTrack.title, 'info');
+                }
+              } catch (ytErr) {
+                console.log('❌ YouTube preview failed:', ytErr);
+              }
+            }
+
+            // Final fallback - only if still no preview
+            if (!playableTrack.audioUrl) {
+              playableTrack.audioUrl = 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3';
+              showNotification(
+                'Playing Sample Audio', 
+                `No preview available for "${playableTrack.title.length > 30 ? playableTrack.title.substring(0, 30) + '...' : playableTrack.title}"`,
+                'warning'
+              );
+            }
+          }
+        } catch (apiError) {
+          console.log('❌ Backend API call failed:', apiError);
+          playableTrack.audioUrl = 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3';
+          showNotification(
+            'Playing Sample Audio', 
+            `API unavailable - using sample for "${playableTrack.title.length > 30 ? playableTrack.title.substring(0, 30) + '...' : playableTrack.title}"`,
+            'warning'
+          );
+        }
+      } else {
+        console.log('✅ Track already has preview URL:', playableTrack.audioUrl);
       }
 
       console.log('🔍 Final track preview status:', {

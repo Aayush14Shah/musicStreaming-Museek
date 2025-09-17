@@ -8,11 +8,15 @@ const formatDuration = (ms = 0) => {
 };
 
 const TrackList = ({ items = [], onTrackClick }) => {
-  // Show all tracks - fallback audio will be used if no preview_url exists
+  // Backend now sends mixed content - prioritize tracks with previews
   const tracks = items.filter(t => {
     const track = t.track || t; // Handle both playlist items and direct tracks
     if (track && track.name) {
-      console.log(`✅ TrackList: Showing track: "${track?.name}" - Preview: ${track.preview_url ? 'YES' : 'NO (will use fallback)'}`);
+      if (track.preview_url) {
+        console.log(`✅ TrackList: Showing track with preview: "${track?.name}"`);
+      } else {
+        console.log(`🔄 TrackList: Showing track without preview (will use fallback): "${track?.name}"`);
+      }
       return true;
     }
     return false;
