@@ -142,7 +142,7 @@ const Navbar = () => {
         ) : (
           <button
             onClick={handleRedirect}
-            className="px-4 py-2 bg-[#CD7F32] hover:bg-[#b06f2d] text-[#F5F5F5] rounded-full font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg"
+            className="px-4 py-2 bg-[#CD7F32] hover:bg-[#b06f2d] text-[#F5F5F5] rounded-md font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg"
           >
             Login
           </button>

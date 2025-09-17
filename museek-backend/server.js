@@ -75,11 +75,7 @@ let tokenCache = {
 };
 
 
-/**
- * GET /api/new-releases
- * Calls Spotify's "Browse New Releases" with an app token.
- * Query params supported: ?country=IN&limit=12
- */
+
 // Personalized playlists by user
 app.get("/api/user-playlists", async (req, res) => {
   try {
@@ -274,37 +270,37 @@ function generateFallbackPreview(trackData) {
 }
 
 // app.get(path, handler)
-app.get("/api/new-releases", async(req, res) => {
-  try {
-    // 1) Get a fresh token (we’ll add caching in Option B)
-    const {access_token} = await getAppToken();
+// app.get("/api/new-releases", async(req, res) => {
+//   try {
+//     // 1) Get a fresh token (we’ll add caching in Option B)
+//     const {access_token} = await getAppToken();
 
-    // 2) Build optional query params for Spotify
-    const country = req.query.country || "IN";
-    const limit = parseInt(req.query.limit || "12", 10)
+//     // 2) Build optional query params for Spotify
+//     const country = req.query.country || "IN";
+//     const limit = parseInt(req.query.limit || "12", 10)
 
-    // 3) Call Spotify Web API with the Bearer token || axios.get(url, config)
-    /* 
-    config.headers.Authorization = 'Bearer <token>' is required for Spotify.
-    config.params is an object that axios turns into ?key=value query string.
-    */
-    const {data} = await axios.get(
-      "https://api.spotify.com/v1/browse/new-releases",
-      {
-        headers: {Authorization: `Bearer ${access_token}`},
-        params: {country, limit},  // axios turns this into ?country=IN&limit=12
-      }
-    )
+//     // 3) Call Spotify Web API with the Bearer token || axios.get(url, config)
+//     /* 
+//     config.headers.Authorization = 'Bearer <token>' is required for Spotify.
+//     config.params is an object that axios turns into ?key=value query string.
+//     */
+//     const {data} = await axios.get(
+//       "https://api.spotify.com/v1/browse/new-releases",
+//       {
+//         headers: {Authorization: `Bearer ${access_token}`},
+//         params: {country, limit},  // axios turns this into ?country=IN&limit=12
+//       }
+//     )
 
-    // 4) Send the Spotify JSON straight back to your React app
-    res.json(data);
-  } catch (error) {
-    // Helpful error reporting
-    const status = error.response?.status || 500;
-    const payload = error.response?.data || {message: error.message};
-    res.status(status).json({error: payload});
-  }
-})
+//     // 4) Send the Spotify JSON straight back to your React app
+//     res.json(data);
+//   } catch (error) {
+//     // Helpful error reporting
+//     const status = error.response?.status || 500;
+//     const payload = error.response?.data || {message: error.message};
+//     res.status(status).json({error: payload});
+//   }
+// })
 
 /**
  * GET /api/featured-playlists

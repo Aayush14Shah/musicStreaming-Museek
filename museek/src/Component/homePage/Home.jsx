@@ -16,7 +16,7 @@ const Home = () => {
   console.log('Home.jsx userId from localStorage:', userId);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrack, setCurrentTrack] = useState(null);
-  const [newReleases, setNewReleases] = useState([]);
+  // const [newReleases, setNewReleases] = useState([]);
   const [featuredPlaylists, setFeaturedPlaylists] = useState([]);
   const [topTracks, setTopTracks] = useState([]);
   const [moodBooster, setMoodBooster] = useState([]);
@@ -64,7 +64,7 @@ const Home = () => {
           { url: 'http://localhost:5000/api/genres?country=IN&limit=12', setter: setGenres, path: 'categories.items' },
           ...(userId ? [{ url: `http://localhost:5000/api/user-playlists?userId=${userId}`, setter: setUserPlaylists, path: 'playlists' }] : []),
           { url: 'http://localhost:5000/api/recommended-tracks?seed_genres=pop,rock&limit=12&market=US', setter: setRecommendedTracks, path: 'tracks' },
-          { url: 'http://localhost:5000/api/new-releases?limit=8', setter: setNewReleases, path: 'albums.items' },
+          // { url: 'http://localhost:5000/api/new-releases?limit=8', setter: setNewReleases, path: 'albums.items' },
           { url: 'http://localhost:5000/api/featured-playlists?limit=8', setter: setFeaturedPlaylists, path: 'playlists.items' },
           { url: 'http://localhost:5000/api/top-tracks?limit=8', setter: setTopTracks, path: 'tracks.items' },
           { url: 'http://localhost:5000/api/mood-booster?limit=8', setter: setMoodBooster, path: 'playlists.items' },
@@ -175,17 +175,17 @@ const Home = () => {
                   { id: 'pp7', name: 'Rock This', description: 'Rock hits', images: [{ url: 'https://placehold.co/300x300?text=Rock+This' }] },
                   { id: 'pp8', name: 'Viva Latino', description: 'Latin hits', images: [{ url: 'https://placehold.co/300x300?text=Viva+Latino' }] }
                 ];
-              } else if (url.includes('new-releases')) {
-                items = [
-                  { id: 'nr1', name: 'New Album 1', description: 'Fresh release', images: [{ url: 'https://placehold.co/300x300?text=New+Album+1' }] },
-                  { id: 'nr2', name: 'New Album 2', description: 'Latest drop', images: [{ url: 'https://placehold.co/300x300?text=New+Album+2' }] },
-                  { id: 'nr3', name: 'New Album 3', description: 'Brand new', images: [{ url: 'https://placehold.co/300x300?text=New+Album+3' }] },
-                  { id: 'nr4', name: 'New Album 4', description: 'Recent release', images: [{ url: 'https://placehold.co/300x300?text=New+Album+4' }] },
-                  { id: 'nr5', name: 'New Album 5', description: 'New music', images: [{ url: 'https://placehold.co/300x300?text=New+Album+5' }] },
-                  { id: 'nr6', name: 'New Album 6', description: 'Fresh tracks', images: [{ url: 'https://placehold.co/300x300?text=New+Album+6' }] },
-                  { id: 'nr7', name: 'New Album 7', description: 'Latest album', images: [{ url: 'https://placehold.co/300x300?text=New+Album+7' }] },
-                  { id: 'nr8', name: 'New Album 8', description: 'New release', images: [{ url: 'https://placehold.co/300x300?text=New+Album+8' }] }
-                ];
+              // } else if (url.includes('new-releases')) {
+              //   items = [
+              //     { id: 'nr1', name: 'New Album 1', description: 'Fresh release', images: [{ url: 'https://placehold.co/300x300?text=New+Album+1' }] },
+              //     { id: 'nr2', name: 'New Album 2', description: 'Latest drop', images: [{ url: 'https://placehold.co/300x300?text=New+Album+2' }] },
+              //     { id: 'nr3', name: 'New Album 3', description: 'Brand new', images: [{ url: 'https://placehold.co/300x300?text=New+Album+3' }] },
+              //     { id: 'nr4', name: 'New Album 4', description: 'Recent release', images: [{ url: 'https://placehold.co/300x300?text=New+Album+4' }] },
+              //     { id: 'nr5', name: 'New Album 5', description: 'New music', images: [{ url: 'https://placehold.co/300x300?text=New+Album+5' }] },
+              //     { id: 'nr6', name: 'New Album 6', description: 'Fresh tracks', images: [{ url: 'https://placehold.co/300x300?text=New+Album+6' }] },
+              //     { id: 'nr7', name: 'New Album 7', description: 'Latest album', images: [{ url: 'https://placehold.co/300x300?text=New+Album+7' }] },
+              //     { id: 'nr8', name: 'New Album 8', description: 'New release', images: [{ url: 'https://placehold.co/300x300?text=New+Album+8' }] }
+              //   ];
               }
             }
 
@@ -365,7 +365,7 @@ const Home = () => {
                 
 
 
-                <CarouselPlaylistRow title="New Releases" items={newReleases} onPlaylistClick={handlePlaylistClick} />
+                {/* <CarouselPlaylistRow title="New Releases" items={newReleases} onPlaylistClick={handlePlaylistClick} /> */}
                 <CarouselPlaylistRow title="Artist Playlists" items={userPlaylists} onPlaylistClick={handlePlaylistClick} />
                 <CarouselPlaylistRow title="Featured Playlists" items={featuredPlaylists} onPlaylistClick={handlePlaylistClick} />
                 <CarouselTrackRow title="Top Tracks" items={topTracks} onTrackClick={handleTrackClick} />

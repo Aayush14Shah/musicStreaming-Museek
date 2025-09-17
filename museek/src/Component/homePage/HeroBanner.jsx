@@ -17,9 +17,9 @@ const HeroBanner = ({ featured }) => {
     <div className="relative z-20 flex flex-col items-center justify-center text-center px-4 md:px-8 max-w-4xl mx-auto">
       <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4">{banner.name}</h1>
       <p className="text-sm sm:text-base md:text-xl max-w-2xl mx-auto mb-6 text-[#CD7F32] line-clamp-3">{banner.description}</p>
-      <button className="px-6 py-3 md:px-8 md:py-4 bg-[#CD7F32] rounded-full text-[#121212] font-semibold hover:bg-[#1C2B2D] hover:text-[#F5F5F5] transition-colors duration-200 text-sm md:text-base">
+      {/* <button className="px-6 py-3 md:px-8 md:py-4 bg-[#CD7F32] rounded-full text-[#121212] font-semibold hover:bg-[#1C2B2D] hover:text-[#F5F5F5] transition-colors duration-200 text-sm md:text-base">
         Play Now
-      </button>
+      </button> */}
     </div>
   </div>
   );

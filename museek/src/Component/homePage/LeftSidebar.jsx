@@ -88,7 +88,6 @@ const LeftSidebar = () => {
 
             <nav className="space-y-1">
               <a href="/" className="block px-3 py-2 rounded-md hover:bg-[#242424] text-sm transition-colors">Home</a>
-              <a href="#" className="block px-3 py-2 rounded-md hover:bg-[#242424] text-sm transition-colors">Search</a>
             </nav>
 
             <div className="border-t border-white/5 pt-3">
