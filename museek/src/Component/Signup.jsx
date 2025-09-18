@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Logo from '../Images/LogoFinalLightModeFrameResized.png';
+import Logo from '../Images/LogoFinalDarkModeFrameResized.png';
 import loginSideImage from '../Images/login_side_image.jpg';
 
 const Signup = () => {
