@@ -61,7 +61,10 @@ const Navbar = () => {
       <div className="flex-1 flex justify-center px-2 md:px-4">
         <div className="flex items-center space-x-2 md:space-x-4 max-w-[600px] w-full">
           <Tooltip title="Go to Home" arrow>
-            <button className="w-10 h-10 flex items-center justify-center bg-[#1C2B2D] opacity-80 hover:opacity-100 transition rounded-full">
+            <button 
+              onClick={() => navigate("/")}
+              className="w-10 h-10 flex items-center justify-center bg-[#1C2B2D] opacity-80 hover:opacity-100 transition rounded-full"
+            >
               <img
                 src={home_white_variant}
                 alt="Home Icon"
@@ -73,7 +76,7 @@ const Navbar = () => {
             <input
               type="text"
               placeholder="What do you want to play?"
-              className="w-full px-4 py-2 md:py-3 rounded-full outline-none border-none text-[#F5F5F5] bg-[#1C2B2D] placeholder:text-[#CD7F32] pl-10 md:pl-12 text-sm md:text-base"
+              className="w-full px-4 py-2 md:py-3 rounded-full outline-none border-none text-[#F5F5F5] bg-[#181818] placeholder:text-[#CD7F32] pl-10 md:pl-12 text-sm md:text-base"
             />
             <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#CD7F32] opacity-70 w-5 h-5 md:w-6 md:h-6" />
           </div>

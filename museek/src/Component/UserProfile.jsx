@@ -1,5 +1,6 @@
 // UserProfile.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "./homePage/Navbar";
 import MusicPlayer from "./homePage/MusicPlayer";
 import NowPlayingSidebar from "./homePage/NowPlayingSidebar";
@@ -44,6 +45,7 @@ const safeParse = (s, fallback) => {
 };
 
 export default function UserProfile() {
+  const navigate = useNavigate();
   // user id set at login
   const userId = localStorage.getItem("userId");
 
@@ -339,8 +341,21 @@ export default function UserProfile() {
           }}
         >
           {/* Gray background box like sidebars */}
-          <div className="bg-[#0f0f0f] min-h-screen mx-4 rounded-lg shadow-lg">
+          <div className="bg-[#0f0f0f] min-h-screen mx-4 rounded-lg shadow-lg mt-4">
             <div className="p-6 md:p-8">
+          {/* Back Button */}
+          <div className="mb-6">
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-2 text-[#cd7f32] hover:text-[#b06f2d] transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Home
+            </button>
+          </div>
+
           {/* Header Section - Professional Layout */}
           <div className="flex items-start gap-8 mb-8">
             {/* Avatar */}
@@ -573,18 +588,15 @@ export default function UserProfile() {
         onClose={() => toggleSidebar(false)}
       />
 
-      {/* Floating "Show Now Playing" — text button (no icon) bottom-right, exactly as you requested */}
+      {/* Floating "Show Now Playing" button */}
       {!isSidebarOpen && (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className="fixed right-1.5 bottom-24 z-50">
           <button
             onClick={() => toggleSidebar(true)}
-            className="px-4 py-2 rounded-full font-semibold shadow-lg"
-            style={{
-              background: "#cd7f32",
-              color: "#111",
-            }}
+            className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-[#0e0e0e]/95 text-[#F5F5F5] shadow-[0_8px_20px_rgba(0,0,0,0.35)] z-40 hover:bg-[#151515]/95 transition-colors"
             aria-label="Show Now Playing"
           >
+            <span className="inline-block w-2 h-2 rounded-full bg-[#CD7F32]"></span>
             Show Now Playing
           </button>
         </div>

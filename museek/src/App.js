@@ -7,6 +7,7 @@ import Preferences from './Component/Preferences';
 import Signup from './Component/Signup';
 import SpotifyAuthSuccess from './Component/SpotifyAuthSuccess';
 import UserProfile from './Component/UserProfile';
+import Settings from './Component/Settings';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/spotify-auth-success" element={<SpotifyAuthSuccess />} />
             <Route path="/profile" element={<UserProfile />} />
+            <Route path="/settings" element={<Settings />} />
         </Routes>
     </div>
   ); 
