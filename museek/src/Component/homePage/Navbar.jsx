@@ -10,7 +10,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import CircularLogoFinalDarkMode from '../../Images/CircularLogoFinalDarkMode.png';
 import home_white_variant from '../../Images/Icons/home_white_variant.png';
 import { Navigate,useNavigate } from 'react-router-dom';
-import Login from '../Login';
+import UserProfile from '../UserProfile';
 
 const Navbar = () => {
   const [userInitial, setUserInitial] = useState(null);

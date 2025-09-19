@@ -678,6 +678,36 @@ app.get("/api/debug/track-previews", async (req, res) => {
   }
 });
 
+// PATCH user avatar
+app.patch("/api/user/:id/avatar", async (req, res) => {
+  try {
+    const { avatar } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { avatar },
+      { new: true }
+    );
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PATCH user name
+app.patch("/api/user/:id/name", async (req, res) => {
+  try {
+    const { name } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { name },
+      { new: true }
+    );
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.use("/auth", authRoutes);
 app.use("/auth/spotify", spotifyAuthRouter);
 app.use("/api/spotify", spotifyRoutes);
