@@ -7,10 +7,6 @@ import NowPlayingSidebar from "./homePage/NowPlayingSidebar";
 import {
   Button,
   IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   TextField,
   Tooltip,
   CircularProgress,
@@ -331,20 +327,25 @@ export default function UserProfile() {
 
   /* ---------- Render UI ---------- */
   return (
-    <div className="min-h-screen bg-[#0b0b0b] text-white">
+    <div className="min-h-screen bg-[#181818] text-white">
       <Navbar />
 
-      {/* main area reserves space on the right when sidebar open */}
-      <div
-        className="pt-[64px] pb-28 transition-all duration-200"
-        style={{ paddingRight: isSidebarOpen ? `${SIDEBAR_WIDTH_PX}px` : undefined }}
-      >
-        <div className="max-w-6xl mx-auto px-5 md:px-8">
-          {/* Header Row */}
-          <div className="flex items-start gap-6 md:gap-8">
+      {/* main area - content starts from left, only right part resizes */}
+      <div className="pt-[64px] pb-28">
+        <div 
+          className="transition-all duration-200"
+          style={{ 
+            marginRight: isSidebarOpen ? `${SIDEBAR_WIDTH_PX}px` : '0px'
+          }}
+        >
+          {/* Gray background box like sidebars */}
+          <div className="bg-[#0f0f0f] min-h-screen mx-4 rounded-lg shadow-lg">
+            <div className="p-6 md:p-8">
+          {/* Header Section - Professional Layout */}
+          <div className="flex items-start gap-8 mb-8">
             {/* Avatar */}
             <div className="relative flex-shrink-0">
-              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-[#222] bg-[#111] shadow-sm">
+              <div className="w-36 h-36 md:w-44 md:h-44 rounded-full overflow-hidden border-4 border-[#cd7f32] bg-[#111] shadow-lg">
                 <img
                   src={AVATARS[avatarIndex % AVATARS.length]}
                   alt="avatar"
@@ -352,26 +353,26 @@ export default function UserProfile() {
                 />
               </div>
 
-              {/* edit pen icon: small circular button overlapping bottom-right */}
+              {/* edit pen icon: properly positioned circular button */}
               <Tooltip title="Change avatar">
                 <button
                   onClick={openAvatarModal}
-                  className="absolute right-0 bottom-0 transform translate-x-1/4 translate-y-1/4 bg-[#0f0f0f] border border-[#2a2a2a] p-2 rounded-full shadow-md"
+                  className="absolute -bottom-1 -right-1 w-8 h-8 bg-[#cd7f32] border-2 border-[#0f0f0f] rounded-full shadow-lg hover:bg-[#b06f2d] transition-colors flex items-center justify-center"
                   aria-label="Edit avatar"
                 >
-                  <EditIcon fontSize="small" sx={{ color: "#cd7f32" }} />
+                  <EditIcon sx={{ color: "#fff", fontSize: 16 }} />
                 </button>
               </Tooltip>
             </div>
 
             {/* Name / email / joined */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start justify-between gap-6">
                 <div className="min-w-0">
                   {!editingName ? (
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 mb-3">
                       <h1
-                        className="text-2xl md:text-3xl font-bold truncate cursor-text"
+                        className="text-3xl md:text-4xl font-bold truncate cursor-text"
                         onClick={() => setEditingName(true)}
                         title="Click to edit name"
                       >
@@ -389,7 +390,7 @@ export default function UserProfile() {
                       </Tooltip>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 mb-3">
                       <TextField
                         inputRef={nameRef}
                         variant="filled"
@@ -397,7 +398,7 @@ export default function UserProfile() {
                         value={nameInput}
                         onChange={(e) => setNameInput(e.target.value)}
                         InputProps={{
-                          style: { background: "#0f0f0f", color: "#fff", borderRadius: 8 },
+                          style: { background: "#181818", color: "#fff", borderRadius: 8 },
                         }}
                       />
                       <Button
@@ -420,51 +421,53 @@ export default function UserProfile() {
                     </div>
                   )}
 
-                  <div className="mt-2 flex flex-col sm:flex-row sm:items-center sm:gap-6">
-                    <div className="text-sm text-gray-300 truncate">{user?.email || localStorage.getItem("userEmail") || "—"}</div>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6 mb-4">
+                    <div className="text-base text-gray-300 truncate">{user?.email || localStorage.getItem("userEmail") || "—"}</div>
                     <FriendlyJoined u={user} />
                   </div>
+
+                  <p className="text-sm text-gray-400 max-w-2xl leading-relaxed">
+                    Welcome back. Manage your profile, favorites, and recent activity here.
+                  </p>
                 </div>
 
                 {/* Active summary (only total hours) */}
-                <div className="flex-shrink-0 mt-1 md:mt-0">
-                  <div className="bg-[#0f0f0f] px-4 py-3 rounded-lg text-center min-w-[120px]">
-                    <div className="text-xs text-gray-400">Total Listening</div>
-                    <div className="text-xl md:text-2xl font-semibold" style={{ color: "#cd7f32" }}>
+                <div className="flex-shrink-0">
+                  <div className="bg-[#181818] px-6 py-5 rounded-xl text-center min-w-[160px] border border-[#cd7f32]/20">
+                    <div className="text-sm text-gray-400 mb-2">Total Listening</div>
+                    <div className="text-3xl md:text-4xl font-bold" style={{ color: "#cd7f32" }}>
                       {totalListeningHours}h
                     </div>
                   </div>
                 </div>
               </div>
-
-              <p className="mt-4 text-sm text-gray-400 max-w-2xl">
-                Welcome back! Here are your own playlists and recent activity. This page keeps layout consistent when the player sidebar opens.
-              </p>
             </div>
           </div>
 
-          {/* Favorite Artists */}
-          <div className="mt-8">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Favorite Artists</h2>
-              <div className="text-sm text-gray-400">{(favoriteArtists || []).length} artists</div>
-            </div>
+          {/* Sections with thin line separators */}
+          <div className="space-y-8">
+            {/* Favorite Artists */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold">Favorite Artists</h2>
+                <span className="text-sm px-3 py-1 rounded-full bg-[#181818] text-gray-300">
+                  {(favoriteArtists || []).length} total
+                </span>
+              </div>
 
-            <div className="mt-3">
-              {/* neat horizontal scroller of artist chips */}
               {loadingUser ? (
-                <div className="py-6"><CircularProgress color="inherit" size={24} /></div>
+                <div className="py-8"><CircularProgress color="inherit" size={24} /></div>
               ) : (favoriteArtists && favoriteArtists.length) ? (
-                <div className="flex gap-3 overflow-x-auto py-2">
+                <div className="flex gap-4 overflow-x-auto py-2">
                   {favoriteArtists.map((name, idx) => {
                     const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1a1a1a&color=ffffff&rounded=true&size=64`;
                     return (
                       <div
                         key={`${name}-${idx}`}
-                        className="flex-none bg-[#0f0f0f] border border-[#222] rounded-lg px-3 py-2 flex items-center gap-3 shadow-sm min-w-[160px]"
+                        className="flex-none bg-[#181818] rounded-lg px-4 py-3 flex items-center gap-3 min-w-[200px] hover:bg-[#222] transition-colors"
                       >
-                        <img src={avatarUrl} alt={name} className="w-10 h-10 rounded-full object-cover" />
-                        <div className="flex flex-col">
+                        <img src={avatarUrl} alt={name} className="w-12 h-12 rounded-full object-cover" />
+                        <div className="flex flex-col min-w-0">
                           <span className="text-sm text-gray-100 font-medium truncate">{name}</span>
                           <span className="text-xs text-gray-400">Favorite</span>
                         </div>
@@ -473,30 +476,33 @@ export default function UserProfile() {
                   })}
                 </div>
               ) : (
-                <div className="text-gray-500 py-3">No favorite artists added yet.</div>
+                <div className="text-gray-500 py-8 text-center">No favorite artists added yet.</div>
               )}
             </div>
-          </div>
 
-          {/* Your Playlists */}
-          <div className="mt-8">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Your Playlists</h2>
-              <div className="text-sm text-gray-400">{(playlists || []).length} created</div>
-            </div>
+            {/* Thin separator line */}
+            <div className="border-t border-[#333]"></div>
 
-            <div className="mt-4">
+            {/* Your Playlists */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold">Your Playlists</h2>
+                <span className="text-sm px-3 py-1 rounded-full bg-[#181818] text-gray-300">
+                  {(playlists || []).length} created
+                </span>
+              </div>
+
               {playlists && playlists.length ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {playlists.map((pl, i) => {
                     const id = pl.id || pl._id || `local-${i}`;
                     const cover = (pl.images && pl.images[0] && pl.images[0].url) || pl.cover || `https://placehold.co/300x170?text=${encodeURIComponent(pl.name || "Playlist")}`;
                     return (
-                      <div key={id} className="bg-[#0f0f0f] rounded-lg p-3 border border-transparent hover:border-[#222] transition">
-                        <div className="w-full h-36 rounded-md overflow-hidden bg-[#0b0b0b]">
-                          <img src={cover} alt={pl.name} className="w-full h-full object-cover" />
+                      <div key={id} className="bg-[#181818] rounded-lg p-4 hover:bg-[#222] transition-colors group">
+                        <div className="w-full h-40 rounded-md overflow-hidden bg-[#0b0b0b] mb-3">
+                          <img src={cover} alt={pl.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                         </div>
-                        <div className="mt-3">
+                        <div>
                           <div className="text-sm font-semibold text-gray-100 truncate">{pl.name}</div>
                           {pl.description && <div className="text-xs text-gray-400 mt-1 truncate">{pl.description}</div>}
                         </div>
@@ -505,30 +511,32 @@ export default function UserProfile() {
                   })}
                 </div>
               ) : (
-                <div className="py-8 text-gray-500">You haven't created any playlists yet.</div>
+                <div className="text-gray-500 py-8 text-center">You haven't created any playlists yet.</div>
               )}
             </div>
-          </div>
 
-          {/* Recently Played - shorter landscape cards */}
-          <div className="mt-10">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Recently Played</h2>
-              <div className="text-sm text-gray-400">{(recentlyPlayed || []).length} items</div>
-            </div>
+            {/* Thin separator line */}
+            <div className="border-t border-[#333]"></div>
 
-            <div className="mt-4">
+            {/* Recently Played */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold">Recently Played</h2>
+                <span className="text-sm px-3 py-1 rounded-full bg-[#181818] text-gray-300">
+                  {(recentlyPlayed || []).length} items
+                </span>
+              </div>
+
               {recentlyPlayed && recentlyPlayed.length ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {recentlyPlayed.map((rp, i) => {
-                    // rp.images is array with { url } per your format
                     const imageUrl = (rp.images && rp.images[0] && rp.images[0].url) ||
                       (rp.album && rp.album.images && rp.album.images[0] && rp.album.images[0].url) ||
                       `https://placehold.co/300x170?text=${encodeURIComponent(rp.name || "Recent")}`;
 
                     return (
-                      <div key={`${rp.id || rp.name}-${i}`} className="bg-[#0f0f0f] rounded-lg p-2 flex gap-3 items-center">
-                        <div className="w-36 h-20 rounded-md overflow-hidden flex-shrink-0 bg-[#0b0b0b]">
+                      <div key={`${rp.id || rp.name}-${i}`} className="bg-[#181818] rounded-lg p-3 flex gap-3 items-center hover:bg-[#222] transition-colors">
+                        <div className="w-16 h-16 rounded-md overflow-hidden flex-shrink-0 bg-[#0b0b0b]">
                           <img src={imageUrl} alt={rp.name} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -540,8 +548,10 @@ export default function UserProfile() {
                   })}
                 </div>
               ) : (
-                <div className="py-8 text-gray-500">No recently played tracks found.</div>
+                <div className="text-gray-500 py-8 text-center">No recently played tracks found.</div>
               )}
+            </div>
+          </div>
             </div>
           </div>
         </div>
@@ -580,56 +590,72 @@ export default function UserProfile() {
         </div>
       )}
 
-      {/* Avatar modal - simple, consistent, no reset, no textual cancel (close icon only) */}
-      <Dialog open={avatarOpen} onClose={cancelAvatarModal} maxWidth="md" fullWidth>
-        <DialogTitle sx={{ bgcolor: "#121212", color: "#fff", position: "relative" }}>
-          Choose avatar
-          <IconButton
-            onClick={cancelAvatarModal}
-            sx={{ position: "absolute", right: 8, top: 8, color: "#fff" }}
-            aria-label="close"
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
+      {/* Professional Avatar Modal with Blurred Background */}
+      {avatarOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          {/* Blurred background overlay */}
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={cancelAvatarModal}></div>
 
-        <DialogContent dividers sx={{ bgcolor: "#0b0b0b" }}>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
-            {AVATARS.map((src, idx) => {
-              const selected = idx === tempAvatarIndex;
-              return (
-                <button
-                  key={src}
-                  type="button"
-                  onClick={() => setTempAvatarIndex(idx)}
-                  className={`relative rounded-lg overflow-hidden border ${selected ? "border-[#cd7f32]" : "border-transparent"} focus:outline-none`}
-                >
-                  <div className="w-full aspect-[1/1] bg-[#0b0b0b] flex items-center justify-center p-2">
-                    <img src={src} alt={`avatar-${idx}`} className="max-w-full max-h-full object-contain rounded-md" />
-                  </div>
-                  {selected && (
-                    <div className="absolute top-2 right-2 bg-black/70 rounded-full p-0.5">
-                      <CheckIcon sx={{ color: "#cd7f32", fontSize: 18 }} />
+          {/* Modal content */}
+          <div className="relative bg-[#282828]/95 backdrop-blur-md rounded-2xl shadow-2xl p-8 max-w-2xl w-full mx-4 border border-[#cd7f32]/30">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white">Choose Your Avatar</h2>
+              <button
+                onClick={cancelAvatarModal}
+                className="p-2 text-gray-400 hover:text-white transition-colors rounded-full hover:bg-gray-700"
+                aria-label="close"
+              >
+                <CloseIcon />
+              </button>
+            </div>
+
+            {/* Avatar grid */}
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-4 mb-6">
+              {AVATARS.map((src, idx) => {
+                const selected = idx === tempAvatarIndex;
+                return (
+                  <button
+                    key={src}
+                    type="button"
+                    onClick={() => setTempAvatarIndex(idx)}
+                    className={`relative rounded-xl overflow-hidden border-2 transition-all duration-200 hover:scale-105 ${
+                      selected 
+                        ? "border-[#cd7f32] shadow-lg shadow-[#cd7f32]/30" 
+                        : "border-gray-600 hover:border-gray-400"
+                    } focus:outline-none focus:ring-2 focus:ring-[#cd7f32]/50`}
+                  >
+                    <div className="w-full aspect-square bg-[#181818] flex items-center justify-center p-2">
+                      <img src={src} alt={`avatar-${idx}`} className="max-w-full max-h-full object-contain rounded-lg" />
                     </div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </DialogContent>
+                    {selected && (
+                      <div className="absolute top-2 right-2 bg-[#cd7f32] rounded-full p-1 shadow-lg">
+                        <CheckIcon sx={{ color: "#fff", fontSize: 16 }} />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
 
-        <DialogActions sx={{ bgcolor: "#121212", px: 3, py: 2 }}>
-          <div style={{ flex: 1 }} />
-          <Button
-            variant="contained"
-            onClick={confirmAvatarModal}
-            startIcon={<SaveIcon />}
-            sx={{ backgroundColor: "#cd7f32" }}
-          >
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
+            {/* Action buttons */}
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={cancelAvatarModal}
+                className="px-6 py-2 text-gray-300 hover:text-white transition-colors rounded-lg hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmAvatarModal}
+                className="px-6 py-2 bg-gradient-to-r from-[#cd7f32] to-[#b06f2d] text-white font-semibold rounded-lg hover:from-[#b06f2d] hover:to-[#cd7f32] transition-all duration-300 shadow-lg hover:shadow-xl"
+              >
+                Save Avatar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
