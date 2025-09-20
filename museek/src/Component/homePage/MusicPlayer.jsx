@@ -19,6 +19,9 @@ import Slider from '@mui/material/Slider';
 import VolumeDown from '@mui/icons-material/VolumeDown';
 import VolumeUp from '@mui/icons-material/VolumeUp';
 
+// generic mm:ss formatter
+const formatTime = (sec = 0) => `${Math.floor(sec / 60)}:${Math.floor(sec % 60).toString().padStart(2, '0')}`;
+
 const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
   const [isShuffling, setIsShuffling] = useState(false);
   const [isRepeating, setIsRepeating] = useState(false);
@@ -195,7 +198,7 @@ const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
         </div>
         <div className="flex items-center space-x-2 w-full">
           <span className="text-xs md:text-sm hidden sm:block">
-            {currentTrack ? `${Math.floor(progress / 60)}:${(progress % 60).toString().padStart(2, '0')}` : '0:00'}
+            {currentTrack ? formatTime(progress) : '0:00'}
           </span>
           <Slider
           aria-label="time-indicator"
@@ -235,7 +238,7 @@ const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
           })}
         />
           <span className="text-xs md:text-sm hidden sm:block">
-            {duration ? `${Math.floor(duration / 60)}:${Math.floor(duration % 60).toString().padStart(2, '0')}` : '0:00'}
+            {duration ? formatTime(duration) : '0:00'}
           </span>
         </div>
       </div>
