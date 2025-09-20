@@ -8,6 +8,9 @@ import Signup from './Component/Signup';
 import SpotifyAuthSuccess from './Component/SpotifyAuthSuccess';
 import UserProfile from './Component/UserProfile';
 import Settings from './Component/Settings';
+import AdminDashboard from './Component/AdminSide/Dashboard';
+import ManageUser from './Component/AdminSide/ManageUser';
+import ManageAdmins from './Component/AdminSide/ManageAdmins';
 
 function App() {
   return (
@@ -24,6 +27,11 @@ function App() {
             <Route path="/spotify-auth-success" element={<SpotifyAuthSuccess />} />
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/settings" element={<Settings />} />
+
+            {/* Admin URLs */}
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/manageUser" element={<ManageUser />} />
+            <Route path="/admin/manageAdmin" element={<ManageAdmins />} />
         </Routes>
     </div>
   ); 
