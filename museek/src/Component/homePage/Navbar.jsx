@@ -7,7 +7,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 // Assume images are imported as in the original
-import CircularLogoFinalDarkMode from '../../Images/CircularLogoFinalDarkMode.png';
+import CircularLogoFinalDarkMode from '../../Images/CircularLogoFinalLightMode.png';
 import home_white_variant from '../../Images/Icons/home_white_variant.png';
 import { Navigate,useNavigate } from 'react-router-dom';
 import UserProfile from '../UserProfile';
