@@ -5,8 +5,6 @@ import Logo from '../Images/LogoFinalDarkModeFrameResized.png';
 import ForgotPageImage from '../Images/ForgotPageImage.jpg';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
-
-
 const Forgot = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -18,6 +16,7 @@ const Forgot = () => {
   const [error, setError] = useState('');
   const [resetPassword, setResetPassword] = useState('');
   const [resetConfirm, setResetConfirm] = useState('');
+  const [passwordWarnings, setPasswordWarnings] = useState([]);
   const otpRefs = useRef([]);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -81,10 +80,23 @@ const Forgot = () => {
     setLoading(false);
   };
 
+  // Password validation function
+  const validatePassword = (password) => {
+    const warnings = [];
+    if (password.length < 8) warnings.push('At least 8 characters');
+    if (!/[a-z]/.test(password)) warnings.push('At least one lowercase letter');
+    if (!/[A-Z]/.test(password)) warnings.push('At least one uppercase letter');
+    if (!/[0-9]/.test(password)) warnings.push('At least one digit');
+    if (!/[^A-Za-z0-9]/.test(password)) warnings.push('At least one special character');
+    return warnings;
+  };
+
   const handlePasswordReset = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    const warnings = validatePassword(resetPassword);
+    setPasswordWarnings(warnings);
     if (!resetPassword || !resetConfirm) {
       setError('Please fill in both password fields.');
       setLoading(false);
@@ -92,6 +104,11 @@ const Forgot = () => {
     }
     if (resetPassword !== resetConfirm) {
       setError('Passwords do not match.');
+      setLoading(false);
+      return;
+    }
+    if (warnings.length > 0) {
+      setError('Password does not meet requirements.');
       setLoading(false);
       return;
     }
@@ -200,7 +217,10 @@ const Forgot = () => {
                       placeholder="New Password"
                       className="w-full   px-5 py-4 bg-[#0e0e0e] border-2 border-gray-600 rounded-xl text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#CD7F32]/20 focus:border-[#CD7F32] transition-all duration-300 shadow-sm hover:shadow-md"
                       value={resetPassword}
-                      onChange={e => setResetPassword(e.target.value)}
+                      onChange={e => {
+                        setResetPassword(e.target.value);
+                        setPasswordWarnings(validatePassword(e.target.value));
+                      }}
                       required
                     />
                     <button
@@ -212,6 +232,14 @@ const Forgot = () => {
                       {showPassword ? "🙈" : "👁️"}
                     </button>
                   </div>
+                  {/* Password requirements warnings */}
+                  {passwordWarnings.length > 0 && (
+                    <ul className="text-yellow-400 text-sm pl-4 list-disc">
+                      {passwordWarnings.map((w, i) => (
+                        <li key={i}>{w}</li>
+                      ))}
+                    </ul>
+                  )}
                   {/* Confirm Password Field with show/hide button */}
                   <div className="relative">
                     <input
@@ -226,9 +254,17 @@ const Forgot = () => {
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-[#CD7F32] transition-colors duration-200"
-                      tabIndex={-1}
                     >
-                      {showPassword ? "🙈" : "👁️"}
+                      {showPassword ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268-2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      )}
                     </button>
                   </div>
                 </div>
