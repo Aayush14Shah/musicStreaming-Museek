@@ -8,12 +8,12 @@ import Signup from './Component/Signup';
 import SpotifyAuthSuccess from './Component/SpotifyAuthSuccess';
 import UserProfile from './Component/UserProfile';
 import Settings from './Component/Settings';
+import Forgot from './Component/Forgot';
 import AdminDashboard from './Component/AdminSide/Dashboard';
 import ManageUser from './Component/AdminSide/ManageUser';
 import ManageAdmins from './Component/AdminSide/ManageAdmins';
 import ManageSongs from './Component/AdminSide/ManageSongs';
 import AddSong from './Component/AdminSide/AddSong';
-import Forgot from './Component/Forgot';
 
 
 function App() {
