@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import Logo from '../Images/LogoFinalLightModeFrameResized.png';
+import Logo from '../Images/LogoFinalDarkModeFrameResized.png';
 import loginPageImage from '../Images/loginPageImage.jpg';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
@@ -131,6 +131,7 @@ const Login = () => {
                 <button 
                   type="button" 
                   className="text-[#CD7F32] hover:text-[#b06f2d] font-medium transition duration-200 hover:underline"
+                  onClick={() => navigate('/Forgot')}
                 >
                   Forgot password?
                 </button>
