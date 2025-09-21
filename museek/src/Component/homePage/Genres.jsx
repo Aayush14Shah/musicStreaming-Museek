@@ -1,33 +1,61 @@
 import React from 'react';
 
-const Genres = () => {
-  // Static data for now, to be replaced with API data later
-  const genres = [
-    { name: "Rock", color: "bg-[#CD7F32]" },
-    { name: "Pop", color: "bg-[#1C2B2D]" },
-    { name: "Jazz", color: "bg-[#F5F5F5]" },
-    { name: "Chill", color: "bg-[#CD7F32]/70" },
-    { name: "Hip-Hop", color: "bg-[#1C2B2D]/70" },
-    { name: "Classical", color: "bg-[#F5F5F5]/70" },
+const GenreCard = ({ genre, idx, onClick }) => {
+  // subtle base backgrounds to keep your brand palette
+  const bases = [
+    'from-[#1a1a1a] to-[#0f0f0f]',
+    'from-[#2a2a2a] to-[#121212]',
+    'from-[#1a1a1a] to-[#0f0f0f]',
+    'from-[#2a2a2a] to-[#101010]',
   ];
+  const base = bases[idx % bases.length];
+  const icon = genre?.icons?.[0]?.url;
 
   return (
-    <div className="w-full py-8 bg-[#121212]">
-      <h2 className="text-2xl md:text-3xl font-bold text-[#F5F5F5] mb-6 px-4">Explore Genres</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 px-4">
-        {genres.map((genre, index) => (
-          <div
-            key={index}
-            className={`${genre.color} text-center rounded-lg p-4 cursor-pointer hover:opacity-90 transition-opacity duration-200`}
-            style={{ minHeight: "120px" }}
-          >
-            <h3 className="text-white text-sm sm:text-base md:text-lg font-semibold line-clamp-2">
-              {genre.name}
-            </h3>
-          </div>
-        ))}
+    <button
+      type="button"
+      aria-label={genre?.name || 'Genre'}
+      onClick={() => onClick?.(genre)}
+      className="group relative overflow-hidden rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4ade80] transition-transform duration-200 hover:-translate-y-1 hover:shadow-xl"
+    >
+      <div className={`relative w-full aspect-square bg-gradient-to-br ${base}`}>
+        {icon && (
+          <img
+            src={icon}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-75 transition-opacity"
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-black/0 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 p-2">
+          <h3 className="text-white font-semibold text-xs sm:text-sm line-clamp-2 drop-shadow leading-tight">
+            {genre?.name || 'Unknown Genre'}
+          </h3>
+        </div>
       </div>
-    </div>
+    </button>
+  );
+};
+
+const Genres = ({ items = [], onSelect }) => {
+  const filtered = items.filter(Boolean);
+
+  return (
+    <section className="w-full py-8 md:py-12">
+      <h2 className="px-1 md:px-0 text-2xl md:text-3xl font-bold text-[#F5F5F5] mb-6">
+        Explore Genres
+      </h2>
+
+      {filtered.length ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 sm:gap-4">
+          {filtered.map((genre, i) => (
+            <GenreCard key={genre.id || i} genre={genre} idx={i} onClick={onSelect} />
+          ))}
+        </div>
+      ) : (
+        <p className="text-[#F5F5F5]/80">No genres available</p>
+      )}
+    </section>
   );
 };
 
