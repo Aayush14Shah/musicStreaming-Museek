@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import Logo from '../Images/LogoFinalLightModeFrameResized.png';
+import Logo from '../Images/LogoFinalDarkModeFrameResized.png';
 import loginPageImage from '../Images/loginPageImage.jpg';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 

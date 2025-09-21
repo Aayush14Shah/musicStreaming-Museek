@@ -28,4 +28,14 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.post("/dashboard", async (req, res) => {
+  try {
+    const admin = new Admin(req.body);
+    await admin.save();
+    res.status(201).json({ message: "Admin registered" });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 export default router;

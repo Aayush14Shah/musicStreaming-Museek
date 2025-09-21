@@ -11,6 +11,7 @@ import authRoutes from "./routes/auth.js";
 import spotifyAuthRouter from "./routes/spotifyAuth.js";
 import spotifyRoutes from "./routes/spotify.js";
 import User from "./models/Register_user.js";
+import Admin from "./models/admin.js";
 
 dotenv.config();
 await connectDB();
@@ -1026,12 +1027,94 @@ app.get("/api/debug/track-previews", async (req, res) => {
   }
 });
 
+// PATCH user avatar
+app.patch("/api/user/:id/avatar", async (req, res) => {
+  try {
+    const { avatar } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { avatar },
+      { new: true }
+    );
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PATCH user name
+app.patch("/api/user/:id/name", async (req, res) => {
+  try {
+    const { name } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { name },
+      { new: true }
+    );
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/users", async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
+// PATCH user by id (for editing name or deactivating)
+app.patch("/api/users/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body; // e.g. { name: "newName" } or { status: false }
+
+    const updatedUser = await User.findByIdAndUpdate(id, updates, {
+      new: true,
+    });
+
+    res.json(updatedUser);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update user" });
+  }
+});
+
+app.get("/api/admins", async (req, res) => {
+  try {
+    const admins = await Admin.find();
+    res.json(admins);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
+// PATCH user by id (for editing name or deactivating)
+app.patch("/api/admins/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body; 
+
+    const updatedAdmin = await Admin.findByIdAndUpdate(id, updates, {
+      new: true,
+    });
+
+    res.json(updatedUser);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update user" });
+  }
+});
+
 app.use("/auth", authRoutes);
 app.use("/auth/spotify", spotifyAuthRouter);
 app.use("/api/spotify", spotifyRoutes);
 
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`API running on http://localhost:${PORT}`));
+
 
 /*
 URLSearchParams (why we used it)

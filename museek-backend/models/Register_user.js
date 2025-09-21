@@ -7,7 +7,7 @@ const UserSchema = new mongoose.Schema(
     password: { type: String, required: true },
     mobile: { type: String },
     favoriteArtists: [{ type: String }],
-    languages: [{ type: String }]
+    languages: [{ type: String }],
   },
   { timestamps: true }
 );
