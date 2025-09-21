@@ -131,6 +131,7 @@ const Login = () => {
                 <button 
                   type="button" 
                   className="text-[#CD7F32] hover:text-[#b06f2d] font-medium transition duration-200 hover:underline"
+                  onClick={() => navigate('/Forgot')}
                 >
                   Forgot password?
                 </button>
