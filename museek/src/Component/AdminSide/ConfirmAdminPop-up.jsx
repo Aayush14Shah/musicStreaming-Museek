@@ -1,25 +1,48 @@
-import React from "react";
-import { Button } from "@mui/material";
+import React, { useEffect, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import { Button } from "@mui/material";
 
 const ConfirmAdminPopup = ({ deleteAdmin, setDeleteAdmin, handleConfirm, loading, error }) => {
+  const [localLoading, setLocalLoading] = useState(false);
+  const [localError, setLocalError] = useState("");
+
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key === "Escape") setDeleteAdmin(null);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [setDeleteAdmin]);
+
   if (!deleteAdmin) return null;
+
+  const handleConfirmAction = async () => {
+    setLocalError("");
+    setLocalLoading(true);
+    try {
+      if (handleConfirm) {
+        await handleConfirm();
+      }
+      setDeleteAdmin(null);
+    } catch (err) {
+      console.error(err);
+      setLocalError(err.message || "Action failed");
+    } finally {
+      setLocalLoading(false);
+    }
+  };
 
   return (
     <div className="absolute inset-0 flex items-center justify-center z-50">
-      {/* Overlay */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={() => setDeleteAdmin(null)}
       />
-
-      {/* Modal Content */}
       <div
         onClick={(e) => e.stopPropagation()}
         className="relative bg-[#282828]/80 backdrop-blur-md rounded-2xl shadow-2xl p-6 max-w-sm w-full border border-[#CD7F32]/30 text-center"
       >
-        {/* Close Button */}
         <button
           onClick={() => setDeleteAdmin(null)}
           className="absolute top-4 right-4 text-[#F5F5F5] hover:text-[#CD7F32]"
@@ -28,21 +51,19 @@ const ConfirmAdminPopup = ({ deleteAdmin, setDeleteAdmin, handleConfirm, loading
           <CloseIcon />
         </button>
 
-        {/* Content */}
         <div className="flex flex-col items-center gap-3">
           <div className="bg-[#111] rounded-full p-3">
             <WarningAmberIcon style={{ fontSize: 36 }} className="text-[#CD7F32]" />
           </div>
-
-          <h3 className="text-lg font-semibold text-[#F5F5F5]">Delete Admin?</h3>
+          <h3 className="text-lg font-semibold text-[#F5F5F5]">
+            Deactivate admin?
+          </h3>
           <p className="text-sm text-[#F5F5F5]/70">
-            This action will permanently remove{" "}
-            <span className="font-semibold text-[#CD7F32]">{deleteAdmin.name}</span>.
+            This will mark the admin as inactive. They will not be deleted.
           </p>
 
-          {error && <p className="text-xs text-red-300">{error}</p>}
+          {(error || localError) && <p className="text-xs text-red-300">{error || localError}</p>}
 
-          {/* Buttons */}
           <div className="w-full flex gap-3 mt-4">
             <Button
               onClick={() => setDeleteAdmin(null)}
@@ -53,12 +74,12 @@ const ConfirmAdminPopup = ({ deleteAdmin, setDeleteAdmin, handleConfirm, loading
                 borderRadius: "0.75rem",
               }}
               variant="contained"
-              disabled={loading}
+              disabled={loading || localLoading}
             >
               Cancel
             </Button>
             <Button
-              onClick={handleConfirm}
+              onClick={handleConfirmAction}
               fullWidth
               sx={{
                 backgroundColor: "#CD7F32",
@@ -66,9 +87,9 @@ const ConfirmAdminPopup = ({ deleteAdmin, setDeleteAdmin, handleConfirm, loading
                 borderRadius: "0.75rem",
               }}
               variant="contained"
-              disabled={loading}
+              disabled={loading || localLoading}
             >
-              {loading ? "Processing..." : "Delete"}
+              {loading || localLoading ? "Processing..." : "Deactivate"}
             </Button>
           </div>
         </div>

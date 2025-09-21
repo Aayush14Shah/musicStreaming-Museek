@@ -124,7 +124,7 @@ const AddSong = () => {
         {/* Main Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
           <main className="flex-1 overflow-y-auto p-6 lg:p-8">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-6xl mx-auto">
               
               {/* Header */}
               <div className="flex items-center gap-4 mb-8">
@@ -140,6 +140,9 @@ const AddSong = () => {
                       backgroundColor: "#CD7F32/10"
                     },
                     textTransform: "none",
+                    fontWeight: "bold",
+                    borderRadius: "0.5rem",
+                    padding: "0.75rem 1.5rem",
                   }}
                 >
                   Back
@@ -154,17 +157,18 @@ const AddSong = () => {
 
               {/* Form */}
               <div className="bg-[#181818] border border-[#CD7F32]/20 rounded-lg p-8 shadow-lg">
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-8">
                   
                   {/* Basic Information */}
-                  <div>
-                    <Typography variant="h6" className="mb-4 text-[#CD7F32] font-semibold">
+                  <div className="mb-8">
+                    <Typography variant="h6" className="mb-[40px] text-[#CD7F32] font-semibold text-lg">
                       Basic Information
                     </Typography>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <TextField
                         name="title"
                         label="Song Title"
+                        placeholder="Enter song title"
                         value={formData.title}
                         onChange={handleInputChange}
                         required
@@ -182,6 +186,10 @@ const AddSong = () => {
                               borderColor: '#CD7F32',
                             },
                             backgroundColor: '#2a2a2a',
+                            '& input::placeholder': {
+                              color: '#F5F5F5/70',
+                              opacity: 1,
+                            },
                           },
                           '& .MuiInputLabel-root': {
                             color: '#F5F5F5/70',
@@ -194,6 +202,7 @@ const AddSong = () => {
                       <TextField
                         name="artist"
                         label="Artist Name"
+                        placeholder="Enter artist name"
                         value={formData.artist}
                         onChange={handleInputChange}
                         required
@@ -211,6 +220,10 @@ const AddSong = () => {
                               borderColor: '#CD7F32',
                             },
                             backgroundColor: '#2a2a2a',
+                            '& input::placeholder': {
+                              color: '#F5F5F5/70',
+                              opacity: 1,
+                            },
                           },
                           '& .MuiInputLabel-root': {
                             color: '#F5F5F5/70',
@@ -223,6 +236,7 @@ const AddSong = () => {
                       <TextField
                         name="album"
                         label="Album Name"
+                        placeholder="Enter album name"
                         value={formData.album}
                         onChange={handleInputChange}
                         fullWidth
@@ -239,6 +253,10 @@ const AddSong = () => {
                               borderColor: '#CD7F32',
                             },
                             backgroundColor: '#2a2a2a',
+                            '& input::placeholder': {
+                              color: '#F5F5F5/70',
+                              opacity: 1,
+                            },
                           },
                           '& .MuiInputLabel-root': {
                             color: '#F5F5F5/70',
@@ -277,6 +295,10 @@ const AddSong = () => {
                             '& .MuiSvgIcon-root': {
                               color: '#F5F5F5',
                             },
+                            '& input::placeholder': {
+                              color: '#F5F5F5/70',
+                              opacity: 1,
+                            },
                           }}
                         >
                           {genres.map((genre) => (
@@ -290,6 +312,7 @@ const AddSong = () => {
                         name="releaseDate"
                         label="Release Date"
                         type="date"
+                        placeholder="Select release date"
                         value={formData.releaseDate}
                         onChange={handleInputChange}
                         fullWidth
@@ -309,6 +332,10 @@ const AddSong = () => {
                               borderColor: '#CD7F32',
                             },
                             backgroundColor: '#2a2a2a',
+                            '& input::placeholder': {
+                              color: '#F5F5F5/70',
+                              opacity: 1,
+                            },
                           },
                           '& .MuiInputLabel-root': {
                             color: '#F5F5F5/70',
@@ -338,6 +365,10 @@ const AddSong = () => {
                               borderColor: '#CD7F32',
                             },
                             backgroundColor: '#2a2a2a',
+                            '& input::placeholder': {
+                              color: '#F5F5F5/70',
+                              opacity: 1,
+                            },
                           },
                           '& .MuiInputLabel-root': {
                             color: '#F5F5F5/70',
@@ -351,10 +382,11 @@ const AddSong = () => {
                   </div>
 
                   {/* Description */}
-                  <div>
+                  <div className="mb-8">
                     <TextField
                       name="description"
                       label="Description (Optional)"
+                      placeholder="Enter song description"
                       value={formData.description}
                       onChange={handleInputChange}
                       multiline
@@ -385,34 +417,36 @@ const AddSong = () => {
                   </div>
 
                   {/* File Uploads */}
-                  <div>
-                    <Typography variant="h6" className="mb-4 text-[#CD7F32] font-semibold">
+                  <div className="mb-8">
+                    <Typography variant="h6" className="mb-6 text-[#CD7F32] font-semibold text-lg">
                       File Uploads
                     </Typography>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       
                       {/* Audio File Upload */}
-                      <div>
-                        <Typography variant="body2" className="mb-2 text-[#F5F5F5]/70">
+                      <div className="space-y-3">
+                        <Typography variant="body2" className="text-[#F5F5F5]/70 font-medium">
                           Audio File *
                         </Typography>
                         <Box
                           sx={{
                             border: '2px dashed #CD7F32/30',
-                            borderRadius: '8px',
-                            padding: '2rem',
+                            borderRadius: '12px',
+                            padding: '2.5rem',
                             textAlign: 'center',
                             backgroundColor: '#2a2a2a',
+                            transition: 'all 0.3s ease',
                             '&:hover': {
                               borderColor: '#CD7F32',
                               backgroundColor: '#CD7F32/5',
+                              transform: 'translateY(-2px)',
                             },
                             cursor: 'pointer',
                           }}
                           onClick={() => document.getElementById('audio-file-input').click()}
                         >
-                          <CloudUploadIcon sx={{ fontSize: 48, color: '#CD7F32', mb: 2 }} />
-                          <Typography variant="body2" className="text-[#F5F5F5]/70">
+                          <CloudUploadIcon sx={{ fontSize: 56, color: '#CD7F32', mb: 2 }} />
+                          <Typography variant="body1" className="text-[#F5F5F5] font-medium mb-1">
                             {formData.audioFile ? formData.audioFile.name : 'Click to upload audio file'}
                           </Typography>
                           <Typography variant="caption" className="text-[#F5F5F5]/50">
@@ -430,27 +464,29 @@ const AddSong = () => {
                       </div>
 
                       {/* Cover Image Upload */}
-                      <div>
-                        <Typography variant="body2" className="mb-2 text-[#F5F5F5]/70">
+                      <div className="space-y-3">
+                        <Typography variant="body2" className="text-[#F5F5F5]/70 font-medium">
                           Cover Image (Optional)
                         </Typography>
                         <Box
                           sx={{
                             border: '2px dashed #CD7F32/30',
-                            borderRadius: '8px',
-                            padding: '2rem',
+                            borderRadius: '12px',
+                            padding: '2.5rem',
                             textAlign: 'center',
                             backgroundColor: '#2a2a2a',
+                            transition: 'all 0.3s ease',
                             '&:hover': {
                               borderColor: '#CD7F32',
                               backgroundColor: '#CD7F32/5',
+                              transform: 'translateY(-2px)',
                             },
                             cursor: 'pointer',
                           }}
                           onClick={() => document.getElementById('cover-image-input').click()}
                         >
-                          <CloudUploadIcon sx={{ fontSize: 48, color: '#CD7F32', mb: 2 }} />
-                          <Typography variant="body2" className="text-[#F5F5F5]/70">
+                          <CloudUploadIcon sx={{ fontSize: 56, color: '#CD7F32', mb: 2 }} />
+                          <Typography variant="body1" className="text-[#F5F5F5] font-medium mb-1">
                             {formData.coverImage ? formData.coverImage.name : 'Click to upload cover image'}
                           </Typography>
                           <Typography variant="caption" className="text-[#F5F5F5]/50">
@@ -469,7 +505,7 @@ const AddSong = () => {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex gap-4 pt-6 border-t border-[#CD7F32]/20">
+                  <div className="flex flex-col sm:flex-row gap-4 pt-8 border-t border-[#CD7F32]/20">
                     <Button
                       type="submit"
                       variant="contained"
@@ -477,9 +513,11 @@ const AddSong = () => {
                         backgroundColor: "#CD7F32",
                         "&:hover": { backgroundColor: "#b46f2a" },
                         fontWeight: "bold",
-                        borderRadius: "0.5rem",
-                        padding: "0.75rem 2rem",
+                        borderRadius: "0.75rem",
+                        padding: "0.875rem 2.5rem",
                         textTransform: "none",
+                        fontSize: "1rem",
+                        minWidth: "140px",
                       }}
                     >
                       Add Song
@@ -496,9 +534,11 @@ const AddSong = () => {
                           backgroundColor: "#CD7F32/10"
                         },
                         fontWeight: "bold",
-                        borderRadius: "0.5rem",
-                        padding: "0.75rem 2rem",
+                        borderRadius: "0.75rem",
+                        padding: "0.875rem 2.5rem",
                         textTransform: "none",
+                        fontSize: "1rem",
+                        minWidth: "140px",
                       }}
                     >
                       Cancel
