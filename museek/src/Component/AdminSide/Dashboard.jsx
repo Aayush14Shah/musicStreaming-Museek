@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Avatar, Button } from "@mui/material";
 import {
   Home as HomeIcon,
@@ -17,6 +17,13 @@ import AdminNavbar from "./AdminNavbar";
 const Dashboard = () => {
   const [open, setOpen] = useState(false);
   const [showAddAdmin, setShowAddAdmin] = useState(false);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    activeAdmins: 0,
+    totalCustomSongs: 0,
+    listeningHours: "5,000" // Keep this static as requested
+  });
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -24,6 +31,43 @@ const Dashboard = () => {
     console.log("Logout clicked");
     // TODO: Add real logout logic
   };
+
+  // Fetch dashboard statistics
+  const fetchDashboardStats = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch all data in parallel
+      const [usersResponse, adminsResponse, songsResponse] = await Promise.all([
+        fetch('http://localhost:5000/api/users'),
+        fetch('http://localhost:5000/api/admins'),
+        fetch('http://localhost:5000/api/custom-songs/stats/overview')
+      ]);
+
+      const [usersData, adminsData, songsData] = await Promise.all([
+        usersResponse.json(),
+        adminsResponse.json(),
+        songsResponse.json()
+      ]);
+
+      setStats({
+        totalUsers: usersData.length || 0,
+        activeAdmins: adminsData.length || 0,
+        totalCustomSongs: songsData.totalSongs || 0,
+        listeningHours: "5,000" // Keep static
+      });
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+      // Keep default values on error
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load stats on component mount
+  useEffect(() => {
+    fetchDashboardStats();
+  }, []);
 
   return (
     <div className="flex h-screen bg-[#181818] text-[#F5F5F5]">
@@ -46,17 +90,33 @@ const Dashboard = () => {
               {/* Stat Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {[
-                  { title: "Total Users", value: "1,234" },
-                  { title: "Active Admins", value: "5" },
-                  { title: "Total Songs in API", value: "10,000" },
-                  { title: "Listening Hours", value: "5,000" },
+                  { 
+                    title: "Total Users", 
+                    value: loading ? "..." : stats.totalUsers.toLocaleString(),
+                    icon: <PeopleIcon />
+                  },
+                  { 
+                    title: "Active Admins", 
+                    value: loading ? "..." : stats.activeAdmins.toString(),
+                    icon: <AdminIcon />
+                  },
+                  { 
+                    title: "Total Songs in Custom API", 
+                    value: loading ? "..." : stats.totalCustomSongs.toLocaleString(),
+                    icon: <MusicIcon />
+                  },
+                  { 
+                    title: "Listening Hours", 
+                    value: stats.listeningHours,
+                    icon: <HomeIcon />
+                  },
                 ].map((stat, i) => (
                   <div
                     key={i}
                     className="bg-[#CD7F32]/10 rounded-lg p-6 flex items-center gap-6 shadow-md"
                   >
                     <div className="bg-[#CD7F32]/20 p-3 rounded-full text-[#CD7F32] shadow-inner">
-                      <HomeIcon />
+                      {stat.icon}
                     </div>
                     <div>
                       <p className="text-sm text-[#F5F5F5]/70">{stat.title}</p>
@@ -161,6 +221,7 @@ const Dashboard = () => {
                     </Button>
 
                     <Button
+                      onClick={() => navigate("/admin/songs/add")}
                       variant="contained"
                       fullWidth
                       sx={{

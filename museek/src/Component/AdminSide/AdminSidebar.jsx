@@ -11,7 +11,7 @@ import { NavLink } from "react-router-dom";
 const AdminSidebar = () => {
   const links = [
     { to: "/admin/dashboard", label: "Dashboard", icon: <HomeIcon /> },
-    { to: "/admin/content", label: "Content", icon: <MusicIcon /> },
+    { to: "/admin/songs", label: "Songs", icon: <MusicIcon /> },
     { to: "/admin/manageUser", label: "Users", icon: <PeopleIcon /> },
     { to: "/admin/manageAdmin", label: "Admins", icon: <PeopleIcon /> },
     { to: "/admin/analytics", label: "Analytics", icon: <AnalyticsIcon /> },

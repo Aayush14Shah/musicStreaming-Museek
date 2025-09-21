@@ -12,6 +12,10 @@ import spotifyAuthRouter from "./routes/spotifyAuth.js";
 import spotifyRoutes from "./routes/spotify.js";
 import User from "./models/Register_user.js";
 import Admin from "./models/admin.js";
+import CustomSong from "./models/CustomSong.js";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 
 dotenv.config();
 await connectDB();
@@ -22,12 +26,323 @@ const app = express();
 app.use(cors()); // lets your React app call this API
 app.use(express.json()); // parse JSON bodies if you send POST/PUT later
 
+// Create uploads directories if they don't exist
+const uploadsDir = path.join(process.cwd(), 'uploads');
+const audioDir = path.join(uploadsDir, 'audio');
+const imagesDir = path.join(uploadsDir, 'images');
+
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
+if (!fs.existsSync(audioDir)) fs.mkdirSync(audioDir);
+if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir);
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static('uploads'));
+
+// Multer configuration for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    if (file.fieldname === 'audioFile') {
+      cb(null, audioDir);
+    } else if (file.fieldname === 'coverImage') {
+      cb(null, imagesDir);
+    }
+  },
+  filename: (req, file, cb) => {
+    // Generate unique filename with timestamp
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  if (file.fieldname === 'audioFile') {
+    // Accept audio files
+    if (file.mimetype.startsWith('audio/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only audio files are allowed for audioFile'), false);
+    }
+  } else if (file.fieldname === 'coverImage') {
+    // Accept image files
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed for coverImage'), false);
+    }
+  } else {
+    cb(new Error('Unexpected field'), false);
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB limit for audio files
+  }
+});
+
 console.log("CLIENT ID:", process.env.SPOTIFY_CLIENT_ID);
 console.log("CLIENT SECRET:", process.env.SPOTIFY_CLIENT_SECRET);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to Museek API. Use /api endpoints like /api/new-releases.' });
 });
+
+// ==================== CUSTOM SONGS CRUD API ====================
+
+// GET all custom songs (with filtering and pagination) - Shows both active and inactive
+app.get("/api/custom-songs", async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const search = req.query.search || '';
+    const status = req.query.status || '';
+    const genre = req.query.genre || '';
+
+    // Build filter object - no is_active filter, show all songs
+    let filter = {};
+
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { artist: { $regex: search, $options: 'i' } },
+        { album: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    if (status) {
+      filter.apiStatus = status;
+    }
+
+    if (genre) {
+      filter.genre = { $regex: genre, $options: 'i' };
+    }
+
+    const songs = await CustomSong.find(filter)
+      .populate('uploadedBy', 'email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await CustomSong.countDocuments(filter);
+
+    res.json({
+      songs,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching custom songs:', error);
+    res.status(500).json({ error: 'Failed to fetch songs' });
+  }
+});
+
+// GET single custom song by ID
+app.get("/api/custom-songs/:id", async (req, res) => {
+  try {
+    const song = await CustomSong.findOne({ 
+      _id: req.params.id, 
+      is_active: 1 
+    }).populate('uploadedBy', 'email');
+
+    if (!song) {
+      return res.status(404).json({ error: 'Song not found' });
+    }
+
+    res.json(song);
+  } catch (error) {
+    console.error('Error fetching song:', error);
+    res.status(500).json({ error: 'Failed to fetch song' });
+  }
+});
+
+// POST create new custom song
+app.post("/api/custom-songs", upload.fields([
+  { name: 'audioFile', maxCount: 1 },
+  { name: 'coverImage', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const {
+      title,
+      artist,
+      album,
+      genre,
+      releaseDate,
+      duration,
+      description,
+      uploadedBy
+    } = req.body;
+
+    // Check if audio file was uploaded
+    if (!req.files || !req.files.audioFile) {
+      return res.status(400).json({ error: 'Audio file is required' });
+    }
+
+    const audioFile = req.files.audioFile[0];
+    const coverImage = req.files.coverImage ? req.files.coverImage[0] : null;
+
+    // Create new song document
+    const newSong = new CustomSong({
+      title,
+      artist,
+      album,
+      genre,
+      releaseDate: releaseDate ? new Date(releaseDate) : null,
+      duration,
+      description,
+      audioFilePath: audioFile.path,
+      audioFileName: audioFile.filename,
+      coverImagePath: coverImage ? coverImage.path : null,
+      coverImageName: coverImage ? coverImage.filename : null,
+      fileSize: audioFile.size,
+      mimeType: audioFile.mimetype,
+      uploadedBy: uploadedBy || '507f1f77bcf86cd799439011', // Default admin ID (you should pass real admin ID)
+      apiStatus: 'Published' // Set as published by default
+    });
+
+    const savedSong = await newSong.save();
+    
+    // Populate the uploadedBy field for response
+    await savedSong.populate('uploadedBy', 'email');
+
+    console.log(`✅ New song uploaded: "${title}" by ${artist}`);
+    res.status(201).json(savedSong);
+  } catch (error) {
+    console.error('Error creating song:', error);
+    
+    // Clean up uploaded files if database save failed
+    if (req.files) {
+      if (req.files.audioFile) {
+        fs.unlink(req.files.audioFile[0].path, () => {});
+      }
+      if (req.files.coverImage) {
+        fs.unlink(req.files.coverImage[0].path, () => {});
+      }
+    }
+    
+    res.status(500).json({ error: 'Failed to create song' });
+  }
+});
+
+// PUT update custom song
+app.put("/api/custom-songs/:id", async (req, res) => {
+  try {
+    const {
+      title,
+      artist,
+      album,
+      genre,
+      releaseDate,
+      duration,
+      description,
+      apiStatus
+    } = req.body;
+
+    const updateData = {
+      title,
+      artist,
+      album,
+      genre,
+      releaseDate: releaseDate ? new Date(releaseDate) : null,
+      duration,
+      description,
+      apiStatus
+    };
+
+    const updatedSong = await CustomSong.findOneAndUpdate(
+      { _id: req.params.id, is_active: 1 },
+      updateData,
+      { new: true }
+    ).populate('uploadedBy', 'email');
+
+    if (!updatedSong) {
+      return res.status(404).json({ error: 'Song not found' });
+    }
+
+    console.log(`✅ Song updated: "${updatedSong.title}" by ${updatedSong.artist}`);
+    res.json(updatedSong);
+  } catch (error) {
+    console.error('Error updating song:', error);
+    res.status(500).json({ error: 'Failed to update song' });
+  }
+});
+
+// PATCH toggle song active status (activate/deactivate)
+app.patch("/api/custom-songs/:id/toggle-status", async (req, res) => {
+  try {
+    const song = await CustomSong.findById(req.params.id);
+
+    if (!song) {
+      return res.status(404).json({ error: 'Song not found' });
+    }
+
+    // Toggle the is_active status
+    const newStatus = song.is_active === 1 ? 0 : 1;
+    
+    const updatedSong = await CustomSong.findByIdAndUpdate(
+      req.params.id,
+      { is_active: newStatus },
+      { new: true }
+    ).populate('uploadedBy', 'email');
+
+    const statusText = newStatus === 1 ? 'activated' : 'deactivated';
+    console.log(`🔄 Song ${statusText}: "${updatedSong.title}" by ${updatedSong.artist}`);
+    
+    res.json({ 
+      message: `Song ${statusText} successfully`,
+      song: updatedSong 
+    });
+  } catch (error) {
+    console.error('Error toggling song status:', error);
+    res.status(500).json({ error: 'Failed to toggle song status' });
+  }
+});
+
+// GET song statistics for admin dashboard
+app.get("/api/custom-songs/stats/overview", async (req, res) => {
+  try {
+    // Count ALL songs in custom_songs table (for dashboard total)
+    const totalSongs = await CustomSong.countDocuments({});
+    
+    // Count active songs only (for detailed stats)
+    const activeSongs = await CustomSong.countDocuments({ is_active: 1 });
+    const inactiveSongs = await CustomSong.countDocuments({ is_active: 0 });
+    
+    // Count by API status (active songs only)
+    const publishedSongs = await CustomSong.countDocuments({ is_active: 1, apiStatus: 'Published' });
+    const draftSongs = await CustomSong.countDocuments({ is_active: 1, apiStatus: 'Draft' });
+    const errorSongs = await CustomSong.countDocuments({ is_active: 1, apiStatus: 'Error' });
+
+    // Get genre distribution (all songs)
+    const genreStats = await CustomSong.aggregate([
+      { $match: {} }, // Include all songs for genre distribution
+      { $group: { _id: '$genre', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 10 }
+    ]);
+
+    res.json({
+      totalSongs, // All songs in custom_songs table
+      activeSongs,
+      inactiveSongs,
+      publishedSongs,
+      draftSongs,
+      errorSongs,
+      genreDistribution: genreStats
+    });
+  } catch (error) {
+    console.error('Error fetching song stats:', error);
+    res.status(500).json({ error: 'Failed to fetch statistics' });
+  }
+});
+
+// ==================== END CUSTOM SONGS API ====================
 
 /**
  * getAppToken()
@@ -1059,26 +1374,76 @@ app.patch("/api/user/:id/name", async (req, res) => {
 
 app.get("/api/users", async (req, res) => {
   try {
-    const users = await User.find();
+    // Get all users (both active and inactive) - sorted by creation date
+    const users = await User.find().sort({ createdAt: -1 });
     res.json(users);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch users" });
   }
 });
 
-// PATCH user by id (for editing name or deactivating)
-app.patch("/api/users/:id", async (req, res) => {
+// GET single user by id (for details view only)
+app.get("/api/users/:id", async (req, res) => {
   try {
-    const { id } = req.params;
-    const updates = req.body; // e.g. { name: "newName" } or { status: false }
-
-    const updatedUser = await User.findByIdAndUpdate(id, updates, {
-      new: true,
-    });
-
-    res.json(updatedUser);
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.json(user);
   } catch (err) {
-    res.status(500).json({ error: "Failed to update user" });
+    res.status(500).json({ error: "Failed to fetch user" });
+  }
+});
+
+// DELETE user (soft delete - set is_active to 0)
+app.delete("/api/users/:id", async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { is_active: 0 },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    console.log(`🗑️ User deactivated: "${user.name}" (${user.email})`);
+    res.json({ message: "User deactivated successfully" });
+  } catch (err) {
+    console.error('Error deactivating user:', err);
+    res.status(500).json({ error: "Failed to deactivate user" });
+  }
+});
+
+// PATCH toggle user active status
+app.patch("/api/users/:id/toggle-status", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Toggle the is_active status
+    const newStatus = user.is_active === 1 ? 0 : 1;
+    
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { is_active: newStatus },
+      { new: true }
+    );
+
+    const statusText = newStatus === 1 ? 'activated' : 'deactivated';
+    console.log(`🔄 User ${statusText}: "${updatedUser.name}" (${updatedUser.email})`);
+    
+    res.json({ 
+      message: `User ${statusText} successfully`,
+      user: updatedUser 
+    });
+  } catch (err) {
+    console.error('Error toggling user status:', err);
+    res.status(500).json({ error: 'Failed to toggle user status' });
   }
 });
 
