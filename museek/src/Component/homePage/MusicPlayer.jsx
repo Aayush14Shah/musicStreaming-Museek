@@ -154,19 +154,7 @@ const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
       audioRef.current.currentTime = newValue;
       setProgress(newValue);
     }
-  };
-
-  const toggleFullScreen = () => {
-                if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen().catch(err => {
-                        console.error(`Error enabling full-screen: ${err.message} (${err.name})`);
-                    });
-                } else {
-                    document.exitFullscreen().catch(err => {
-                        console.error(`Error exiting full-screen: ${err.message} (${err.name})`);
-                    });
-                }
-            };  
+  }; 
 
   const toggleFullScreen = () => {
                 if (!document.fullscreenElement) {
