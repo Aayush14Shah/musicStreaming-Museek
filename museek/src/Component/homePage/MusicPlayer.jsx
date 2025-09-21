@@ -27,6 +27,7 @@ const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
   const [isRepeating, setIsRepeating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [value, setValue] = React.useState(30);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const audioRef = useRef(null);
   const duration = audioRef.current?.duration || currentTrack?.duration || 0;
 
@@ -39,7 +40,33 @@ const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
       alert('30-second preview not available for this track. Please choose another track.');
       return;
     }
-    onTogglePlay();
+    // Toggle play/pause state and control audio
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+        onTogglePlay(); // Update the state
+      } else {
+        audioRef.current.play();
+        onTogglePlay(); // Update the state
+      }
+    }
+  };
+
+  // Fullscreen functionality
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => {
+        setIsFullscreen(true);
+      }).catch(err => {
+        console.log('Error attempting to enable fullscreen:', err);
+      });
+    } else {
+      document.exitFullscreen().then(() => {
+        setIsFullscreen(false);
+      }).catch(err => {
+        console.log('Error attempting to exit fullscreen:', err);
+      });
+    }
   };
 
   // Initialize / update audio element when track changes
@@ -64,9 +91,17 @@ const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
           if (isPlaying) onTogglePlay();
         }
       };
+      const handlePlay = () => {
+        console.log('Audio started playing');
+      };
+      const handlePause = () => {
+        console.log('Audio paused');
+      };
 
       audio.addEventListener('timeupdate', handleTimeUpdate);
       audio.addEventListener('ended', handleEnded);
+      audio.addEventListener('play', handlePlay);
+      audio.addEventListener('pause', handlePause);
 
       if (isPlaying) {
         audio.play();
@@ -75,6 +110,8 @@ const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
       return () => {
         audio.removeEventListener('timeupdate', handleTimeUpdate);
         audio.removeEventListener('ended', handleEnded);
+        audio.removeEventListener('play', handlePlay);
+        audio.removeEventListener('pause', handlePause);
         audio.pause();
       };
     }
@@ -91,6 +128,18 @@ const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
     }
   }, [isPlaying]);
 
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
   // Update volume when slider changes
   const handleVolumeChange = (event, newValue) => {
     setValue(newValue);
@@ -106,6 +155,18 @@ const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
       setProgress(newValue);
     }
   };
+
+  const toggleFullScreen = () => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.error(`Error enabling full-screen: ${err.message} (${err.name})`);
+                    });
+                } else {
+                    document.exitFullscreen().catch(err => {
+                        console.error(`Error exiting full-screen: ${err.message} (${err.name})`);
+                    });
+                }
+            };  
 
   const toggleFullScreen = () => {
                 if (!document.fullscreenElement) {
@@ -159,7 +220,7 @@ const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
 
       {/* Center: Controls and Progress Bar */}
       <div className="flex flex-col items-center flex-1 max-w-[600px]">
-        <div className="flex items-center space-x-2 md:space-x-4 mb-1 md:mb-2">
+        <div className="flex items-center space-x-2 md:space-x-4 mb-2 md:mb-3">
           <Tooltip title="Shuffle" arrow>
             <button 
               onClick={() => setIsShuffling(!isShuffling)} 
@@ -180,14 +241,18 @@ const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
           <Tooltip title={currentTrack ? "Play/Pause 30s Preview" : "Select a track for 30s preview"} arrow>
             <button 
               onClick={handlePlayButtonClick} 
-              className={`rounded-full p-1 md:p-2 transition-colors ${
+              className={`rounded-full p-2 md:p-3 transition-all duration-200 hover:scale-105 ${
                 currentTrack
-                  ? 'text-[#F5F5F5] hover:text-[#CD7F32] bg-[#1a1a1a]' 
+                  ? 'text-[#F5F5F5] hover:text-[#CD7F32] bg-[#1a1a1a] hover:bg-[#2a2a2a]' 
                   : 'text-[#888] bg-[#1a1a1a] cursor-not-allowed'
               }`}
               disabled={!currentTrack}
             >
-              {isPlaying ? <PauseIcon fontSize="medium" /> : <PlayArrowIcon fontSize="medium" />}
+              {isPlaying ? (
+                <PauseIcon sx={{ fontSize: 24 }} />
+              ) : (
+                <PlayArrowIcon sx={{ fontSize: 24 }} />
+              )}
             </button>
           </Tooltip>
           <Tooltip title="Next" arrow>
@@ -256,7 +321,7 @@ const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
       </div>
 
       {/* Right: Icons and Volume */}
-      <div className="flex items-center space-x-2 md:space-x-4 justify-end min-w-[200px] md:min-w-[300px]">
+      <div className="flex items-center space-x-1 md:space-x-3 justify-end min-w-[200px] md:min-w-[300px]">
         <Tooltip title="Queue" arrow>
           <button 
             className={`${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32]' : 'text-[#888] cursor-not-allowed'} hidden sm:block`}
@@ -281,22 +346,42 @@ const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
             <DevicesIcon fontSize="small" />
           </button>
         </Tooltip>
-        <Tooltip title="Volume" arrow>
-          <button 
-            className={`${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32]' : 'text-[#888] cursor-not-allowed'}`}
-            disabled={!currentTrack}
-          >
-            <VolumeUpIcon fontSize="small" />
-          </button>
-        </Tooltip>
-        <Box sx={{ width: 200 }}>
-        <Stack spacing={2} direction="row" sx={{ alignItems: 'center', mb: 1 }}>
-          <VolumeDown />
-          <Slider size="small" aria-label="Volume" value={value} onChange={handleVolumeChange} color="white"/>
-          <VolumeUp />
-        </Stack>
-        </Box>
-        <Tooltip title="Fullscreen" arrow>
+        
+        {/* Volume Section - Properly Aligned */}
+        <div className="flex items-center space-x-1 md:space-x-2">
+          <Tooltip title="Volume" arrow>
+            <button 
+              className={`${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32]' : 'text-[#888] cursor-not-allowed'}`}
+              disabled={!currentTrack}
+            >
+              <VolumeUpIcon fontSize="small" />
+            </button>
+          </Tooltip>
+          <Box sx={{ width: { xs: 80, sm: 120, md: 150 } }}>
+            <Stack spacing={1} direction="row" sx={{ alignItems: 'center' }}>
+              <VolumeDown sx={{ fontSize: 16 }} />
+              <Slider 
+                size="small" 
+                aria-label="Volume" 
+                value={value} 
+                onChange={handleVolumeChange}
+                sx={{
+                  color: '#CD7F32',
+                  '& .MuiSlider-thumb': {
+                    width: 12,
+                    height: 12,
+                  },
+                  '& .MuiSlider-rail': {
+                    opacity: 0.3,
+                  },
+                }}
+              />
+              <VolumeUp sx={{ fontSize: 16 }} />
+            </Stack>
+          </Box>
+        </div>
+        
+        <Tooltip title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"} arrow>
           <button 
             onClick={toggleFullScreen}
             className={`${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32]' : 'text-[#888]'} hidden md:block`}
