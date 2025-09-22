@@ -10,6 +10,8 @@ import MusicPlayer from './MusicPlayer';
 import NowPlayingSidebar from './NowPlayingSidebar';
 import LeftSidebar from './LeftSidebar';
 import { PlaylistView } from '../PlaylistView';
+import CustomSongsSection from '../CustomSongs/CustomSongsSection';
+import CustomAudioPlayer from '../CustomSongs/CustomAudioPlayer';
 
 const Home = () => {
   const userId = localStorage.getItem('userId');
@@ -35,6 +37,8 @@ const Home = () => {
   const [error, setError] = useState(null);
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [playlistTracks, setPlaylistTracks] = useState([]);
+  const [currentCustomSong, setCurrentCustomSong] = useState(null);
+  const [isCustomSongPlaying, setIsCustomSongPlaying] = useState(false);
 
   useEffect(() => {
     const savedRecentlyPlayed = localStorage.getItem('recentlyPlayed');
@@ -66,7 +70,7 @@ const Home = () => {
           { url: 'http://localhost:5000/api/recommended-tracks?seed_genres=pop,rock&limit=12&market=US', setter: setRecommendedTracks, path: 'tracks' },
           // { url: 'http://localhost:5000/api/new-releases?limit=8', setter: setNewReleases, path: 'albums.items' },
           { url: 'http://localhost:5000/api/featured-playlists?limit=8', setter: setFeaturedPlaylists, path: 'playlists.items' },
-          { url: 'http://localhost:5000/api/top-tracks?limit=8', setter: setTopTracks, path: 'tracks.items' },
+          { url: 'http://localhost:5000/api/trending-tracks?limit=8', setter: setTopTracks, path: 'tracks.items' },
           { url: 'http://localhost:5000/api/mood-booster?limit=8', setter: setMoodBooster, path: 'playlists.items' },
           { url: 'http://localhost:5000/api/popular-playlists?limit=8', setter: setPopularPlaylists, path: 'playlists.items' },
         ];
@@ -278,77 +282,50 @@ const Home = () => {
         audioUrl: playableTrack.audioUrl
       });
 
-      // All tracks from backend now have preview URLs, but double-check
+      // Ultra-fast parallel loading: Try both YouTube and Deezer simultaneously
       if (!playableTrack.audioUrl) {
-        console.log('⚠️ Unexpected: Track without preview URL (should be filtered by backend)');
-        console.log('🔄 Trying backend API as fallback...');
+        console.log('⚡ Ultra-fast loading: Trying YouTube & Deezer in parallel...');
         
         try {
-          const response = await fetch(`http://localhost:5000/api/spotify/track?trackId=${playableTrack.id}`);
-          const trackData = await response.json();
-          
-          if (trackData.preview_url) {
-            console.log('✅ Got preview URL from backend API:', trackData.preview_url);
-            playableTrack.audioUrl = trackData.preview_url;
-            
-            if (trackData.alternative_version) {
-              showNotification(
-                'Playing Alternative Version', 
-                `Found preview for "${trackData.alternative_track_name || playableTrack.title}"`,
-                'info'
-              );
-            } else if (trackData.alternative_market) {
-              showNotification(
-                'Playing Regional Version', 
-                `Found preview from ${trackData.alternative_market} region`,
-                'info'
-              );
-            }
-          } else {
-            // Try Deezer preview as additional fallback
-            console.log('🔍 Trying Deezer preview...');
-            try {
-              const dzResp = await fetch(`http://localhost:5000/api/deezer/preview?trackName=${encodeURIComponent(playableTrack.title)}&artistName=${encodeURIComponent(playableTrack.artist)}`);
-              const dzData = await dzResp.json();
-              if (dzData.found && dzData.preview_url) {
-                playableTrack.audioUrl = dzData.preview_url;
-                showNotification('Playing Deezer Preview', `Preview found on Deezer for "${dzData.title}"`, 'info');
-              }
-            } catch (dzErr) {
-              console.log('❌ Deezer preview failed:', dzErr);
-            }
+          // Make both API calls simultaneously with timeout
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Timeout')), 3000) // 3 second timeout
+          );
 
-            // Try YouTube preview as last-resort before sample audio
-            if (!playableTrack.audioUrl) {
-              console.log('🔍 Trying YouTube preview...');
-              try {
-                const ytResp = await fetch(`http://localhost:5000/api/youtube/preview?trackName=${encodeURIComponent(playableTrack.title)}&artistName=${encodeURIComponent(playableTrack.artist)}`);
-                const ytData = await ytResp.json();
-                if (ytData.found && ytData.preview_url) {
-                  playableTrack.audioUrl = ytData.preview_url;
-                  showNotification('Playing YouTube Preview', ytData.title || playableTrack.title, 'info');
-                }
-              } catch (ytErr) {
-                console.log('❌ YouTube preview failed:', ytErr);
-              }
-            }
+          const ytPromise = fetch(`http://localhost:5000/api/youtube/preview?trackName=${encodeURIComponent(playableTrack.title)}&artistName=${encodeURIComponent(playableTrack.artist)}`)
+            .then(res => res.json())
+            .then(data => ({ source: 'youtube', data }));
 
-            // Final fallback - only if still no preview
-            if (!playableTrack.audioUrl) {
-              playableTrack.audioUrl = 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3';
-              showNotification(
-                'Playing Sample Audio', 
-                `No preview available for "${playableTrack.title.length > 30 ? playableTrack.title.substring(0, 30) + '...' : playableTrack.title}"`,
-                'warning'
-              );
-            }
+          const dzPromise = fetch(`http://localhost:5000/api/deezer/preview?trackName=${encodeURIComponent(playableTrack.title)}&artistName=${encodeURIComponent(playableTrack.artist)}`)
+            .then(res => res.json())
+            .then(data => ({ source: 'deezer', data }));
+
+          // Race between APIs and timeout - use whichever responds first
+          const result = await Promise.race([
+            Promise.any([ytPromise, dzPromise]),
+            timeoutPromise
+          ]);
+
+          if (result.source === 'youtube' && result.data.found && result.data.preview_url) {
+            playableTrack.audioUrl = result.data.preview_url;
+            console.log('✅ YouTube preview found (fast):', result.data.title || playableTrack.title);
+            showNotification('Playing YouTube Preview', result.data.title || playableTrack.title, 'info');
+          } else if (result.source === 'deezer' && result.data.found && result.data.preview_url) {
+            playableTrack.audioUrl = result.data.preview_url;
+            console.log('✅ Deezer preview found (fast):', result.data.title);
+            showNotification('Playing Deezer Preview', `30s preview: "${result.data.title}"`, 'info');
           }
-        } catch (apiError) {
-          console.log('❌ Backend API call failed:', apiError);
+        } catch (error) {
+          console.log('❌ Fast loading failed:', error.message);
+        }
+
+        // Final fallback if parallel loading failed
+        if (!playableTrack.audioUrl) {
+          console.log('⚠️ Using instant sample audio');
           playableTrack.audioUrl = 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3';
           showNotification(
             'Playing Sample Audio', 
-            `API unavailable - using sample for "${playableTrack.title.length > 30 ? playableTrack.title.substring(0, 30) + '...' : playableTrack.title}"`,
+            `No preview available for "${playableTrack.title.length > 30 ? playableTrack.title.substring(0, 30) + '...' : playableTrack.title}"`,
             'warning'
           );
         }
@@ -405,6 +382,27 @@ const Home = () => {
     }
   };
 
+  // Handle custom song play/pause
+  const handleCustomSongPlay = (song, shouldPlay) => {
+    if (song) {
+      // Stop Spotify track if playing
+      if (currentTrack) {
+        setCurrentTrack(null);
+        setIsPlaying(false);
+      }
+      
+      setCurrentCustomSong(song);
+      setIsCustomSongPlaying(shouldPlay);
+      
+      // Save to localStorage
+      localStorage.setItem('lastPlayedCustomSong', JSON.stringify(song));
+    } else {
+      setCurrentCustomSong(null);
+      setIsCustomSongPlaying(false);
+      localStorage.removeItem('lastPlayedCustomSong');
+    }
+  };
+
   return (
     <div className="relative flex size-full min-h-screen flex-col bg-gradient-to-br from-[#121212] via-[#1a1a1a] to-[#0e0e0e] dark group/design-root overflow-x-hidden" style={{ fontFamily: 'Inter, "Noto Sans", sans-serif' }}>
       <Navbar />
@@ -430,12 +428,17 @@ const Home = () => {
 
                 <HeroBanner featured={heroFeatured} />
                 
-
+                {/* Custom Songs Section - Your Offline Library */}
+                <CustomSongsSection 
+                  onSongPlay={handleCustomSongPlay}
+                  currentPlayingSong={currentCustomSong}
+                  isPlaying={isCustomSongPlaying}
+                />
 
                 {/* <CarouselPlaylistRow title="New Releases" items={newReleases} onPlaylistClick={handlePlaylistClick} /> */}
                 <CarouselPlaylistRow title="Artist Playlists" items={userPlaylists} onPlaylistClick={handlePlaylistClick} />
                 <CarouselPlaylistRow title="Featured Playlists" items={featuredPlaylists} onPlaylistClick={handlePlaylistClick} />
-                <CarouselTrackRow title="Top Tracks" items={topTracks} onTrackClick={handleTrackClick} />
+                <CarouselTrackRow title="Trending Songs" items={topTracks} onTrackClick={handleTrackClick} />
                 <CarouselPlaylistRow title="Recently Played" items={recentlyPlayed} onPlaylistClick={handlePlaylistClick} />
                 <CarouselPlaylistRow title="Popular Playlists" items={popularPlaylists} onPlaylistClick={handlePlaylistClick} />
                 <CarouselPlaylistRow title="Mood Booster" items={moodBooster} onPlaylistClick={handlePlaylistClick} />
@@ -446,8 +449,18 @@ const Home = () => {
           </div>
         </div>
       </div>
+      {/* Spotify Music Player */}
       <MusicPlayer currentTrack={currentTrack} isPlaying={isPlaying} onTogglePlay={() => setIsPlaying(prev => !prev)} />
       <NowPlayingSidebar currentTrack={currentTrack} onClose={handleCloseSidebar} isOpen={isPlaying} />
+      
+      {/* Custom Songs Audio Player */}
+      {currentCustomSong && (
+        <CustomAudioPlayer 
+          currentSong={currentCustomSong}
+          isPlaying={isCustomSongPlaying}
+          onPlayPause={handleCustomSongPlay}
+        />
+      )}
 
       {!isPlaying && (
         <button
