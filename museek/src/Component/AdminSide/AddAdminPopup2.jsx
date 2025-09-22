@@ -69,27 +69,21 @@ const AddAdminPopup2 = ({ showPopup, setShowPopup }) => {
                 onChange={handleChange}
                 fullWidth
                 sx={{
-                  '& .MuiOutlinedInput-root': {
-                    color: '#F5F5F5',
-                    '& fieldset': {
-                      borderColor: '#CD7F32/30',
+                  "& .MuiOutlinedInput-root": {
+                    color: "#F5F5F5",
+                    "& fieldset": {
+                      borderColor: "#CD7F32/30",
                     },
-                    '&:hover fieldset': {
-                      borderColor: '#CD7F32',
+                    "&:hover fieldset": {
+                      borderColor: "#CD7F32",
                     },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#CD7F32',
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#CD7F32",
                     },
-                    backgroundColor: '#2a2a2a',
-                    '& input::placeholder': {
-                      color: '#F5F5F5/70',
+                    backgroundColor: "#2a2a2a",
+                    "& input::placeholder": {
+                      color: "#F5F5F5/70",
                       opacity: 1,
-                    },
-                  },
-                  '& .MuiInputLabel-root': {
-                    color: '#F5F5F5/70',
-                    '&.Mui-focused': {
-                      color: '#CD7F32',
                     },
                   },
                 }}
@@ -103,27 +97,27 @@ const AddAdminPopup2 = ({ showPopup, setShowPopup }) => {
                 onChange={handleChange}
                 fullWidth
                 sx={{
-                  '& .MuiOutlinedInput-root': {
-                    color: '#F5F5F5',
-                    '& fieldset': {
-                      borderColor: '#CD7F32/30',
+                  "& .MuiOutlinedInput-root": {
+                    color: "#F5F5F5",
+                    "& fieldset": {
+                      borderColor: "#CD7F32/30",
                     },
-                    '&:hover fieldset': {
-                      borderColor: '#CD7F32',
+                    "&:hover fieldset": {
+                      borderColor: "#CD7F32",
                     },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#CD7F32',
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#CD7F32",
                     },
-                    backgroundColor: '#2a2a2a',
-                    '& input::placeholder': {
-                      color: '#F5F5F5/70',
+                    backgroundColor: "#2a2a2a",
+                    "& input::placeholder": {
+                      color: "#F5F5F5/70",
                       opacity: 1,
                     },
                   },
-                  '& .MuiInputLabel-root': {
-                    color: '#F5F5F5/70',
-                    '&.Mui-focused': {
-                      color: '#CD7F32',
+                  "& .MuiInputLabel-root": {
+                    color: "#F5F5F5/70",
+                    "&.Mui-focused": {
+                      color: "#CD7F32",
                     },
                   },
                 }}
@@ -159,28 +153,25 @@ const AddAdminPopup2 = ({ showPopup, setShowPopup }) => {
                 onChange={handleChange}
                 fullWidth
                 sx={{
-                  '& .MuiOutlinedInput-root': {
-                    color: '#F5F5F5',
-                    '& fieldset': {
-                      borderColor: '#CD7F32/30',
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#CD7F32/30",
                     },
-                    '&:hover fieldset': {
-                      borderColor: '#CD7F32',
+                    "&:hover fieldset": {
+                      borderColor: "#CD7F32",
                     },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#CD7F32',
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#CD7F32",
                     },
-                    backgroundColor: '#2a2a2a',
-                    '& input::placeholder': {
-                      color: '#F5F5F5/70',
+                    backgroundColor: "#2a2a2a",
+                    "& input::placeholder": {
+                      color: "#F5F5F5/70",
                       opacity: 1,
                     },
                   },
-                  '& .MuiInputLabel-root': {
-                    color: '#F5F5F5/70',
-                    '&.Mui-focused': {
-                      color: '#CD7F32',
-                    },
+                  "& .MuiInputBase-input.Mui-disabled": {
+                    color: "#f5f5f5",
+                    WebkitTextFillColor: "#f5f5f5",
                   },
                 }}
               />
@@ -192,9 +183,9 @@ const AddAdminPopup2 = ({ showPopup, setShowPopup }) => {
                   sx={{
                     borderColor: "#CD7F32/50",
                     color: "#F5F5F5/70",
-                    "&:hover": { 
+                    "&:hover": {
                       borderColor: "#CD7F32",
-                      backgroundColor: "#CD7F32/10"
+                      backgroundColor: "#CD7F32/10",
                     },
                     fontWeight: "bold",
                     borderRadius: "0.75rem",

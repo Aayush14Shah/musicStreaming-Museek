@@ -7,6 +7,7 @@ import {
   Assessment as AnalyticsIcon,
 } from "@mui/icons-material";
 import { NavLink } from "react-router-dom";
+import LogoFinalDarkModeFrameResized from "../../Images/LogoFinalDarkModeFrameResized.png";
 
 const AdminSidebar = () => {
   const links = [
@@ -22,8 +23,12 @@ const AdminSidebar = () => {
     <aside className="w-64 bg-[#181818] border-r border-[#CD7F32]/20 shadow-lg flex-shrink-0">
       <div className="flex h-full flex-col">
         {/* Logo */}
-        <div className="h-16 flex items-center px-6 border-b border-[#CD7F32]/20">
-          <h1 className="text-xl font-bold text-[#CD7F32]">Music Admin</h1>
+        <div className="h-16 flex items-center border-b border-[#CD7F32]/20">
+          <div className="max-w-lg mx-auto px-4 w-full">
+            <div className="flex justify-left">
+              <img src={LogoFinalDarkModeFrameResized} alt="Brand Logo" className="w-36" />
+            </div>
+          </div>
         </div>
 
         {/* Navigation */}

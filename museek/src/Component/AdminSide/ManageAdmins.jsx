@@ -110,7 +110,7 @@ const ManageAdmins = () => {
                       {admins.map((admin, index) => (
                         <tr
                           key={admin._id}
-                          className="hover:bg-[#CD7F32]/5 transition cursor-pointer"
+                          className={`hover:bg-[#CD7F32]/5 transition cursor-pointer ${admin.is_active === 0 ? 'opacity-60' : ''}`}
                           onClick={() => setSelectedAdmin(admin)}
                         >
                           <td className="px-6 py-4 whitespace-nowrap font-medium">{index + 1}</td>
@@ -118,7 +118,7 @@ const ManageAdmins = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-[#F5F5F5]/70">{admin.email}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-[#F5F5F5]/70">{admin.role || "Admin"}</td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            {admin.status ? (
+                            {admin.is_active ? (
                               <span className="px-3 py-1 text-xs font-medium rounded-full bg-green-500/20 text-green-400">
                                 Active
                               </span>

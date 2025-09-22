@@ -3,9 +3,9 @@ import CloseIcon from "@mui/icons-material/Close";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { Button } from "@mui/material";
 
-const ConfirmAdminPopup = ({ deleteAdmin, setDeleteAdmin, handleConfirm, loading, error }) => {
-  const [localLoading, setLocalLoading] = useState(false);
-  const [localError, setLocalError] = useState("");
+export default function ConfirmAdminPopup({ deleteAdmin, setDeleteAdmin, onSuccess }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     function onKey(e) {
@@ -17,32 +17,42 @@ const ConfirmAdminPopup = ({ deleteAdmin, setDeleteAdmin, handleConfirm, loading
 
   if (!deleteAdmin) return null;
 
-  const handleConfirmAction = async () => {
-    setLocalError("");
-    setLocalLoading(true);
+  const handleConfirm = async () => {
+    setError("");
+    setLoading(true);
     try {
-      if (handleConfirm) {
-        await handleConfirm();
+      const res = await fetch(`/api/admins/${deleteAdmin._id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_active: 0 }), // deactivate admin
+      });
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(err || "Failed to deactivate admin");
       }
+      const updated = await res.json();
       setDeleteAdmin(null);
+      if (onSuccess) onSuccess(updated);
     } catch (err) {
-      console.error(err);
-      setLocalError(err.message || "Action failed");
+      setError(err.message || "Action failed");
     } finally {
-      setLocalLoading(false);
+      setLoading(false);
     }
   };
 
   return (
     <div className="absolute inset-0 flex items-center justify-center z-50">
+      {/* Blur background */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={() => setDeleteAdmin(null)}
       />
+      {/* Popup box */}
       <div
         onClick={(e) => e.stopPropagation()}
         className="relative bg-[#282828]/80 backdrop-blur-md rounded-2xl shadow-2xl p-6 max-w-sm w-full border border-[#CD7F32]/30 text-center"
       >
+        {/* Close button */}
         <button
           onClick={() => setDeleteAdmin(null)}
           className="absolute top-4 right-4 text-[#F5F5F5] hover:text-[#CD7F32]"
@@ -62,7 +72,7 @@ const ConfirmAdminPopup = ({ deleteAdmin, setDeleteAdmin, handleConfirm, loading
             This will mark the admin as inactive. They will not be deleted.
           </p>
 
-          {(error || localError) && <p className="text-xs text-red-300">{error || localError}</p>}
+          {error && <p className="text-xs text-red-300">{error}</p>}
 
           <div className="w-full flex gap-3 mt-4">
             <Button
@@ -74,12 +84,12 @@ const ConfirmAdminPopup = ({ deleteAdmin, setDeleteAdmin, handleConfirm, loading
                 borderRadius: "0.75rem",
               }}
               variant="contained"
-              disabled={loading || localLoading}
+              disabled={loading}
             >
               Cancel
             </Button>
             <Button
-              onClick={handleConfirmAction}
+              onClick={handleConfirm}
               fullWidth
               sx={{
                 backgroundColor: "#CD7F32",
@@ -87,15 +97,13 @@ const ConfirmAdminPopup = ({ deleteAdmin, setDeleteAdmin, handleConfirm, loading
                 borderRadius: "0.75rem",
               }}
               variant="contained"
-              disabled={loading || localLoading}
+              disabled={loading}
             >
-              {loading || localLoading ? "Processing..." : "Deactivate"}
+              {loading ? "Processing..." : "Deactivate"}
             </Button>
           </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default ConfirmAdminPopup;
+}
