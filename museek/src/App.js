@@ -8,11 +8,13 @@ import Signup from './Component/Signup';
 import SpotifyAuthSuccess from './Component/SpotifyAuthSuccess';
 import UserProfile from './Component/UserProfile';
 import Settings from './Component/Settings';
+import Forgot from './Component/Forgot';
 import AdminDashboard from './Component/AdminSide/Dashboard';
 import ManageUser from './Component/AdminSide/ManageUser';
 import ManageAdmins from './Component/AdminSide/ManageAdmins';
 import ManageSongs from './Component/AdminSide/ManageSongs';
 import AddSong from './Component/AdminSide/AddSong';
+
 
 function App() {
   return (
@@ -24,6 +26,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/Login" element={<Login />} />
             <Route path="/Signup" element={<Signup />} />
+            <Route path="/Forgot" element={<Forgot />} />
             <Route path="/preferences" element={<Preferences />} />
             <Route path="/about" element={<About />} />
             <Route path="/spotify-auth-success" element={<SpotifyAuthSuccess />} />
