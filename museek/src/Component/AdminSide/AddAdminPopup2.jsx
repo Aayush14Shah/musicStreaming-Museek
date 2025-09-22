@@ -36,8 +36,8 @@ const AddAdminPopup2 = ({ showPopup, setShowPopup }) => {
         ></div>
 
         {/* Popup box */}
-        <div className="relative bg-[#282828]/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 max-w-sm w-full border border-[#CD7F32]/30">
-          <h1 className="text-2xl font-bold text-[#F5F5F5] mb-4 text-center">
+        <div className="relative bg-[#282828]/90 backdrop-blur-md rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 border border-[#CD7F32]/30">
+          <h1 className="text-2xl font-bold text-[#F5F5F5] mb-6 text-center">
             {step === 1 ? "Add Admin" : "Verify OTP"}
           </h1>
 
@@ -59,42 +59,86 @@ const AddAdminPopup2 = ({ showPopup, setShowPopup }) => {
 
           {/* Step 1: Email + Password */}
           {step === 1 && (
-            <div className="space-y-4">
+            <div className="space-y-6">
               <TextField
                 label="Email"
                 name="email"
                 type="email"
+                placeholder="Enter admin email"
                 value={formData.email}
                 onChange={handleChange}
                 fullWidth
-                InputProps={{
-                  style: { color: "#F5F5F5" },
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    color: '#F5F5F5',
+                    '& fieldset': {
+                      borderColor: '#CD7F32/30',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#CD7F32',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#CD7F32',
+                    },
+                    backgroundColor: '#2a2a2a',
+                    '& input::placeholder': {
+                      color: '#F5F5F5/70',
+                      opacity: 1,
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: '#F5F5F5/70',
+                    '&.Mui-focused': {
+                      color: '#CD7F32',
+                    },
+                  },
                 }}
-                InputLabelProps={{ style: { color: "#aaa" } }}
               />
               <TextField
                 label="Password"
                 name="password"
                 type="password"
+                placeholder="Enter admin password"
                 value={formData.password}
                 onChange={handleChange}
                 fullWidth
-                InputProps={{
-                  style: { color: "#F5F5F5" },
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    color: '#F5F5F5',
+                    '& fieldset': {
+                      borderColor: '#CD7F32/30',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#CD7F32',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#CD7F32',
+                    },
+                    backgroundColor: '#2a2a2a',
+                    '& input::placeholder': {
+                      color: '#F5F5F5/70',
+                      opacity: 1,
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: '#F5F5F5/70',
+                    '&.Mui-focused': {
+                      color: '#CD7F32',
+                    },
+                  },
                 }}
-                InputLabelProps={{ style: { color: "#aaa" } }}
               />
               <Button
                 onClick={handleNext}
                 fullWidth
                 sx={{
-                  mt: 2,
                   backgroundColor: "#CD7F32",
                   "&:hover": { backgroundColor: "#b46f2a" },
                   fontWeight: "bold",
                   borderRadius: "0.75rem",
-                  padding: "0.75rem",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+                  padding: "0.875rem",
+                  textTransform: "none",
+                  fontSize: "1rem",
                 }}
                 variant="contained"
               >
@@ -105,29 +149,58 @@ const AddAdminPopup2 = ({ showPopup, setShowPopup }) => {
 
           {/* Step 2: OTP */}
           {step === 2 && (
-            <div className="space-y-4">
+            <div className="space-y-6">
               <TextField
                 label="Enter OTP"
                 name="otp"
                 type="text"
+                placeholder="Enter 6-digit OTP"
                 value={formData.otp}
                 onChange={handleChange}
                 fullWidth
-                InputProps={{
-                  style: { color: "#F5F5F5" },
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    color: '#F5F5F5',
+                    '& fieldset': {
+                      borderColor: '#CD7F32/30',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#CD7F32',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#CD7F32',
+                    },
+                    backgroundColor: '#2a2a2a',
+                    '& input::placeholder': {
+                      color: '#F5F5F5/70',
+                      opacity: 1,
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: '#F5F5F5/70',
+                    '&.Mui-focused': {
+                      color: '#CD7F32',
+                    },
+                  },
                 }}
-                InputLabelProps={{ style: { color: "#aaa" } }}
               />
               <div className="flex gap-3">
                 <Button
                   onClick={() => setStep(1)}
                   fullWidth
+                  variant="outlined"
                   sx={{
-                    backgroundColor: "#444",
-                    "&:hover": { backgroundColor: "#555" },
+                    borderColor: "#CD7F32/50",
+                    color: "#F5F5F5/70",
+                    "&:hover": { 
+                      borderColor: "#CD7F32",
+                      backgroundColor: "#CD7F32/10"
+                    },
                     fontWeight: "bold",
-                    color: "#F5F5F5",
                     borderRadius: "0.75rem",
+                    padding: "0.875rem",
+                    textTransform: "none",
+                    fontSize: "1rem",
                   }}
                 >
                   Back
@@ -140,6 +213,9 @@ const AddAdminPopup2 = ({ showPopup, setShowPopup }) => {
                     "&:hover": { backgroundColor: "#b46f2a" },
                     fontWeight: "bold",
                     borderRadius: "0.75rem",
+                    padding: "0.875rem",
+                    textTransform: "none",
+                    fontSize: "1rem",
                   }}
                   variant="contained"
                 >
