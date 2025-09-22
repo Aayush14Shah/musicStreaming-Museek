@@ -106,7 +106,12 @@ router.post("/reset-password", async (req, res) => {
     res.json({ message: "Password reset successful" });
   } catch (err) {
     res.status(500).json({ message: err.message });
+
   }});
+
+  }
+});
+
 
 router.post("/dashboard", async (req, res) => {
   try {

@@ -205,7 +205,7 @@ const ManageSongs = () => {
                     placeholder="Search songs, artists, albums..."
                     value={searchQuery}
                     onChange={handleSearch}
-                    className="w-full bg-[#2a2a2a] border border-[#CD7F32]/20 rounded-lg pl-10 pr-4 py-3 text-[#F5F5F5] placeholder-[#F5F5F5]/50 focus:outline-none focus:border-[#CD7F32] focus:ring-1 focus:ring-[#CD7F32]"
+                    className="w-full bg-[#2a2a2a] border border-[#CD7F32]/20 rounded-lg pl-10 pr-4 py-3 text-[#F5F5F5] placeholder-[#F5F5F5]/70 focus:outline-none focus:border-[#CD7F32] focus:ring-1 focus:ring-[#CD7F32]"
                   />
                 </div>
                 <Button
