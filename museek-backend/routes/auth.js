@@ -49,19 +49,13 @@ router.post("/login", async (req, res) => {
 });
 
 
-// Send OTP for both signup and forgot password
-// expects { email, purpose } where purpose is 'signup' or 'forgot'
-router.post("/send-otp", async (req, res) => {
-  const { email, purpose } = req.body;
+// Forgot Password - send OTP (real email logic)
+router.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
   if (!email) return res.status(400).json({ message: "Email required" });
   try {
-    if (purpose === 'forgot') {
-      const user = await User.findOne({ email });
-      if (!user) return res.status(404).json({ message: "User not found" });
-    } else if (purpose === 'signup') {
-      const user = await User.findOne({ email });
-      if (user) return res.status(400).json({ message: "Email already registered" });
-    }
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
     // Generate OTP and expiry (5 min)
     const otp = generateOTP();
     const otpExpiry = Date.now() + 5 * 60 * 1000;
@@ -71,8 +65,8 @@ router.post("/send-otp", async (req, res) => {
     await transporter.sendMail({
       from: "ankbizzcorp@gmail.com",
       to: email,
-      subject: "Museek OTP Verification",
-      text: `Your OTP is: ${otp}. It is valid for 5 minutes.`
+      subject: "Museek Password Reset OTP",
+      text: `Your OTP for password reset is: ${otp}. It is valid for 5 minutes.`
     });
 
     res.json({ message: "OTP sent to email" });
@@ -81,7 +75,7 @@ router.post("/send-otp", async (req, res) => {
   }
 });
 
-// Verify OTP (for both signup and forgot password)
+// Verify OTP (real logic)
 router.post("/verify-otp", async (req, res) => {
   const { email, otp } = req.body;
   if (!email || !otp) return res.status(400).json({ message: "Email and OTP required" });
@@ -106,12 +100,7 @@ router.post("/reset-password", async (req, res) => {
     res.json({ message: "Password reset successful" });
   } catch (err) {
     res.status(500).json({ message: err.message });
-
   }});
-
-  }
-});
-
 
 router.post("/dashboard", async (req, res) => {
   try {
