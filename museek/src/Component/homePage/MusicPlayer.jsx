@@ -154,7 +154,19 @@ const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
       audioRef.current.currentTime = newValue;
       setProgress(newValue);
     }
-  };
+  }; 
+
+  const toggleFullScreen = () => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.error(`Error enabling full-screen: ${err.message} (${err.name})`);
+                    });
+                } else {
+                    document.exitFullscreen().catch(err => {
+                        console.error(`Error exiting full-screen: ${err.message} (${err.name})`);
+                    });
+                }
+            };  
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-[#121212]/95 backdrop-blur-sm text-[#F5F5F5] p-2 md:p-4 z-40 h-16 md:h-20 flex items-center justify-between gap-4 md:gap-6">
@@ -359,9 +371,8 @@ const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
         
         <Tooltip title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"} arrow>
           <button 
-            onClick={toggleFullscreen}
-            className={`${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32]' : 'text-[#888] cursor-not-allowed'} hidden md:block`}
-            disabled={!currentTrack}
+            onClick={toggleFullScreen}
+            className={`${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32]' : 'text-[#888]'} hidden md:block`}
           >
             <FullscreenIcon fontSize="small" />
           </button>

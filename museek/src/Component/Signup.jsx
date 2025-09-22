@@ -13,12 +13,48 @@ const Signup = () => {
   });
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordWarnings, setPasswordWarnings] = useState([]);
+  const [emailWarning, setEmailWarning] = useState("");
+  const [showWarnings, setShowWarnings] = useState(false);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  // Password validation function
+  const validatePassword = (password) => {
+    const warnings = [];
+    if (password.length < 8) warnings.push('At least 8 characters');
+    if (!/[a-z]/.test(password)) warnings.push('At least one lowercase letter');
+    if (!/[A-Z]/.test(password)) warnings.push('At least one uppercase letter');
+    if (!/[0-9]/.test(password)) warnings.push('At least one digit');
+    if (!/[^A-Za-z0-9]/.test(password)) warnings.push('At least one special character');
+    return warnings;
+  };
+
+  // Email validation function
+  const validateEmail = (email) => {
+    // Simple regex for demonstration
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    if (e.target.name === 'password' && showWarnings) {
+      setPasswordWarnings(validatePassword(e.target.value));
+    }
+    if (e.target.name === 'email' && showWarnings) {
+      setEmailWarning(validateEmail(e.target.value) ? "" : "Enter a valid email address");
+    }
+  };
   
   const handleSubmit = (e) => {
     e.preventDefault();
-    navigate('/preferences', { state: form });
+    setShowWarnings(true);
+    const pwWarnings = validatePassword(form.password);
+    setPasswordWarnings(pwWarnings);
+    const emailValid = validateEmail(form.email);
+    setEmailWarning(emailValid ? "" : "Enter a valid email address");
+    if (pwWarnings.length === 0 && emailValid) {
+      navigate('/preferences', { state: form });
+    }
   };
   
   const handleLogin = () => navigate('/Login');
@@ -99,6 +135,9 @@ const Signup = () => {
                   required
                 />
                 <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#CD7F32]/0 via-[#CD7F32]/0 to-[#CD7F32]/0 group-hover:from-[#CD7F32]/5 group-hover:via-[#CD7F32]/3 group-hover:to-[#CD7F32]/5 transition-all duration-300 pointer-events-none"></div>
+                {showWarnings && emailWarning && (
+                  <div className="text-yellow-400 text-sm mt-2 pl-1">{emailWarning}</div>
+                )}
               </div>
               
               <div className="relative group">
@@ -124,11 +163,19 @@ const Signup = () => {
                   ) : (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268-2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
                   )}
                 </button>
                 <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#CD7F32]/0 via-[#CD7F32]/0 to-[#CD7F32]/0 group-hover:from-[#CD7F32]/5 group-hover:via-[#CD7F32]/3 group-hover:to-[#CD7F32]/5 transition-all duration-300 pointer-events-none"></div>
+                {/* Password requirements warnings */}
+                {showWarnings && passwordWarnings.length > 0 && (
+                  <ul className="text-yellow-400 text-sm pl-4 list-disc mt-2">
+                    {passwordWarnings.map((w, i) => (
+                      <li key={i}>{w}</li>
+                    ))}
+                  </ul>
+                )}
               </div>
               
               <div className="flex items-center">
