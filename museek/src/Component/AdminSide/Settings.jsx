@@ -6,7 +6,6 @@ import {
   Database, 
   Shield, 
   Palette,
-  Music,
   Users,
   Mail,
   Eye,
@@ -110,7 +109,6 @@ const Settings = () => {
   const tabs = [
     { id: 'general', label: 'General', icon: SettingsIcon },
     { id: 'users', label: 'Users', icon: Users },
-    { id: 'music', label: 'Music', icon: Music },
     { id: 'security', label: 'Security', icon: Shield }
   ];
 
@@ -205,53 +203,6 @@ const Settings = () => {
     </div>
   );
 
-  const renderMusicSettings = () => (
-    <div className="space-y-6">
-      <div className="bg-[#222]/50 rounded-lg p-6 border border-[#CD7F32]/20">
-        <h3 className="text-lg font-semibold text-[#CD7F32] mb-4 flex items-center gap-2">
-          <Music size={20} />
-          Suggested Music Settings
-        </h3>
-        <div className="space-y-4 text-sm text-gray-300">
-          <div className="flex items-start gap-3">
-            <div className="w-2 h-2 bg-[#CD7F32] rounded-full mt-2 flex-shrink-0"></div>
-            <div>
-              <strong>Auto-Moderation:</strong> Automatically scan uploaded songs for explicit content or copyright issues
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <div className="w-2 h-2 bg-[#CD7F32] rounded-full mt-2 flex-shrink-0"></div>
-            <div>
-              <strong>Quality Control:</strong> Set minimum audio quality requirements (bitrate, sample rate)
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <div className="w-2 h-2 bg-[#CD7F32] rounded-full mt-2 flex-shrink-0"></div>
-            <div>
-              <strong>Genre Auto-Detection:</strong> Automatically detect and suggest genres for uploaded songs
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <div className="w-2 h-2 bg-[#CD7F32] rounded-full mt-2 flex-shrink-0"></div>
-            <div>
-              <strong>Playlist Limits:</strong> Max songs per playlist, auto-cleanup of empty playlists
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <div className="w-2 h-2 bg-[#CD7F32] rounded-full mt-2 flex-shrink-0"></div>
-            <div>
-              <strong>Recommendation Engine:</strong> Configure how the system suggests music to users
-            </div>
-          </div>
-        </div>
-        <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-          <p className="text-blue-400 text-sm">
-            💡 <strong>Implementation Priority:</strong> These features can be added based on user needs and feedback.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
 
   const renderSecuritySettings = () => (
     <div className="space-y-6">
@@ -339,7 +290,6 @@ const Settings = () => {
     switch (activeTab) {
       case 'general': return renderGeneralSettings();
       case 'users': return renderUserSettings();
-      case 'music': return renderMusicSettings();
       case 'security': return renderSecuritySettings();
       default: return renderGeneralSettings();
     }

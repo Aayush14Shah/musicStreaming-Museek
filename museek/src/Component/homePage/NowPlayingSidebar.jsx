@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tooltip } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import ShareIcon from '@mui/icons-material/Share';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
+import useLikes from '../../hooks/useLikes';
+import AddToPlaylistModal from '../Playlists/AddToPlaylistModal';
 
 const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now Playing" }) => {
-  const [isLiked, setIsLiked] = useState(false);
+  const userId = localStorage.getItem('userId');
+  const { isLiked, toggleLike, loading } = useLikes(userId);
+  const [showPlaylistModal, setShowPlaylistModal] = useState(false);
   
   // Dynamic playlist name from album
   const dynamicPlaylistName = currentTrack?.album || playlistName;
@@ -56,9 +60,28 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
     },
   };
 
-  const toggleLike = () => setIsLiked(!isLiked);
+  const handleLikeToggle = async () => {
+    if (!currentTrack || !userId) return;
+    
+    const songData = {
+      songId: currentTrack.id,
+      songType: 'spotify', // Assuming Spotify for now, can be dynamic
+      songTitle: currentTrack.title,
+      songArtist: currentTrack.artist,
+      songAlbum: currentTrack.album,
+      songImage: currentTrack.image,
+      songPreviewUrl: currentTrack.audioUrl,
+      spotifyUri: currentTrack.uri
+    };
+    
+    const result = await toggleLike(songData);
+    if (result.success) {
+      console.log('Like toggled successfully');
+    }
+  };
+  
   const shareSong = () => console.log('Share song');
-  const addToPlaylist = () => console.log('Add to playlist');
+  const addToPlaylist = () => setShowPlaylistModal(true);
 
   return (
     <div
@@ -82,13 +105,18 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
               <h2 className="text-lg font-semibold mb-2">{currentTrack.title}</h2>
               <p className="text-sm text-[#CD7F32] mb-3 font-normal">{currentTrack.artist}</p>
               <div className="flex items-center gap-3">
-                <Tooltip title={isLiked ? 'Remove from Liked Songs' : 'Add to Liked Songs'} arrow>
+                <Tooltip title={isLiked(currentTrack?.id, 'spotify') ? 'Remove from Liked Songs' : 'Add to Liked Songs'} arrow>
                   <button
-                    onClick={toggleLike}
+                    onClick={handleLikeToggle}
+                    disabled={loading}
                     aria-label="Toggle like"
-                    className={`w-7 h-7 flex items-center justify-center p-1.5 rounded-full transition-colors ${isLiked ? 'bg-[#CD7F32] text-[#121212]' : 'bg-[#242424] text-[#F5F5F5] hover:bg-[#CD7F32] hover:text-[#121212]'}`}
+                    className={`w-7 h-7 flex items-center justify-center p-1.5 rounded-full transition-colors ${
+                      isLiked(currentTrack?.id, 'spotify') 
+                        ? 'bg-[#CD7F32] text-[#121212]' 
+                        : 'bg-[#242424] text-[#F5F5F5] hover:bg-[#CD7F32] hover:text-[#121212]'
+                    } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    {isLiked ? <FavoriteIcon fontSize="small" /> : <FavoriteBorderIcon fontSize="small" />}
+                    {isLiked(currentTrack?.id, 'spotify') ? <FavoriteIcon fontSize="small" /> : <FavoriteBorderIcon fontSize="small" />}
                   </button>
                 </Tooltip>
                 <Tooltip title="Share" arrow>
@@ -133,6 +161,14 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
           </div>
         </div>
       </div>
+
+      {/* Add to Playlist Modal */}
+      <AddToPlaylistModal
+        open={showPlaylistModal}
+        onClose={() => setShowPlaylistModal(false)}
+        song={currentTrack}
+        userId={userId}
+      />
     </div>
   );
 };

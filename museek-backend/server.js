@@ -13,6 +13,9 @@ import spotifyRoutes from "./routes/spotify.js";
 import User from "./models/Register_user.js";
 import Admin from "./models/admin.js";
 import CustomSong from "./models/CustomSong.js";
+import Like from "./models/Like.js";
+import Playlist from "./models/Playlist.js";
+import PlaylistSong from "./models/PlaylistSong.js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -211,7 +214,7 @@ app.post("/api/custom-songs", upload.fields([
     // Populate the uploadedBy field for response
     await savedSong.populate('uploadedBy', 'email');
 
-    console.log(`✅ New song uploaded: "${title}" by ${artist}`);
+    console.log(` New song uploaded: "${title}" by ${artist}`);
     res.status(201).json(savedSong);
   } catch (error) {
     console.error('Error creating song:', error);
@@ -265,7 +268,7 @@ app.put("/api/custom-songs/:id", async (req, res) => {
       return res.status(404).json({ error: 'Song not found' });
     }
 
-    console.log(`✅ Song updated: "${updatedSong.title}" by ${updatedSong.artist}`);
+    console.log(` Song updated: "${updatedSong.title}" by ${updatedSong.artist}`);
     res.json(updatedSong);
   } catch (error) {
     console.error('Error updating song:', error);
@@ -935,6 +938,27 @@ const initializeSampleLogs = () => {
 // Initialize sample logs
 initializeSampleLogs();
 
+// Add sample listening hours to existing users (for demonstration)
+const addSampleListeningHours = async () => {
+  try {
+    const users = await User.find({ listeningHours: { $exists: false } }).limit(10);
+    
+    for (const user of users) {
+      const randomHours = Math.floor(Math.random() * 100) + 10; // 10-110 hours
+      await User.findByIdAndUpdate(user._id, { listeningHours: randomHours });
+    }
+    
+    if (users.length > 0) {
+      console.log(`📊 Added sample listening hours to ${users.length} users`);
+    }
+  } catch (error) {
+    console.log('Sample listening hours initialization skipped');
+  }
+};
+
+// Initialize sample data after a short delay
+setTimeout(addSampleListeningHours, 2000);
+
 // Get current settings
 app.get("/api/settings", (req, res) => {
   res.json(appSettings);
@@ -1027,7 +1051,556 @@ app.get("/api/audit-logs", (req, res) => {
   });
 });
 
-// ==================== END SETTINGS API ====================
+// Get total listening hours across all users
+app.get("/api/listening-hours/total", async (req, res) => {
+  try {
+    const result = await User.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalHours: { $sum: "$listeningHours" }
+        }
+      }
+    ]);
+    
+    const totalHours = result.length > 0 ? result[0].totalHours : 0;
+    res.json({ totalHours });
+  } catch (error) {
+    console.error('Error fetching total listening hours:', error);
+    res.status(500).json({ error: 'Failed to fetch listening hours' });
+  }
+});
+
+// Update user listening hours (for future use when tracking actual listening)
+app.post("/api/users/:id/listening-hours", async (req, res) => {
+  try {
+    const { hours } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { listeningHours: hours } },
+      { new: true }
+    );
+    
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    res.json({ message: "Listening hours updated", totalHours: user.listeningHours });
+  } catch (error) {
+    console.error('Error updating listening hours:', error);
+    res.status(500).json({ error: "Failed to update listening hours" });
+  }
+});
+
+// ==================== LIKES API ====================
+
+// Like a song
+app.post("/api/likes", async (req, res) => {
+  try {
+    const { userId, songId, songType, songTitle, songArtist, songAlbum, songImage, songPreviewUrl, spotifyUri, customSongPath } = req.body;
+    
+    // Validate required fields
+    if (!userId || !songId || !songType || !songTitle || !songArtist) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    
+    // Check if already liked
+    const existingLike = await Like.findOne({ userId, songId, songType });
+    if (existingLike) {
+      return res.status(409).json({ error: "Song already liked" });
+    }
+    
+    const like = new Like({
+      userId,
+      songId,
+      songType,
+      songTitle,
+      songArtist,
+      songAlbum: songAlbum || 'Unknown Album',
+      songImage,
+      songPreviewUrl,
+      spotifyUri,
+      customSongPath
+    });
+    
+    await like.save();
+    console.log(`❤️ User ${userId} liked: "${songTitle}" by ${songArtist}`);
+    
+    res.status(201).json({ message: "Song liked successfully", like });
+  } catch (error) {
+    console.error('Error liking song:', error);
+    res.status(500).json({ error: "Failed to like song" });
+  }
+});
+
+// Unlike a song
+app.delete("/api/likes", async (req, res) => {
+  try {
+    const { userId, songId, songType } = req.body;
+    
+    if (!userId || !songId || !songType) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    
+    const like = await Like.findOneAndDelete({ userId, songId, songType });
+    
+    if (!like) {
+      return res.status(404).json({ error: "Like not found" });
+    }
+    
+    console.log(`💔 User ${userId} unliked: "${like.songTitle}" by ${like.songArtist}`);
+    res.json({ message: "Song unliked successfully" });
+  } catch (error) {
+    console.error('Error unliking song:', error);
+    res.status(500).json({ error: "Failed to unlike song" });
+  }
+});
+
+// Get user's liked songs
+app.get("/api/likes/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { page = 1, limit = 20, songType } = req.query;
+    
+    const query = { userId };
+    if (songType) {
+      query.songType = songType;
+    }
+    
+    const likes = await Like.find(query)
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+    
+    const total = await Like.countDocuments(query);
+    
+    res.json({
+      likes,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      total
+    });
+  } catch (error) {
+    console.error('Error fetching liked songs:', error);
+    res.status(500).json({ error: "Failed to fetch liked songs" });
+  }
+});
+
+// Check if a song is liked by user
+app.get("/api/likes/check/:userId/:songId/:songType", async (req, res) => {
+  try {
+    const { userId, songId, songType } = req.params;
+    
+    const like = await Like.findOne({ userId, songId, songType });
+    
+    res.json({ isLiked: !!like });
+  } catch (error) {
+    console.error('Error checking like status:', error);
+    res.status(500).json({ error: "Failed to check like status" });
+  }
+});
+
+// Get like statistics
+app.get("/api/likes/stats/overview", async (req, res) => {
+  try {
+    const totalLikes = await Like.countDocuments();
+    const spotifyLikes = await Like.countDocuments({ songType: 'spotify' });
+    const customLikes = await Like.countDocuments({ songType: 'custom' });
+    
+    // Most liked songs
+    const mostLikedSongs = await Like.aggregate([
+      {
+        $group: {
+          _id: { songId: "$songId", songType: "$songType" },
+          count: { $sum: 1 },
+          songTitle: { $first: "$songTitle" },
+          songArtist: { $first: "$songArtist" },
+          songAlbum: { $first: "$songAlbum" },
+          songImage: { $first: "$songImage" }
+        }
+      },
+      { $sort: { count: -1 } },
+      { $limit: 10 }
+    ]);
+    
+    // Users with most likes
+    const topUsers = await Like.aggregate([
+      {
+        $group: {
+          _id: "$userId",
+          likeCount: { $sum: 1 }
+        }
+      },
+      { $sort: { likeCount: -1 } },
+      { $limit: 10 },
+      {
+        $lookup: {
+          from: "Registered_Users",
+          localField: "_id",
+          foreignField: "_id",
+          as: "user"
+        }
+      },
+      {
+        $project: {
+          userId: "$_id",
+          likeCount: 1,
+          userName: { $arrayElemAt: ["$user.name", 0] }
+        }
+      }
+    ]);
+    
+    res.json({
+      totalLikes,
+      spotifyLikes,
+      customLikes,
+      mostLikedSongs,
+      topUsers
+    });
+  } catch (error) {
+    console.error('Error fetching like statistics:', error);
+    res.status(500).json({ error: "Failed to fetch like statistics" });
+  }
+});
+
+// ==================== PLAYLIST API ====================
+
+// Create a new playlist
+app.post("/api/playlists", async (req, res) => {
+  try {
+    const { name, description, userId, isPublic } = req.body;
+    
+    if (!name || !userId) {
+      return res.status(400).json({ error: "Name and userId are required" });
+    }
+    
+    // Check if playlist name already exists for this user
+    const existingPlaylist = await Playlist.findOne({ userId, name, is_active: 1 });
+    if (existingPlaylist) {
+      return res.status(409).json({ error: "Playlist name already exists" });
+    }
+    
+    const playlist = new Playlist({
+      name: name.trim(),
+      description: description?.trim() || '',
+      userId,
+      isPublic: isPublic || false
+    });
+    
+    await playlist.save();
+    console.log(`🎵 User ${userId} created playlist: "${name}"`);
+    
+    res.status(201).json({ message: "Playlist created successfully", playlist });
+  } catch (error) {
+    console.error('Error creating playlist:', error);
+    res.status(500).json({ error: "Failed to create playlist" });
+  }
+});
+
+// Get user's playlists
+app.get("/api/playlists/user/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { page = 1, limit = 20 } = req.query;
+    
+    const playlists = await Playlist.find({ userId, is_active: 1 })
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+    
+    const total = await Playlist.countDocuments({ userId, is_active: 1 });
+    
+    res.json({
+      playlists,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      total
+    });
+  } catch (error) {
+    console.error('Error fetching user playlists:', error);
+    res.status(500).json({ error: "Failed to fetch playlists" });
+  }
+});
+
+// Get single playlist with songs
+app.get("/api/playlists/:playlistId", async (req, res) => {
+  try {
+    const { playlistId } = req.params;
+    
+    const playlist = await Playlist.findById(playlistId);
+    if (!playlist || playlist.is_active === 0) {
+      return res.status(404).json({ error: "Playlist not found" });
+    }
+    
+    const songs = await PlaylistSong.find({ playlistId })
+      .sort({ position: 1, createdAt: 1 });
+    
+    res.json({ playlist, songs });
+  } catch (error) {
+    console.error('Error fetching playlist:', error);
+    res.status(500).json({ error: "Failed to fetch playlist" });
+  }
+});
+
+// Update playlist
+app.put("/api/playlists/:playlistId", async (req, res) => {
+  try {
+    const { playlistId } = req.params;
+    const { name, description, isPublic } = req.body;
+    
+    const playlist = await Playlist.findById(playlistId);
+    if (!playlist || playlist.is_active === 0) {
+      return res.status(404).json({ error: "Playlist not found" });
+    }
+    
+    // Check if new name conflicts with existing playlists
+    if (name && name !== playlist.name) {
+      const existingPlaylist = await Playlist.findOne({ 
+        userId: playlist.userId, 
+        name: name.trim(), 
+        is_active: 1,
+        _id: { $ne: playlistId }
+      });
+      if (existingPlaylist) {
+        return res.status(409).json({ error: "Playlist name already exists" });
+      }
+    }
+    
+    if (name) playlist.name = name.trim();
+    if (description !== undefined) playlist.description = description.trim();
+    if (isPublic !== undefined) playlist.isPublic = isPublic;
+    
+    await playlist.save();
+    
+    res.json({ message: "Playlist updated successfully", playlist });
+  } catch (error) {
+    console.error('Error updating playlist:', error);
+    res.status(500).json({ error: "Failed to update playlist" });
+  }
+});
+
+// Delete playlist
+app.delete("/api/playlists/:playlistId", async (req, res) => {
+  try {
+    const { playlistId } = req.params;
+    
+    const playlist = await Playlist.findById(playlistId);
+    if (!playlist || playlist.is_active === 0) {
+      return res.status(404).json({ error: "Playlist not found" });
+    }
+    
+    // Soft delete playlist
+    playlist.is_active = 0;
+    await playlist.save();
+    
+    // Also remove all songs from playlist
+    await PlaylistSong.deleteMany({ playlistId });
+    
+    console.log(`🗑️ Playlist "${playlist.name}" deleted`);
+    res.json({ message: "Playlist deleted successfully" });
+  } catch (error) {
+    console.error('Error deleting playlist:', error);
+    res.status(500).json({ error: "Failed to delete playlist" });
+  }
+});
+
+// Add song to playlist
+app.post("/api/playlists/:playlistId/songs", async (req, res) => {
+  try {
+    const { playlistId } = req.params;
+    const { songId, songType, songTitle, songArtist, songAlbum, songImage, songPreviewUrl, songDuration, spotifyUri, customSongPath, addedBy } = req.body;
+    
+    if (!songId || !songType || !songTitle || !songArtist || !addedBy) {
+      return res.status(400).json({ error: "Missing required song fields" });
+    }
+    
+    const playlist = await Playlist.findById(playlistId);
+    if (!playlist || playlist.is_active === 0) {
+      return res.status(404).json({ error: "Playlist not found" });
+    }
+    
+    // Check if song already exists in playlist
+    const existingSong = await PlaylistSong.findOne({ playlistId, songId, songType });
+    if (existingSong) {
+      return res.status(409).json({ error: "Song already in playlist" });
+    }
+    
+    // Get next position
+    const lastSong = await PlaylistSong.findOne({ playlistId }).sort({ position: -1 });
+    const position = lastSong ? lastSong.position + 1 : 1;
+    
+    const playlistSong = new PlaylistSong({
+      playlistId,
+      songId,
+      songType,
+      songTitle,
+      songArtist,
+      songAlbum: songAlbum || 'Unknown Album',
+      songImage,
+      songPreviewUrl,
+      songDuration: songDuration || 0,
+      spotifyUri,
+      customSongPath,
+      addedBy,
+      position
+    });
+    
+    await playlistSong.save();
+    
+    // Update playlist stats
+    playlist.songCount += 1;
+    playlist.totalDuration += (songDuration || 0);
+    await playlist.save();
+    
+    console.log(`🎵 Added "${songTitle}" to playlist "${playlist.name}"`);
+    res.status(201).json({ message: "Song added to playlist", playlistSong });
+  } catch (error) {
+    console.error('Error adding song to playlist:', error);
+    res.status(500).json({ error: "Failed to add song to playlist" });
+  }
+});
+
+// Remove song from playlist
+app.delete("/api/playlists/:playlistId/songs/:songId/:songType", async (req, res) => {
+  try {
+    const { playlistId, songId, songType } = req.params;
+    
+    const playlist = await Playlist.findById(playlistId);
+    if (!playlist || playlist.is_active === 0) {
+      return res.status(404).json({ error: "Playlist not found" });
+    }
+    
+    const playlistSong = await PlaylistSong.findOneAndDelete({ playlistId, songId, songType });
+    if (!playlistSong) {
+      return res.status(404).json({ error: "Song not found in playlist" });
+    }
+    
+    // Update playlist stats
+    playlist.songCount = Math.max(0, playlist.songCount - 1);
+    playlist.totalDuration = Math.max(0, playlist.totalDuration - (playlistSong.songDuration || 0));
+    await playlist.save();
+    
+    // Reorder remaining songs
+    await PlaylistSong.updateMany(
+      { playlistId, position: { $gt: playlistSong.position } },
+      { $inc: { position: -1 } }
+    );
+    
+    console.log(`🗑️ Removed "${playlistSong.songTitle}" from playlist "${playlist.name}"`);
+    res.json({ message: "Song removed from playlist" });
+  } catch (error) {
+    console.error('Error removing song from playlist:', error);
+    res.status(500).json({ error: "Failed to remove song from playlist" });
+  }
+});
+
+// Reorder songs in playlist
+app.put("/api/playlists/:playlistId/songs/reorder", async (req, res) => {
+  try {
+    const { playlistId } = req.params;
+    const { songUpdates } = req.body; // Array of {songId, songType, newPosition}
+    
+    const playlist = await Playlist.findById(playlistId);
+    if (!playlist || playlist.is_active === 0) {
+      return res.status(404).json({ error: "Playlist not found" });
+    }
+    
+    // Update positions
+    for (const update of songUpdates) {
+      await PlaylistSong.findOneAndUpdate(
+        { playlistId, songId: update.songId, songType: update.songType },
+        { position: update.newPosition }
+      );
+    }
+    
+    res.json({ message: "Playlist order updated" });
+  } catch (error) {
+    console.error('Error reordering playlist:', error);
+    res.status(500).json({ error: "Failed to reorder playlist" });
+  }
+});
+
+// Get playlists containing a specific song
+app.get("/api/songs/:songId/:songType/playlists", async (req, res) => {
+  try {
+    const { songId, songType } = req.params;
+    const { userId } = req.query;
+    
+    let query = { songId, songType };
+    if (userId) {
+      // Get user's playlists containing this song
+      const userPlaylists = await Playlist.find({ userId, is_active: 1 }).select('_id');
+      const playlistIds = userPlaylists.map(p => p._id);
+      query.playlistId = { $in: playlistIds };
+    }
+    
+    const playlistSongs = await PlaylistSong.find(query).populate('playlistId');
+    const playlists = playlistSongs.map(ps => ps.playlistId).filter(p => p && p.is_active === 1);
+    
+    res.json({ playlists });
+  } catch (error) {
+    console.error('Error fetching song playlists:', error);
+    res.status(500).json({ error: "Failed to fetch playlists" });
+  }
+});
+
+// Get playlist statistics
+app.get("/api/playlists/stats/overview", async (req, res) => {
+  try {
+    const totalPlaylists = await Playlist.countDocuments({ is_active: 1 });
+    const publicPlaylists = await Playlist.countDocuments({ is_active: 1, isPublic: true });
+    const totalSongs = await PlaylistSong.countDocuments();
+    
+    // Most popular playlists (by song count)
+    const popularPlaylists = await Playlist.find({ is_active: 1, isPublic: true })
+      .sort({ songCount: -1 })
+      .limit(10)
+      .populate('userId', 'name');
+    
+    // Users with most playlists
+    const topPlaylistCreators = await Playlist.aggregate([
+      { $match: { is_active: 1 } },
+      {
+        $group: {
+          _id: "$userId",
+          playlistCount: { $sum: 1 },
+          totalSongs: { $sum: "$songCount" }
+        }
+      },
+      { $sort: { playlistCount: -1 } },
+      { $limit: 10 },
+      {
+        $lookup: {
+          from: "Registered_Users",
+          localField: "_id",
+          foreignField: "_id",
+          as: "user"
+        }
+      },
+      {
+        $project: {
+          userId: "$_id",
+          playlistCount: 1,
+          totalSongs: 1,
+          userName: { $arrayElemAt: ["$user.name", 0] }
+        }
+      }
+    ]);
+    
+    res.json({
+      totalPlaylists,
+      publicPlaylists,
+      totalSongs,
+      popularPlaylists,
+      topPlaylistCreators
+    });
+  } catch (error) {
+    console.error('Error fetching playlist statistics:', error);
+    res.status(500).json({ error: "Failed to fetch playlist statistics" });
+  }
+});
+
+// ==================== END PLAYLIST API ====================
 
 /**
  * getAppToken()
@@ -1168,7 +1741,7 @@ app.get("/api/spotify/track", async (req, res) => {
           );
           
           if (altData.preview_url) {
-            console.log(`✅ Found preview in ${market} market: ${altData.preview_url}`);
+            console.log(` Found preview in ${market} market: ${altData.preview_url}`);
             alternativePreview = altData.preview_url;
             data.preview_url = alternativePreview;
             data.fallback_preview = false;
@@ -1229,7 +1802,7 @@ app.get("/api/spotify/track", async (req, res) => {
       }
     } else {
       data.fallback_preview = false;
-      console.log(`✅ Using original Spotify preview: ${data.preview_url}`);
+      console.log(` Using original Spotify preview: ${data.preview_url}`);
     }
 
     // Final verification
@@ -1327,9 +1900,18 @@ app.get("/api/youtube/preview", async (req, res) => {
     if (!trackName) return res.status(400).json({ error: "trackName required" });
 
     const query = `${trackName} ${artistName}`.trim();
+    console.log('🔍 YouTube search query:', query);
+    
     const searchRes = await ytSearch(query);
+    console.log('🔍 YouTube search results:', searchRes.videos?.length || 0, 'videos found');
+    
     const video = searchRes.videos && searchRes.videos.length ? searchRes.videos[0] : null;
-    if (!video) return res.json({ found: false, message: "No YouTube result" });
+    if (!video) {
+      console.log('❌ No YouTube video found for:', query);
+      return res.json({ found: false, message: "No YouTube result" });
+    }
+
+    console.log('✅ Found YouTube video:', video.title, 'ID:', video.videoId);
 
     const info = await ytdlp(`https://www.youtube.com/watch?v=${video.videoId}`, {
       dumpSingleJson: true,
@@ -1339,10 +1921,33 @@ app.get("/api/youtube/preview", async (req, res) => {
       youtubeSkipDashManifest: true
     });
 
-    if (!info || !info.formats) return res.json({ found: false, message: "yt-dlp returned no formats" });
+    if (!info || !info.formats) {
+      console.log('❌ yt-dlp returned no formats for:', video.videoId);
+      return res.json({ found: false, message: "yt-dlp returned no formats" });
+    }
+    
+    console.log('🔍 Available formats:', info.formats.length);
     const audio = info.formats.find(f => f.ext === 'm4a' && f.url);
-    if (!audio) return res.json({ found: false, message: "No audio-only format" });
+    if (!audio) {
+      console.log('❌ No m4a audio format found, trying any audio format...');
+      const anyAudio = info.formats.find(f => f.acodec && f.acodec !== 'none' && f.url);
+      if (anyAudio) {
+        console.log('✅ Found alternative audio format:', anyAudio.ext);
+        return res.json({
+          found: true,
+          source: "youtube",
+          title: info.title,
+          artist: artistName,
+          preview_url: anyAudio.url,
+          youtube_video_id: video.videoId,
+          format: anyAudio.ext
+        });
+      }
+      console.log('❌ No audio format found at all');
+      return res.json({ found: false, message: "No audio-only format" });
+    }
 
+    console.log('✅ YouTube preview URL found:', audio.url.substring(0, 50) + '...');
     return res.json({
       found: true,
       source: "youtube",
@@ -1552,7 +2157,7 @@ app.get("/api/top-tracks", async (req, res) => {
     const tracksWithPreview = data.items?.filter(item => item.track?.preview_url) || [];
     const tracksWithoutPreview = data.items?.filter(item => !item.track?.preview_url) || [];
     
-    console.log(`✅ Tracks WITH preview: ${tracksWithPreview.length}`);
+    console.log(` Tracks WITH preview: ${tracksWithPreview.length}`);
     console.log(`❌ Tracks WITHOUT preview: ${tracksWithoutPreview.length}`);
     
     if (tracksWithoutPreview.length > 0) {
@@ -1687,7 +2292,7 @@ app.get("/api/recommended-tracks", async (req, res) => {
     const tracksWithPreview = data.tracks.filter(t => t.preview_url);
     const tracksWithoutPreview = data.tracks.filter(t => !t.preview_url);
     
-    console.log(`✅ Tracks WITH preview: ${tracksWithPreview.length}`);
+    console.log(` Tracks WITH preview: ${tracksWithPreview.length}`);
     console.log(`❌ Tracks WITHOUT preview: ${tracksWithoutPreview.length}`);
     
     if (tracksWithoutPreview.length > 0) {
@@ -1849,7 +2454,7 @@ app.get("/api/playlist-tracks", async (req, res) => {
       return track && !track.preview_url;
     });
 
-    console.log(`✅ Tracks WITH preview: ${tracksWithPreview.length}`);
+    console.log(` Tracks WITH preview: ${tracksWithPreview.length}`);
     console.log(`❌ Tracks WITHOUT preview: ${tracksWithoutPreview.length}`);
 
     // Smart filtering logic
@@ -1900,7 +2505,7 @@ app.get("/api/test/spotify-preview", async (req, res) => {
     console.log('🧪 Testing Spotify API for real preview URLs...');
     
     const { access_token } = await getAppToken();
-    console.log('✅ Got access token:', access_token ? 'YES' : 'NO');
+    console.log(' Got access token:', access_token ? 'YES' : 'NO');
     
     // Test with known tracks that should have previews
     const testTracks = [
@@ -1937,7 +2542,7 @@ app.get("/api/test/spotify-preview", async (req, res) => {
         results.push(result);
         
         if (data.preview_url) {
-          console.log(`✅ FOUND PREVIEW: "${data.name}" - ${data.preview_url}`);
+          console.log(` FOUND PREVIEW: "${data.name}" - ${data.preview_url}`);
         } else {
           console.log(`❌ NO PREVIEW: "${data.name}"`);
         }
