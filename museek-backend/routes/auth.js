@@ -112,4 +112,31 @@ router.post("/dashboard", async (req, res) => {
   }
 });
 
+// Update admin name by ID
+router.patch("/:id", async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ error: "Name is required" });
+    }
+
+    const updatedAdmin = await Admin.findByIdAndUpdate(
+      req.params.id,
+      { name },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedAdmin) {
+      return res.status(404).json({ error: "Admin not found" });
+    }
+
+    res.json(updatedAdmin);
+  } catch (err) {
+    console.error("Error updating admin:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
 export default router;

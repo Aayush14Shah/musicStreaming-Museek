@@ -1,4 +1,3 @@
-// Updated MusicPlayer.jsx (improved responsiveness)
 import React, { useState, useEffect, useRef } from 'react';
 import { Tooltip } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
@@ -22,155 +21,132 @@ import VolumeUp from '@mui/icons-material/VolumeUp';
 // generic mm:ss formatter
 const formatTime = (sec = 0) => `${Math.floor(sec / 60)}:${Math.floor(sec % 60).toString().padStart(2, '0')}`;
 
-const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
+const MusicPlayer = ({ currentTrack, isPlaying, onPlay, onPause }) => {
   const [isShuffling, setIsShuffling] = useState(false);
   const [isRepeating, setIsRepeating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [value, setValue] = React.useState(30);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const audioRef = useRef(null);
-  const duration = audioRef.current?.duration || currentTrack?.duration || 0;
+  const [playing, setPlaying] = useState(!!isPlaying);
+  const [volume, setVolume] = useState(30);
 
-  const handlePlayButtonClick = () => {
-    if (!currentTrack) {
-      alert('Please select a track from the playlists above to start listening to 30-second previews!');
-      return;
-    }
-    if (!currentTrack.audioUrl) {
-      alert('30-second preview not available for this track. Please choose another track.');
-      return;
-    }
-    // Toggle play/pause state and control audio
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-        onTogglePlay(); // Update the state
-      } else {
-        audioRef.current.play();
-        onTogglePlay(); // Update the state
-      }
-    }
-  };
-
-  // Fullscreen functionality
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().then(() => {
-        setIsFullscreen(true);
-      }).catch(err => {
-        console.log('Error attempting to enable fullscreen:', err);
-      });
-    } else {
-      document.exitFullscreen().then(() => {
-        setIsFullscreen(false);
-      }).catch(err => {
-        console.log('Error attempting to exit fullscreen:', err);
-      });
-    }
-  };
-
-  // Initialize / update audio element when track changes
   useEffect(() => {
-    if (currentTrack && currentTrack.audioUrl) {
-      // Pause and replace previous audio
+    // cleanup old audio and prepare new one when track changes
+    if (!currentTrack) {
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current = null;
       }
-
-      setProgress(0); // reset progress for new track
-
-      const audio = new Audio(currentTrack.audioUrl);
-      audioRef.current = audio;
-
-      const handleTimeUpdate = () => setProgress(audio.currentTime);
-      const handleEnded = () => {
-        if (isRepeating) {
-          audio.currentTime = 0;
-          audio.play();
-        } else {
-          if (isPlaying) onTogglePlay();
-        }
-      };
-      const handlePlay = () => {
-        console.log('Audio started playing');
-      };
-      const handlePause = () => {
-        console.log('Audio paused');
-      };
-
-      audio.addEventListener('timeupdate', handleTimeUpdate);
-      audio.addEventListener('ended', handleEnded);
-      audio.addEventListener('play', handlePlay);
-      audio.addEventListener('pause', handlePause);
-
-      if (isPlaying) {
-        audio.play();
-      }
-
-      return () => {
-        audio.removeEventListener('timeupdate', handleTimeUpdate);
-        audio.removeEventListener('ended', handleEnded);
-        audio.removeEventListener('play', handlePlay);
-        audio.removeEventListener('pause', handlePause);
-        audio.pause();
-      };
+      setProgress(0);
+      setPlaying(false);
+      return;
     }
+
+    setProgress(0); // reset progress for new track
+
+    const audio = new Audio(currentTrack.audioUrl);
+    audioRef.current = audio;
+
+    const handleTimeUpdate = () => setProgress(audio.currentTime);
+    const handleEnded = () => {
+      if (isRepeating) {
+        audio.currentTime = 0;
+        audio.play();
+      } else {
+        // mark as stopped locally; DO NOT toggle sidebar from here
+        setPlaying(false);
+        if (typeof onPause === 'function') onPause();
+      }
+    };
+    const handlePlay = () => {
+      setPlaying(true);
+      if (typeof onPlay === 'function') onPlay();
+    };
+    const handlePause = () => {
+      setPlaying(false);
+      if (typeof onPause === 'function') onPause();
+    };
+
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+
+    if (playing) {
+      audio.play().catch(() => {});
+    }
+
+    return () => {
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+      try { audio.pause(); } catch (e) {}
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTrack]);
 
-  // Play / pause when isPlaying prop changes
+  // Sync local playing state if parent controls playback via prop
   useEffect(() => {
+    setPlaying(!!isPlaying);
     if (audioRef.current) {
       if (isPlaying) {
-        audioRef.current.play();
+        audioRef.current.play().catch(() => {});
       } else {
         audioRef.current.pause();
       }
     }
   }, [isPlaying]);
 
-  // Listen for fullscreen changes
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
+    if (audioRef.current) audioRef.current.volume = volume / 100;
+  }, [volume]);
 
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-    };
-  }, []);
+  const handlePlayButtonClick = (e) => {
+    if (e && e.stopPropagation) e.stopPropagation(); // prevent bubbling to parent (avoid accidental sidebar toggles)
+    if (!currentTrack) {
+      alert('Please select a track from the playlists above to start listening to previews!');
+      return;
+    }
+    if (!audioRef.current) {
+      alert('Preview not available for this track.');
+      return;
+    }
 
-  // Update volume when slider changes
-  const handleVolumeChange = (event, newValue) => {
-    setValue(newValue);
-    if (audioRef.current) {
-      audioRef.current.volume = newValue / 100;
+    if (playing) {
+      audioRef.current.pause();
+      setPlaying(false);
+      if (typeof onPause === 'function') onPause();
+    } else {
+      audioRef.current.play().catch((err) => console.log('play blocked', err.message));
+      setPlaying(true);
+      if (typeof onPlay === 'function') onPlay();
     }
   };
 
-  // Seek when progress bar changes
   const handleSeek = (_, newValue) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = newValue;
-      setProgress(newValue);
-    }
-  }; 
+    if (!audioRef.current) return;
+    audioRef.current.currentTime = newValue;
+    setProgress(newValue);
+  };
 
-  const toggleFullScreen = () => {
-                if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen().catch(err => {
-                        console.error(`Error enabling full-screen: ${err.message} (${err.name})`);
-                    });
-                } else {
-                    document.exitFullscreen().catch(err => {
-                        console.error(`Error exiting full-screen: ${err.message} (${err.name})`);
-                    });
-                }
-            };  
+  const handleVolumeChange = (_, newValue) => {
+    setVolume(newValue);
+    if (audioRef.current) audioRef.current.volume = newValue / 100;
+  };
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
+    } else {
+      document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
+    }
+  };
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-[#121212]/95 backdrop-blur-sm text-[#F5F5F5] p-2 md:p-4 z-40 h-16 md:h-20 flex items-center justify-between gap-4 md:gap-6">
-      {/* Left: Album Art, Song Info, Add Icon */}
+      {/* Left */}
       <div className="flex items-center space-x-2 md:space-x-4 min-w-[200px] md:min-w-[300px]">
         {currentTrack ? (
           <>
@@ -180,13 +156,10 @@ const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
               <div className="text-[#CD7F32] truncate max-w-[150px] md:max-w-[200px]" title={currentTrack.artist}>
                 {currentTrack.artist}
               </div>
-              <div className="text-[#888] text-xs">30s Preview</div>
+              <div className="text-[#888] text-xs">Preview</div>
             </div>
             <Tooltip title="Add to Liked Songs" arrow>
-              <button 
-                onClick={() => console.log("Added to liked songs")} 
-                className="text-[#F5F5F5] hover:text-[#CD7F32] hidden sm:block"
-              >
+              <button onClick={(e)=>{e.stopPropagation(); console.log("Added to liked songs")}} className="text-[#F5F5F5] hover:text-[#CD7F32] hidden sm:block">
                 <AddIcon fontSize="small" />
               </button>
             </Tooltip>
@@ -195,185 +168,105 @@ const MusicPlayer = ({ currentTrack, isPlaying, onTogglePlay }) => {
           <>
             <div className="w-10 h-10 md:w-12 md:h-12 rounded bg-[#1a1a1a] flex items-center justify-center">
               <svg className="w-6 h-6 text-[#CD7F32]" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
               </svg>
             </div>
             <div className="text-xs md:text-sm overflow-hidden">
               <div className="font-medium text-[#888]">No track selected</div>
-              <div className="text-[#CD7F32]">Choose a track for 30s preview</div>
+              <div className="text-[#CD7F32]">Choose a track for preview</div>
             </div>
           </>
         )}
       </div>
 
-      {/* Center: Controls and Progress Bar */}
+      {/* Center */}
       <div className="flex flex-col items-center flex-1 max-w-[600px]">
         <div className="flex items-center space-x-2 md:space-x-4 mb-2 md:mb-3">
           <Tooltip title="Shuffle" arrow>
-            <button 
-              onClick={() => setIsShuffling(!isShuffling)} 
-              className={`${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32]' : 'text-[#888] cursor-not-allowed'} ${isShuffling ? 'text-[#CD7F32]' : ''}`}
-              disabled={!currentTrack}
-            >
+            <button onClick={(e)=>{e.stopPropagation(); setIsShuffling((s) => !s);}} className={`${currentTrack ? "text-[#F5F5F5] hover:text-[#CD7F32]" : "text-[#888]"}`}>
               <ShuffleIcon fontSize="small" />
             </button>
           </Tooltip>
+
           <Tooltip title="Previous" arrow>
-            <button 
-              className={`${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32]' : 'text-[#888] cursor-not-allowed'}`}
-              disabled={!currentTrack}
-            >
+            <button onClick={(e)=>{e.stopPropagation();}} className={`${currentTrack ? "text-[#F5F5F5] hover:text-[#CD7F32]" : "text-[#888]"}`} disabled={!currentTrack}>
               <SkipPreviousIcon fontSize="small" />
             </button>
           </Tooltip>
-          <Tooltip title={currentTrack ? "Play/Pause 30s Preview" : "Select a track for 30s preview"} arrow>
-            <button 
-              onClick={handlePlayButtonClick} 
-              className={`rounded-full p-2 md:p-3 transition-all duration-200 hover:scale-105 ${
-                currentTrack
-                  ? 'text-[#F5F5F5] hover:text-[#CD7F32] bg-[#1a1a1a] hover:bg-[#2a2a2a]' 
-                  : 'text-[#888] bg-[#1a1a1a] cursor-not-allowed'
-              }`}
+
+          <Tooltip title={currentTrack ? "Play/Pause Preview" : "Select a track"} arrow>
+            <button
+              onClick={(e)=>{e.stopPropagation(); handlePlayButtonClick(e);}}
+              className={`rounded-full p-2 md:p-3 transition-all duration-200 hover:scale-105 ${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32] bg-[#1a1a1a]' : 'text-[#888] bg-[#1a1a1a] cursor-not-allowed'}`}
               disabled={!currentTrack}
             >
-              {isPlaying ? (
-                <PauseIcon sx={{ fontSize: 24 }} />
-              ) : (
-                <PlayArrowIcon sx={{ fontSize: 24 }} />
-              )}
+              {playing ? <PauseIcon sx={{ fontSize: 24 }} /> : <PlayArrowIcon sx={{ fontSize: 24 }} />}
             </button>
           </Tooltip>
+
           <Tooltip title="Next" arrow>
-            <button 
-              className={`${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32]' : 'text-[#888] cursor-not-allowed'}`}
-              disabled={!currentTrack}
-            >
+            <button onClick={(e)=>{e.stopPropagation();}} className={`${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32]' : 'text-[#888] cursor-not-allowed'}`} disabled={!currentTrack}>
               <SkipNextIcon fontSize="small" />
             </button>
           </Tooltip>
+
           <Tooltip title="Repeat" arrow>
-            <button 
-              onClick={() => setIsRepeating(!isRepeating)} 
-              className={`${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32]' : 'text-[#888] cursor-not-allowed'} ${isRepeating ? 'text-[#CD7F32]' : ''}`}
-              disabled={!currentTrack}
-            >
+            <button onClick={(e)=>{e.stopPropagation(); setIsRepeating((r) => !r);}} className={`${isRepeating ? "text-[#CD7F32]" : "text-[#F5F5F5]"}`}>
               <RepeatIcon fontSize="small" />
             </button>
           </Tooltip>
         </div>
+
         <div className="flex items-center space-x-2 w-full">
-          <span className="text-xs md:text-sm hidden sm:block">
-            {currentTrack ? formatTime(progress) : '0:00'}
-          </span>
+          <span className="text-xs md:text-sm hidden sm:block">{formatTime(progress)}</span>
+
           <Slider
-          aria-label="time-indicator"
-          size="small"
-          value={progress}
-          min={0}
-          step={1}
-          max={duration}
-          onChange={handleSeek}
-          sx={(t) => ({
-            color: '#CD7F32',
-            height: 4,
-            '& .MuiSlider-thumb': {
-              width: 8,
-              height: 8,
-              transition: '0.3s cubic-bezier(.47,1.64,.41,.8)',
-              '&::before': {
-                boxShadow: '0 2px 12px 0 rgba(0,0,0,0.4)',
-              },
-              '&:hover, &.Mui-focusVisible': {
-                boxShadow: `0px 0px 0px 8px ${'rgb(0 0 0 / 16%)'}`,
-                ...t.applyStyles('dark', {
-                  boxShadow: `0px 0px 0px 8px ${'rgb(255 255 255 / 16%)'}`,
-                }),
-              },
-              '&.Mui-active': {
-                width: 20,
-                height: 20,
-              },
-            },
-            '& .MuiSlider-rail': {
-              opacity: 0.28,
-            },
-            ...t.applyStyles('dark', {
-              color: '#fff',
-            }),
-          })}
-        />
-          <span className="text-xs md:text-sm hidden sm:block">
-            {duration ? formatTime(duration) : '0:00'}
-          </span>
+            aria-label="time-indicator"
+            size="small"
+            value={progress}
+            min={0}
+            step={1}
+            max={audioRef.current?.duration || currentTrack?.duration || 30}
+            onChange={handleSeek}
+            sx={{
+              color: "#CD7F32",
+              height: 4,
+              '& .MuiSlider-thumb': { width: 8, height: 8 }
+            }}
+          />
+
+          <span className="text-xs md:text-sm hidden sm:block">{formatTime(audioRef.current?.duration || currentTrack?.duration || 0)}</span>
         </div>
       </div>
 
-      {/* Right: Icons and Volume */}
+      {/* Right */}
       <div className="flex items-center space-x-1 md:space-x-3 justify-end min-w-[200px] md:min-w-[300px]">
         <Tooltip title="Queue" arrow>
-          <button 
-            className={`${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32]' : 'text-[#888] cursor-not-allowed'} hidden sm:block`}
-            disabled={!currentTrack}
-          >
+          <button onClick={(e)=>{e.stopPropagation();}} className={`${currentTrack ? "text-[#F5F5F5]" : "text-[#888]"}`}>
             <QueueMusicIcon fontSize="small" />
           </button>
         </Tooltip>
         <Tooltip title="Lyrics" arrow>
-          <button 
-            className={`${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32]' : 'text-[#888] cursor-not-allowed'} hidden sm:block`}
-            disabled={!currentTrack}
-          >
+          <button onClick={(e)=>{e.stopPropagation();}} className={`${currentTrack ? "text-[#F5F5F5]" : "text-[#888]"}`}>
             <LyricsIcon fontSize="small" />
           </button>
         </Tooltip>
-        <Tooltip title="Devices" arrow>
-          <button 
-            className={`${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32]' : 'text-[#888] cursor-not-allowed'} hidden md:block`}
-            disabled={!currentTrack}
-          >
-            <DevicesIcon fontSize="small" />
-          </button>
-        </Tooltip>
-        
-        {/* Volume Section - Properly Aligned */}
         <div className="flex items-center space-x-1 md:space-x-2">
           <Tooltip title="Volume" arrow>
-            <button 
-              className={`${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32]' : 'text-[#888] cursor-not-allowed'}`}
-              disabled={!currentTrack}
-            >
+            <button onClick={(e)=>{e.stopPropagation();}} className={`${currentTrack ? "text-[#F5F5F5]" : "text-[#888]"}`}>
               <VolumeUpIcon fontSize="small" />
             </button>
           </Tooltip>
           <Box sx={{ width: { xs: 80, sm: 120, md: 150 } }}>
-            <Stack spacing={1} direction="row" sx={{ alignItems: 'center' }}>
+            <Stack spacing={1} direction="row" sx={{ alignItems: "center" }}>
               <VolumeDown sx={{ fontSize: 16 }} />
-              <Slider 
-                size="small" 
-                aria-label="Volume" 
-                value={value} 
-                onChange={handleVolumeChange}
-                sx={{
-                  color: '#CD7F32',
-                  '& .MuiSlider-thumb': {
-                    width: 12,
-                    height: 12,
-                  },
-                  '& .MuiSlider-rail': {
-                    opacity: 0.3,
-                  },
-                }}
-              />
+              <Slider size="small" aria-label="Volume" value={volume} onChange={handleVolumeChange} sx={{ color: "#CD7F32" }} />
               <VolumeUp sx={{ fontSize: 16 }} />
             </Stack>
           </Box>
         </div>
-        
         <Tooltip title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"} arrow>
-          <button 
-            onClick={toggleFullScreen}
-            className={`${currentTrack ? 'text-[#F5F5F5] hover:text-[#CD7F32]' : 'text-[#888]'} hidden md:block`}
-          >
+          <button onClick={(e)=>{e.stopPropagation(); toggleFullscreen();}} className={`${currentTrack ? "text-[#F5F5F5]" : "text-[#888]"}`}>
             <FullscreenIcon fontSize="small" />
           </button>
         </Tooltip>
