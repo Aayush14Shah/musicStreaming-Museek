@@ -298,12 +298,16 @@ const Home = () => {
 
       console.log('🔍 Initial track data:', {
         hasAudioUrl: !!playableTrack.audioUrl,
-        audioUrl: playableTrack.audioUrl
+        audioUrl: playableTrack.audioUrl,
+        spotifyPreview: item.preview_url
       });
 
-      // Simplified loading: Try Deezer first (faster), then YouTube, then sample
-      if (!playableTrack.audioUrl) {
-        console.log('🎵 Trying to find preview URL...');
+      // Priority order: 1. Spotify preview, 2. Deezer, 3. YouTube, 4. Sample
+      if (playableTrack.audioUrl) {
+        console.log('✅ Using Spotify preview URL:', playableTrack.audioUrl);
+        showNotification('Playing Spotify Preview', playableTrack.title, 'success');
+      } else {
+        console.log('🎵 No Spotify preview available, trying external sources...');
         
         try {
           // Try Deezer first (usually faster and more reliable)
@@ -367,9 +371,6 @@ const Home = () => {
           `No preview available for "${playableTrack.title.length > 30 ? playableTrack.title.substring(0, 30) + '...' : playableTrack.title}"`,
           'warning'
         );
-            'warning'
-          );
-        }
       } else {
         console.log('✅ Track already has preview URL:', playableTrack.audioUrl);
       }
@@ -406,26 +407,68 @@ const Home = () => {
   };
 
   const handleCloseSidebar = () => {
-    setIsPlaying(false);
+    // Stop Spotify track if playing
+    if (currentTrack) {
+      setCurrentTrack(null);
+      setIsPlaying(false);
+    }
+    
+    // Stop custom song if playing
+    if (currentCustomSong) {
+      setCurrentCustomSong(null);
+      setIsCustomSongPlaying(false);
+      localStorage.removeItem('lastPlayedCustomSong');
+    }
   };
 
   const handlePlaylistClick = async (playlist) => {
     setSelectedPlaylist(playlist);
+    console.log('🎵 Fetching tracks for playlist:', playlist.id);
+    
     try {
-      const res = await fetch(`http://localhost:5000/api/playlist-tracks?playlistId=${playlist.id}&market=IN`);
-      if (res.ok) {
-        const data = await res.json();
-        setPlaylistTracks(data.items?.map(item => item.track) || []);
+      const url = `http://localhost:5000/api/playlist-tracks?playlistId=${playlist.id}&market=IN`;
+      console.log('📡 API URL:', url);
+      
+      const res = await fetch(url);
+      console.log('📊 Response status:', res.status);
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('❌ API Error:', res.status, errorText);
+        throw new Error(`HTTP error! status: ${res.status} - ${errorText}`);
       }
-    } catch (err) {
-      console.error('Failed to fetch playlist tracks:', err);
+      
+      const data = await res.json();
+      console.log('✅ Playlist tracks received:', data.items?.length || 0);
+      console.log('📊 Preview stats:', data.preview_stats);
+      
+      // Transform Spotify playlist items to track format
+      const tracks = (data.items || []).map(item => ({
+        id: item.track.id,
+        name: item.track.name,
+        artists: item.track.artists,
+        album: item.track.album,
+        duration_ms: item.track.duration_ms,
+        preview_url: item.track.preview_url,
+        uri: item.track.uri,
+        external_urls: item.track.external_urls
+      }));
+      
+      console.log('🎵 Transformed tracks:', tracks.length);
+      setPlaylistTracks(tracks);
+    } catch (error) {
+      console.error('❌ Error fetching playlist tracks:', error);
       setPlaylistTracks([]);
+      
+      // Show user-friendly error
+      if (error.message.includes('404')) {
+        console.log('💡 Suggestion: Make sure the backend server is running on port 5000');
+      }
     }
   };
 
-  // Handle custom song play/pause
   const handleCustomSongPlay = (song, shouldPlay) => {
-    if (song) {
+    if (shouldPlay && song) {
       // Stop Spotify track if playing
       if (currentTrack) {
         setCurrentTrack(null);
