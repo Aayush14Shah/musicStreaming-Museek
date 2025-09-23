@@ -32,7 +32,7 @@ const NowPlayingSidebar = ({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  onClose();
+                  onClose(); // This now only controls sidebar visibility
                 }}
                 className="bg-[#CD7F32] text-white px-2 py-1 rounded-md hover:bg-[#CD7F32]/90 transition-colors"
                 aria-label="Close sidebar"
