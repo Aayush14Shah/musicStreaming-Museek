@@ -7,9 +7,11 @@ import CarouselTrackRow from './CarouselTrackRow';
 import Genres from './Genres';
 import TrackList from './TrackList';
 import MusicPlayer from './MusicPlayer';
-import NowPlayingSidebar from './NowPlayingSidebar';
 import LeftSidebar from './LeftSidebar';
-import { PlaylistView } from '../PlaylistView';
+import NowPlayingSidebar from './NowPlayingSidebar';
+import LikedSongs from './LikedSongs';
+import { PlaylistView } from '../PlaylistView'; // Original Spotify playlist view
+import UserPlaylistView from '../Playlists/PlaylistView'; // New user playlist view
 import CustomSongsSection from '../CustomSongs/CustomSongsSection';
 import CustomAudioPlayer from '../CustomSongs/CustomAudioPlayer';
 
@@ -36,7 +38,24 @@ const Home = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentView, setCurrentView] = useState('home'); // 'home', 'playlist', 'genre', 'custom-songs', 'liked-songs'
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+  const [selectedGenre, setSelectedGenre] = useState(null);
+  const [selectedUserPlaylist, setSelectedUserPlaylist] = useState(null);
+  const handleGenreClick = (genre) => {
+    setSelectedGenre(genre);
+    setCurrentView('genre');
+  };
+
+  const handleLikedSongsClick = () => {
+    setCurrentView('liked-songs');
+  };
+
+  const handleUserPlaylistClick = (playlist) => {
+    setSelectedUserPlaylist(playlist);
+    setCurrentView('user-playlist');
+  };
+
   const [playlistTracks, setPlaylistTracks] = useState([]);
   const [currentCustomSong, setCurrentCustomSong] = useState(null);
   const [isCustomSongPlaying, setIsCustomSongPlaying] = useState(false);
@@ -527,50 +546,72 @@ const Home = () => {
         audioUrl: playableTrack.audioUrl,
       });
 
-      // Ultra-fast parallel loading: Try both YouTube and Deezer simultaneously
+      // Simplified loading: Try Deezer first (faster), then YouTube, then sample
       if (!playableTrack.audioUrl) {
-        console.log('⚡ Ultra-fast loading: Trying YouTube & Deezer in parallel...');
+        console.log('🎵 Trying to find preview URL...');
         
         try {
-          // Make both API calls simultaneously with timeout
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Timeout')), 3000) // 3 second timeout
+          // Try Deezer first (usually faster and more reliable)
+          console.log('🎵 Trying Deezer (5 sec timeout)...');
+          const dzTimeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Deezer timeout')), 5000)
           );
 
-          const ytPromise = fetch(`http://localhost:5000/api/youtube/preview?trackName=${encodeURIComponent(playableTrack.title)}&artistName=${encodeURIComponent(playableTrack.artist)}`)
-            .then(res => res.json())
-            .then(data => ({ source: 'youtube', data }));
-
           const dzPromise = fetch(`http://localhost:5000/api/deezer/preview?trackName=${encodeURIComponent(playableTrack.title)}&artistName=${encodeURIComponent(playableTrack.artist)}`)
-            .then(res => res.json())
-            .then(data => ({ source: 'deezer', data }));
+            .then(res => {
+              if (!res.ok) throw new Error(`Deezer API error: ${res.status}`);
+              return res.json();
+            });
 
-          // Race between APIs and timeout - use whichever responds first
-          const result = await Promise.race([
-            Promise.any([ytPromise, dzPromise]),
-            timeoutPromise
-          ]);
+          const dzResult = await Promise.race([dzPromise, dzTimeoutPromise]);
 
-          if (result.source === 'youtube' && result.data.found && result.data.preview_url) {
-            playableTrack.audioUrl = result.data.preview_url;
-            console.log('✅ YouTube preview found (fast):', result.data.title || playableTrack.title);
-            showNotification('Playing YouTube Preview', result.data.title || playableTrack.title, 'info');
-          } else if (result.source === 'deezer' && result.data.found && result.data.preview_url) {
-            playableTrack.audioUrl = result.data.preview_url;
-            console.log('✅ Deezer preview found (fast):', result.data.title);
-            showNotification('Playing Deezer Preview', `30s preview: "${result.data.title}"`, 'info');
+          if (dzResult && dzResult.found && dzResult.preview_url) {
+            playableTrack.audioUrl = dzResult.preview_url;
+            console.log('✅ Deezer preview found:', dzResult.title || playableTrack.title);
+            showNotification('Playing Deezer Preview', dzResult.title || playableTrack.title, 'success');
+          } else {
+            throw new Error('Deezer no preview');
           }
-        } catch (error) {
-          console.log('❌ Fast loading failed:', error.message);
-        }
+        } catch (deezerError) {
+          console.log('❌ Deezer failed, trying YouTube...', deezerError.message);
+          
+          // Fallback to YouTube if Deezer fails
+          try {
+            console.log('🎵 Trying YouTube (5 sec timeout)...');
+            const ytTimeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('YouTube timeout')), 5000)
+            );
 
-        // Final fallback if parallel loading failed
-        if (!playableTrack.audioUrl) {
-          console.log('⚠️ Using instant sample audio');
-          playableTrack.audioUrl = 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3';
-          showNotification(
-            'Playing Sample Audio', 
-            `No preview available for "${playableTrack.title.length > 30 ? playableTrack.title.substring(0, 30) + '...' : playableTrack.title}"`,
+            const ytPromise = fetch(`http://localhost:5000/api/youtube/preview?trackName=${encodeURIComponent(playableTrack.title)}&artistName=${encodeURIComponent(playableTrack.artist)}`)
+              .then(res => {
+                if (!res.ok) throw new Error(`YouTube API error: ${res.status}`);
+                return res.json();
+              });
+
+            const ytResult = await Promise.race([ytPromise, ytTimeoutPromise]);
+
+            if (ytResult && ytResult.found && ytResult.preview_url) {
+              playableTrack.audioUrl = ytResult.preview_url;
+              console.log('✅ YouTube preview found:', ytResult.title || playableTrack.title);
+              showNotification('Playing YouTube Preview', ytResult.title || playableTrack.title, 'success');
+            } else {
+              throw new Error('YouTube no preview');
+            }
+          } catch (youtubeError) {
+            console.log('❌ Both Deezer and YouTube failed:', youtubeError.message);
+            console.log('⚠️ Will use sample audio as final fallback');
+          }
+        }
+      } 
+      // Final fallback if parallel loading failed
+      if (!playableTrack.audioUrl) {
+        console.log('⚠️ Using instant sample audio');
+        playableTrack.audioUrl = 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3';
+        showNotification(
+          'Playing Sample Audio', 
+          `No preview available for "${playableTrack.title.length > 30 ? playableTrack.title.substring(0, 30) + '...' : playableTrack.title}"`,
+          'warning'
+        );
             'warning'
           );
         }
@@ -670,24 +711,26 @@ const Home = () => {
       style={{ fontFamily: 'Inter, "Noto Sans", sans-serif' }}
     >
       <Navbar />
-      <LeftSidebar />
-      <div
-        className={`
-    layout-container 
-    flex flex-col grow w-full transition-all duration-300 ease-in-out 
-    pt-[60px] pb-24
-    md:pl-[16.5rem]
-    ${
-      isSidebarVisible
-        ? "md:pr-[20rem] lg:pr-[22rem]" // adjusted right padding to match sidebar widths
-        : "pr-0"
-    }
-  `}
-      >
+      <LeftSidebar onLikedSongsClick={handleLikedSongsClick} onPlaylistClick={handleUserPlaylistClick} />
+      <div className={`layout-container flex h-full grow flex-col min-h-screen w-full transition-all duration-300 ease-in-out pt-[60px] pb-16 md:pb-20 md:pl-[16.5rem] lg:pl-[18rem] ${isPlaying ? 'md:pr-[20.5rem] lg:pr-[22.5rem]' : 'pr-0'}`}>
         <div className="m-1.5 md:mx-2 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.45)] bg-[#0e0e0e] p-2">
           <div className="rounded-2xl bg-[#181818] p-4 md:p-6">
             {/* CONDITIONAL RENDER */}
-            {selectedPlaylist ? (
+            {currentView === 'liked-songs' ? (
+              <LikedSongs 
+                onTrackClick={handleTrackClick}
+                currentTrack={currentTrack}
+                isPlaying={isPlaying}
+              />
+            ) : currentView === 'user-playlist' && selectedUserPlaylist ? (
+              <UserPlaylistView
+                playlist={selectedUserPlaylist}
+                onBack={() => setCurrentView('home')}
+                onTrackClick={handleTrackClick}
+                currentTrack={currentTrack}
+                isPlaying={isPlaying}
+              />
+            ) : selectedPlaylist ? (
               <PlaylistView
                 playlist={selectedPlaylist}
                 tracks={playlistTracks}
@@ -720,12 +763,9 @@ const Home = () => {
 
                 {/* <CarouselPlaylistRow title="New Releases" items={newReleases} onPlaylistClick={handlePlaylistClick} /> */}
                 <CarouselPlaylistRow title="Artist Playlists" items={userPlaylists} onPlaylistClick={handlePlaylistClick} />
-                <CarouselPlaylistRow title="Featured Playlists" items={featuredPlaylists} onPlaylistClick={handlePlaylistClick} />
-                <CarouselTrackRow title="Trending Songs" items={topTracks} onTrackClick={handleTrackClick} />
                 <CarouselPlaylistRow title="Recently Played" items={recentlyPlayed} onPlaylistClick={handlePlaylistClick} />
                 <CarouselPlaylistRow title="Popular Playlists" items={popularPlaylists} onPlaylistClick={handlePlaylistClick} />
                 <CarouselPlaylistRow title="Mood Booster" items={moodBooster} onPlaylistClick={handlePlaylistClick} />
-                <TrackList items={recommendedTracks} onTrackClick={handleTrackClick} />
                 <Genres items={genres} />
               </>
             )}
