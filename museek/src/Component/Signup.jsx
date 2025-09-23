@@ -137,6 +137,45 @@ const Signup = () => {
   
   const handleLogin = () => navigate('/Login');
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="w-screen h-screen bg-[#121212] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#CD7F32] mx-auto mb-4"></div>
+          <p className="text-white">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show registration disabled message
+  if (registrationDisabled) {
+    return (
+      <div className="w-screen h-screen bg-[#121212] flex items-center justify-center">
+        <div className="max-w-md mx-auto text-center p-8">
+          <div className="mb-6">
+            <img src={Logo} alt="Brand Logo" className="w-32 mx-auto mb-4" />
+          </div>
+          <div className="bg-[#181818] rounded-lg p-8 border border-red-500/30">
+            <div className="text-red-500 text-6xl mb-4">🚫</div>
+            <h2 className="text-2xl font-bold text-white mb-4">Registration Disabled</h2>
+            <p className="text-gray-300 mb-6">
+              New user registration is currently disabled by the administrator. 
+              Please contact support or try again later.
+            </p>
+            <button
+              onClick={handleLogin}
+              className="w-full py-3 bg-[#CD7F32] hover:bg-[#b46f2a] text-white rounded-lg font-semibold transition-colors"
+            >
+              Go to Login
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-screen h-screen bg-[#121212] flex items-center justify-center overflow-hidden">
       <div className="flex w-full h-full bg-gradient-to-br from-[#121212] via-[#1a1a1a] to-[#0e0e0e] overflow-hidden">

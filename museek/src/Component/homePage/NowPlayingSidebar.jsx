@@ -1,19 +1,17 @@
-import React, { useState } from "react";
-import { Tooltip } from "@mui/material";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import ShareIcon from "@mui/icons-material/Share";
-import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
+import React, { useState, useEffect } from 'react';
+import { Tooltip } from '@mui/material';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import ShareIcon from '@mui/icons-material/Share';
+import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
+import useLikes from '../../hooks/useLikes';
+import AddToPlaylistModal from '../Playlists/AddToPlaylistModal';
 
-const NowPlayingSidebar = ({
-  currentTrack,
-  onClose,
-  isOpen,
-  playlistName = "Now Playing",
-}) => {
-  const [trackDetails, setTrackDetails] = useState(null);
-  const [isLiked, setIsLiked] = useState(false);
-
+const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now Playing" }) => {
+  const userId = localStorage.getItem('userId');
+  const { isLiked, toggleLike, loading } = useLikes(userId);
+  const [showPlaylistModal, setShowPlaylistModal] = useState(false);
+  
   // Dynamic playlist name from album
   const dynamicPlaylistName = currentTrack?.album || playlistName;
 
@@ -86,44 +84,28 @@ const NowPlayingSidebar = ({
     },
   };
 
-  const toggleLike = (e) => {
-    e.stopPropagation();
-    setIsLiked(!isLiked);
+  const handleLikeToggle = async () => {
+    if (!currentTrack || !userId) return;
+    
+    const songData = {
+      songId: currentTrack.id,
+      songType: 'spotify', // Assuming Spotify for now, can be dynamic
+      songTitle: currentTrack.title,
+      songArtist: currentTrack.artist,
+      songAlbum: currentTrack.album,
+      songImage: currentTrack.image,
+      songPreviewUrl: currentTrack.audioUrl,
+      spotifyUri: currentTrack.uri
+    };
+    
+    const result = await toggleLike(songData);
+    if (result.success) {
+      console.log('Like toggled successfully');
+    }
   };
-  const shareSong = (e) => {
-    e.stopPropagation();
-    console.log("Share song");
-  };
-  const addToPlaylist = (e) => {
-    e.stopPropagation();
-    console.log("Add to playlist");
-  };
-
-  // useEffect(() => {
-  //   if (!currentTrack?.id) return;
-
-  //   const fetchTrackDetails = async () => {
-  //     try {
-  //       const res = await fetch(
-  //         `http://localhost:5000/api/track/${currentTrack.id}`
-  //       );
-  //       const data = await res.json();
-  //       setTrackDetails({
-  //         title: data.title || currentTrack.title,
-  //         artist: data.artist || currentTrack.artist,
-  //         image: data.image || currentTrack.image,
-  //         artistPhoto: data.artistPhoto || "/default-artist.png",
-  //         description: data.description || "No description available.",
-  //         listeners: data.listeners || "N/A",
-  //         credits: data.credits || [],
-  //       });
-  //     } catch (err) {
-  //       console.error("❌ Error fetching track details:", err);
-  //     }
-  //   };
-
-  //   fetchTrackDetails();
-  // }, [currentTrack]);
+  
+  const shareSong = () => console.log('Share song');
+  const addToPlaylist = () => setShowPlaylistModal(true);
 
   return (
     <div
@@ -176,26 +158,18 @@ const NowPlayingSidebar = ({
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Tooltip
-                  title={
-                    isLiked ? "Remove from Liked Songs" : "Add to Liked Songs"
-                  }
-                  arrow
-                >
+                <Tooltip title={isLiked(currentTrack?.id, 'spotify') ? 'Remove from Liked Songs' : 'Add to Liked Songs'} arrow>
                   <button
-                    onClick={toggleLike}
+                    onClick={handleLikeToggle}
+                    disabled={loading}
                     aria-label="Toggle like"
                     className={`w-7 h-7 flex items-center justify-center p-1.5 rounded-full transition-colors ${
-                      isLiked
-                        ? "bg-[#CD7F32] text-white"
-                        : "bg-[#242424] text-[#F5F5F5] hover:bg-[#CD7F32] hover:text-white"
-                    }`}
+                      isLiked(currentTrack?.id, 'spotify') 
+                        ? 'bg-[#CD7F32] text-[#121212]' 
+                        : 'bg-[#242424] text-[#F5F5F5] hover:bg-[#CD7F32] hover:text-[#121212]'
+                    } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    {isLiked ? (
-                      <FavoriteIcon fontSize="small" />
-                    ) : (
-                      <FavoriteBorderIcon fontSize="small" />
-                    )}
+                    {isLiked(currentTrack?.id, 'spotify') ? <FavoriteIcon fontSize="small" /> : <FavoriteBorderIcon fontSize="small" />}
                   </button>
                 </Tooltip>
                 <Tooltip title="Share" arrow>
@@ -244,6 +218,14 @@ const NowPlayingSidebar = ({
           </div>
         </div>
       </div>
+
+      {/* Add to Playlist Modal */}
+      <AddToPlaylistModal
+        open={showPlaylistModal}
+        onClose={() => setShowPlaylistModal(false)}
+        song={currentTrack}
+        userId={userId}
+      />
     </div>
   );
 };

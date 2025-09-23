@@ -26,9 +26,23 @@ try {
 // Register
 router.post("/register", async (req, res) => {
   try {
+    // Check if registration is allowed by making internal API call
+    try {
+      const settingsResponse = await fetch('http://localhost:5000/api/registration-status');
+      const settings = await settingsResponse.json();
+      
+      if (!settings.allowRegistration) {
+        return res.status(403).json({ 
+          error: "Registration is currently disabled by the administrator" 
+        });
+      }
+    } catch (settingsError) {
+      console.log('Settings check failed, allowing registration by default');
+    }
+    
     const user = new User(req.body);
     await user.save();
-    res.status(201).json({ message: "User registered" });
+    res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -101,6 +115,10 @@ router.post("/reset-password", async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }});
+
+  // }
+// });
+
 
 router.post("/dashboard", async (req, res) => {
   try {

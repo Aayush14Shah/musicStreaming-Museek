@@ -9,6 +9,7 @@ const UserSchema = new mongoose.Schema(
     favoriteArtists: [{ type: String }],
     languages: [{ type: String }],
     is_active: { type: Number, default: 1 }, // 1 = active, 0 = inactive
+    listeningHours: { type: Number, default: 0 }, // Total listening hours
   },
   { timestamps: true }
 );
