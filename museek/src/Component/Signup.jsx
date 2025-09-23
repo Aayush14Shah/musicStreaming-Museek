@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../Images/LogoFinalDarkModeFrameResized.png';
@@ -22,8 +22,28 @@ const Signup = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [otpError, setOtpError] = useState('');
   const [otpVerified, setOtpVerified] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start with loading true
+  const [registrationDisabled, setRegistrationDisabled] = useState(false);
   const otpRefs = useRef([]);
+
+  // Check registration status on component mount
+  useEffect(() => {
+    const checkRegistrationStatus = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/registration-status');
+        setRegistrationDisabled(!response.data.allowRegistration);
+        console.log('📋 Registration status:', response.data.allowRegistration ? 'Enabled' : 'Disabled');
+      } catch (error) {
+        console.error('❌ Error checking registration status:', error);
+        // If API fails, allow registration by default
+        setRegistrationDisabled(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkRegistrationStatus();
+  }, []);
 
   // Password validation function
   const validatePassword = (password) => {
