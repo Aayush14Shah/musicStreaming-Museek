@@ -117,7 +117,7 @@ const ManageAdmins = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-[#F5F5F5]/70">{admin.email}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-[#F5F5F5]/70">{admin.role || "Admin"}</td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            {admin.is_active ? (
+                            {admin.is_active === 1 ? (
                               <span className="px-3 py-1 text-xs font-medium rounded-full bg-green-500/20 text-green-400">
                                 Active
                               </span>

@@ -342,7 +342,692 @@ app.get("/api/custom-songs/stats/overview", async (req, res) => {
   }
 });
 
-// ==================== END CUSTOM SONGS API ====================
+// ==================== USER-FACING CUSTOM SONGS API ====================
+
+// GET all active custom songs for users (public endpoint)
+app.get("/api/songs/custom", async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+    const search = req.query.search || '';
+    const genre = req.query.genre || '';
+
+    // Build filter - only show active songs to users
+    let filter = { is_active: 1, apiStatus: 'Published' };
+
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { artist: { $regex: search, $options: 'i' } },
+        { album: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    if (genre) {
+      filter.genre = { $regex: genre, $options: 'i' };
+    }
+
+    const songs = await CustomSong.find(filter)
+      .select('title artist album genre releaseDate duration description coverImagePath audioFilePath playCount')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await CustomSong.countDocuments(filter);
+
+    // Add full URLs for file access
+    const songsWithUrls = songs.map(song => ({
+      ...song.toObject(),
+      audioUrl: `${req.protocol}://${req.get('host')}/api/songs/custom/stream/${song._id}`,
+      coverUrl: song.coverImagePath ? `${req.protocol}://${req.get('host')}/api/songs/custom/cover/${song._id}` : null
+    }));
+
+    res.json({
+      songs: songsWithUrls,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching custom songs for users:', error);
+    res.status(500).json({ error: 'Failed to fetch songs' });
+  }
+});
+
+// GET single custom song for users
+app.get("/api/songs/custom/:id", async (req, res) => {
+  try {
+    const song = await CustomSong.findOne({ 
+      _id: req.params.id, 
+      is_active: 1, 
+      apiStatus: 'Published' 
+    }).select('title artist album genre releaseDate duration description coverImagePath audioFilePath playCount');
+
+    if (!song) {
+      return res.status(404).json({ error: 'Song not found' });
+    }
+
+    // Add full URLs
+    const songWithUrls = {
+      ...song.toObject(),
+      audioUrl: `${req.protocol}://${req.get('host')}/api/songs/custom/stream/${song._id}`,
+      coverUrl: song.coverImagePath ? `${req.protocol}://${req.get('host')}/api/songs/custom/cover/${song._id}` : null
+    };
+
+    res.json(songWithUrls);
+  } catch (error) {
+    console.error('Error fetching custom song:', error);
+    res.status(500).json({ error: 'Failed to fetch song' });
+  }
+});
+
+// Stream audio file for users
+app.get("/api/songs/custom/stream/:id", async (req, res) => {
+  try {
+    const song = await CustomSong.findOne({ 
+      _id: req.params.id, 
+      is_active: 1, 
+      apiStatus: 'Published' 
+    });
+
+    if (!song || !song.audioFilePath) {
+      return res.status(404).json({ error: 'Audio file not found' });
+    }
+
+    // Handle both relative and absolute paths
+    const audioPath = path.isAbsolute(song.audioFilePath) 
+      ? song.audioFilePath 
+      : path.join(__dirname, song.audioFilePath);
+    
+    console.log('🎵 Streaming request for:', {
+      songId: req.params.id,
+      title: song.title,
+      audioPath: audioPath,
+      fileExists: fs.existsSync(audioPath)
+    });
+    
+    // Check if file exists
+    if (!fs.existsSync(audioPath)) {
+      console.error('❌ Audio file not found:', audioPath);
+      return res.status(404).json({ error: 'Audio file not found on server' });
+    }
+
+    // Get file stats for streaming
+    const stat = fs.statSync(audioPath);
+    const fileSize = stat.size;
+    const range = req.headers.range;
+
+    // Determine content type based on file extension
+    const ext = path.extname(audioPath).toLowerCase();
+    let contentType = 'audio/mpeg';
+    if (ext === '.wav') contentType = 'audio/wav';
+    if (ext === '.flac') contentType = 'audio/flac';
+    if (ext === '.ogg') contentType = 'audio/ogg';
+    if (ext === '.m4a') contentType = 'audio/mp4';
+
+    if (range) {
+      // Handle range requests for audio streaming
+      const parts = range.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+      const chunksize = (end - start) + 1;
+      const file = fs.createReadStream(audioPath, { start, end });
+      const head = {
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunksize,
+        'Content-Type': contentType,
+        'Cache-Control': 'public, max-age=3600',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Range'
+      };
+      res.writeHead(206, head);
+      file.pipe(res);
+    } else {
+      // Send entire file
+      const head = {
+        'Content-Length': fileSize,
+        'Content-Type': contentType,
+        'Accept-Ranges': 'bytes',
+        'Cache-Control': 'public, max-age=3600',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Range'
+      };
+      res.writeHead(200, head);
+      fs.createReadStream(audioPath).pipe(res);
+    }
+
+    // Increment play count
+    await CustomSong.findByIdAndUpdate(req.params.id, { 
+      $inc: { playCount: 1 },
+      lastPlayed: new Date()
+    });
+
+  } catch (error) {
+    console.error('Error streaming audio:', error);
+    res.status(500).json({ error: 'Failed to stream audio' });
+  }
+});
+
+// Get cover image for users
+app.get("/api/songs/custom/cover/:id", async (req, res) => {
+  try {
+    const song = await CustomSong.findOne({ 
+      _id: req.params.id, 
+      is_active: 1, 
+      apiStatus: 'Published' 
+    });
+
+    if (!song || !song.coverImagePath) {
+      return res.status(404).json({ error: 'Cover image not found' });
+    }
+
+    // Handle both relative and absolute paths
+    const imagePath = path.isAbsolute(song.coverImagePath) 
+      ? song.coverImagePath 
+      : path.join(__dirname, song.coverImagePath);
+    
+    // Check if file exists
+    if (!fs.existsSync(imagePath)) {
+      return res.status(404).json({ error: 'Cover image not found on server' });
+    }
+
+    // Set appropriate content type based on file extension
+    const ext = path.extname(imagePath).toLowerCase();
+    let contentType = 'image/jpeg';
+    if (ext === '.png') contentType = 'image/png';
+    if (ext === '.webp') contentType = 'image/webp';
+
+    res.set({
+      'Content-Type': contentType,
+      'Cache-Control': 'public, max-age=86400' // Cache for 24 hours
+    });
+
+    fs.createReadStream(imagePath).pipe(res);
+  } catch (error) {
+    console.error('Error serving cover image:', error);
+    res.status(500).json({ error: 'Failed to serve cover image' });
+  }
+});
+
+// Get custom songs by genre for users
+app.get("/api/songs/custom/genre/:genre", async (req, res) => {
+  try {
+    const { genre } = req.params;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const songs = await CustomSong.find({ 
+      genre: { $regex: genre, $options: 'i' },
+      is_active: 1, 
+      apiStatus: 'Published' 
+    })
+    .select('title artist album genre coverImagePath')
+    .limit(limit)
+    .sort({ playCount: -1 });
+
+    const songsWithUrls = songs.map(song => ({
+      ...song.toObject(),
+      audioUrl: `${req.protocol}://${req.get('host')}/api/songs/custom/stream/${song._id}`,
+      coverUrl: song.coverImagePath ? `${req.protocol}://${req.get('host')}/api/songs/custom/cover/${song._id}` : null
+    }));
+
+    res.json(songsWithUrls);
+  } catch (error) {
+    console.error('Error fetching songs by genre:', error);
+    res.status(500).json({ error: 'Failed to fetch songs by genre' });
+  }
+});
+
+// Get trending custom songs for users
+app.get("/api/songs/custom/trending", async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+
+    const songs = await CustomSong.find({ 
+      is_active: 1, 
+      apiStatus: 'Published' 
+    })
+    .select('title artist album genre coverImagePath playCount')
+    .sort({ playCount: -1, createdAt: -1 })
+    .limit(limit);
+
+    const songsWithUrls = songs.map(song => ({
+      ...song.toObject(),
+      audioUrl: `${req.protocol}://${req.get('host')}/api/songs/custom/stream/${song._id}`,
+      coverUrl: song.coverImagePath ? `${req.protocol}://${req.get('host')}/api/songs/custom/cover/${song._id}` : null
+    }));
+
+    res.json(songsWithUrls);
+  } catch (error) {
+    console.error('Error fetching trending songs:', error);
+    res.status(500).json({ error: 'Failed to fetch trending songs' });
+  }
+});
+
+// Debug endpoint to check if songs exist
+app.get("/api/debug/custom-songs", async (req, res) => {
+  try {
+    const allSongs = await CustomSong.find({});
+    const activeSongs = await CustomSong.find({ is_active: 1 });
+    const publishedSongs = await CustomSong.find({ is_active: 1, apiStatus: 'Published' });
+    
+    console.log('📊 Custom Songs Debug:', {
+      total: allSongs.length,
+      active: activeSongs.length,
+      published: publishedSongs.length
+    });
+
+    if (allSongs.length > 0) {
+      console.log('📝 Sample song:', {
+        title: allSongs[0].title,
+        audioFilePath: allSongs[0].audioFilePath,
+        is_active: allSongs[0].is_active,
+        apiStatus: allSongs[0].apiStatus
+      });
+    }
+
+    res.json({
+      total: allSongs.length,
+      active: activeSongs.length,
+      published: publishedSongs.length,
+      songs: publishedSongs.slice(0, 3).map(song => ({
+        id: song._id,
+        title: song.title,
+        artist: song.artist,
+        audioFilePath: song.audioFilePath,
+        is_active: song.is_active,
+        apiStatus: song.apiStatus,
+        audioUrl: `${req.protocol}://${req.get('host')}/api/songs/custom/stream/${song._id}`,
+        coverUrl: song.coverImagePath ? `${req.protocol}://${req.get('host')}/api/songs/custom/cover/${song._id}` : null
+      }))
+    });
+  } catch (error) {
+    console.error('Error in debug endpoint:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== ANALYTICS API ENDPOINTS ====================
+
+// Get comprehensive analytics data for admin dashboard
+app.get("/api/analytics/overview", async (req, res) => {
+  try {
+    // User Analytics
+    const totalUsers = await User.countDocuments({});
+    const activeUsers = await User.countDocuments({ is_active: 1 });
+    const inactiveUsers = await User.countDocuments({ is_active: 0 });
+    
+    // User registration trends (last 6 months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    
+    const userTrends = await User.aggregate([
+      { $match: { createdAt: { $gte: sixMonthsAgo } } },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]);
+
+    // Custom Songs Analytics - More inclusive queries
+    const totalCustomSongs = await CustomSong.countDocuments({});
+    const publishedSongs = await CustomSong.countDocuments({ apiStatus: 'Published' });
+    const draftSongs = await CustomSong.countDocuments({ apiStatus: 'Draft' });
+    const errorSongs = await CustomSong.countDocuments({ apiStatus: 'Error' });
+    
+    // Most popular custom songs - include all songs, not just active ones
+    const popularSongs = await CustomSong.find({})
+      .sort({ playCount: -1 })
+      .limit(10)
+      .select('title artist playCount apiStatus is_active');
+
+    // Songs upload trends (last 6 months)
+    const songUploadTrends = await CustomSong.aggregate([
+      { $match: { createdAt: { $gte: sixMonthsAgo } } },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]);
+
+    // Admin Activity Analytics - include all songs
+    const songsPerAdmin = await CustomSong.aggregate([
+      { $match: {} }, // Include all songs
+      {
+        $group: {
+          _id: "$uploadedBy",
+          songCount: { $sum: 1 }
+        }
+      },
+      { $sort: { songCount: -1 } },
+      { $limit: 10 }
+    ]);
+
+    // Genre distribution - include all songs
+    const genreDistribution = await CustomSong.aggregate([
+      { $match: {} }, // Include all songs
+      {
+        $group: {
+          _id: "$genre",
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { count: -1 } },
+      { $limit: 8 }
+    ]);
+
+    // Recent activity (last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    const recentUploads = await CustomSong.countDocuments({ 
+      createdAt: { $gte: sevenDaysAgo }
+    });
+    
+    const recentUsers = await User.countDocuments({ 
+      createdAt: { $gte: sevenDaysAgo } 
+    });
+
+    // Storage analytics
+    const storageStats = await CustomSong.aggregate([
+      { $match: { is_active: 1 } },
+      {
+        $group: {
+          _id: null,
+          totalSongs: { $sum: 1 },
+          // Estimate average file size (you can make this more accurate by storing actual file sizes)
+          estimatedStorage: { $sum: 1 } // This will be multiplied by average file size in frontend
+        }
+      }
+    ]);
+
+    res.json({
+      users: {
+        total: totalUsers,
+        active: activeUsers,
+        inactive: inactiveUsers,
+        trends: userTrends
+      },
+      customSongs: {
+        total: totalCustomSongs,
+        published: publishedSongs,
+        draft: draftSongs,
+        error: errorSongs,
+        popular: popularSongs,
+        uploadTrends: songUploadTrends
+      },
+      admins: {
+        songsPerAdmin: songsPerAdmin
+      },
+      genres: genreDistribution,
+      recentActivity: {
+        newSongs: recentUploads,
+        newUsers: recentUsers
+      },
+      storage: {
+        totalSongs: storageStats[0]?.totalSongs || 0,
+        estimatedSizeMB: (storageStats[0]?.totalSongs || 0) * 5 // Assuming 5MB average per song
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching analytics:', error);
+    res.status(500).json({ error: 'Failed to fetch analytics data' });
+  }
+});
+
+// Get detailed user analytics
+app.get("/api/analytics/users", async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments({});
+    const activeUsers = await User.countDocuments({ is_active: 1 });
+    const inactiveUsers = await User.countDocuments({ is_active: 0 });
+    
+    // Daily user registrations (last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const dailyRegistrations = await User.aggregate([
+      { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+            day: { $dayOfMonth: "$createdAt" }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } }
+    ]);
+
+    res.json({
+      summary: {
+        total: totalUsers,
+        active: activeUsers,
+        inactive: inactiveUsers
+      },
+      dailyRegistrations
+    });
+  } catch (error) {
+    console.error('Error fetching user analytics:', error);
+    res.status(500).json({ error: 'Failed to fetch user analytics' });
+  }
+});
+
+// Get detailed custom songs analytics
+app.get("/api/analytics/songs", async (req, res) => {
+  try {
+    const totalSongs = await CustomSong.countDocuments({});
+    const activeSongs = await CustomSong.countDocuments({ is_active: 1 });
+    const publishedSongs = await CustomSong.countDocuments({ apiStatus: 'Published', is_active: 1 });
+    const draftSongs = await CustomSong.countDocuments({ apiStatus: 'Draft', is_active: 1 });
+    
+    // Top 10 most played songs
+    const topSongs = await CustomSong.find({ is_active: 1 })
+      .sort({ playCount: -1 })
+      .limit(10)
+      .select('title artist playCount genre');
+
+    // Genre distribution
+    const genres = await CustomSong.aggregate([
+      { $match: { is_active: 1 } },
+      {
+        $group: {
+          _id: "$genre",
+          count: { $sum: 1 },
+          totalPlays: { $sum: "$playCount" }
+        }
+      },
+      { $sort: { count: -1 } }
+    ]);
+
+    // Upload trends (last 3 months)
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+    
+    const uploadTrends = await CustomSong.aggregate([
+      { $match: { createdAt: { $gte: threeMonthsAgo } } },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]);
+
+    res.json({
+      summary: {
+        total: totalSongs,
+        active: activeSongs,
+        published: publishedSongs,
+        draft: draftSongs
+      },
+      topSongs,
+      genres,
+      uploadTrends
+    });
+  } catch (error) {
+    console.error('Error fetching songs analytics:', error);
+    res.status(500).json({ error: 'Failed to fetch songs analytics' });
+  }
+});
+
+// ==================== SETTINGS API ====================
+
+// In-memory settings store (in production, use database)
+let appSettings = {
+  maxFileSize: 50,
+  allowedFormats: ['MP3', 'WAV', 'FLAC'],
+  allowRegistration: true,
+  maxPlaylistsPerUser: 50,
+  sessionTimeout: 24,
+  enableAuditLogs: true
+};
+
+// Audit logs storage (in production, use database)
+let auditLogs = [];
+
+// Initialize with some sample logs for demonstration
+const initializeSampleLogs = () => {
+  const sampleLogs = [
+    {
+      id: Date.now().toString(),
+      timestamp: new Date().toISOString(),
+      adminId: 'admin_001',
+      action: 'SERVER_STARTED',
+      details: 'Museek server started successfully',
+      ip: 'localhost'
+    },
+    {
+      id: (Date.now() - 60000).toString(),
+      timestamp: new Date(Date.now() - 60000).toISOString(),
+      adminId: 'admin_001',
+      action: 'SETTINGS_INITIALIZED',
+      details: 'Default settings loaded',
+      ip: 'localhost'
+    }
+  ];
+  
+  auditLogs.push(...sampleLogs);
+};
+
+// Initialize sample logs
+initializeSampleLogs();
+
+// Get current settings
+app.get("/api/settings", (req, res) => {
+  res.json(appSettings);
+});
+
+// Helper function to log admin actions
+const logAuditAction = (action, details, adminId = 'system') => {
+  if (appSettings.enableAuditLogs) {
+    const logEntry = {
+      id: Date.now().toString(),
+      timestamp: new Date().toISOString(),
+      adminId,
+      action,
+      details,
+      ip: 'localhost' // In production, get from req.ip
+    };
+    
+    auditLogs.unshift(logEntry); // Add to beginning
+    
+    // Keep only last 1000 logs (prevent memory overflow)
+    if (auditLogs.length > 1000) {
+      auditLogs = auditLogs.slice(0, 1000);
+    }
+    
+    console.log('📋 Audit Log:', action, details);
+  }
+};
+
+// Update settings
+app.post("/api/settings", (req, res) => {
+  try {
+    const oldSettings = { ...appSettings };
+    appSettings = { ...appSettings, ...req.body };
+    
+    // Log the settings change
+    const changes = [];
+    Object.keys(req.body).forEach(key => {
+      if (JSON.stringify(oldSettings[key]) !== JSON.stringify(req.body[key])) {
+        changes.push(`${key}: ${JSON.stringify(oldSettings[key])} → ${JSON.stringify(req.body[key])}`);
+      }
+    });
+    
+    if (changes.length > 0) {
+      logAuditAction('SETTINGS_UPDATED', changes.join(', '));
+    }
+    
+    console.log('⚙️ Settings updated:', appSettings);
+    
+    // Apply file upload settings immediately
+    if (req.body.maxFileSize) {
+      console.log(`📁 Max file size updated to: ${req.body.maxFileSize}MB`);
+    }
+    if (req.body.allowedFormats) {
+      console.log(`🎵 Allowed formats updated to: ${req.body.allowedFormats.join(', ')}`);
+    }
+    
+    res.json({ success: true, settings: appSettings });
+  } catch (error) {
+    console.error('Error updating settings:', error);
+    res.status(500).json({ error: 'Failed to update settings' });
+  }
+});
+
+// Check if registration is allowed (used by signup endpoint)
+app.get("/api/registration-status", (req, res) => {
+  res.json({ 
+    allowRegistration: appSettings.allowRegistration
+  });
+});
+
+// Get current file upload settings (for validation)
+app.get("/api/upload-settings", (req, res) => {
+  res.json({
+    maxFileSize: appSettings.maxFileSize,
+    allowedFormats: appSettings.allowedFormats
+  });
+});
+
+// Get audit logs
+app.get("/api/audit-logs", (req, res) => {
+  const limit = parseInt(req.query.limit) || 50;
+  const offset = parseInt(req.query.offset) || 0;
+  
+  const paginatedLogs = auditLogs.slice(offset, offset + limit);
+  
+  res.json({
+    logs: paginatedLogs,
+    total: auditLogs.length,
+    hasMore: offset + limit < auditLogs.length
+  });
+});
+
+// ==================== END SETTINGS API ====================
 
 /**
  * getAppToken()

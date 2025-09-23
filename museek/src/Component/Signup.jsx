@@ -1,5 +1,4 @@
-import React, { useState, useRef } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../Images/LogoFinalDarkModeFrameResized.png';
 import loginSideImage from '../Images/login_side_image.jpg';
@@ -17,13 +16,26 @@ const Signup = () => {
   const [passwordWarnings, setPasswordWarnings] = useState([]);
   const [emailWarning, setEmailWarning] = useState("");
   const [showWarnings, setShowWarnings] = useState(false);
-  // OTP states
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [otpError, setOtpError] = useState('');
-  const [otpVerified, setOtpVerified] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const otpRefs = useRef([]);
+  const [registrationDisabled, setRegistrationDisabled] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Check if registration is allowed
+  useEffect(() => {
+    const checkRegistrationStatus = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/registration-status');
+        const data = await response.json();
+        setRegistrationDisabled(!data.allowRegistration);
+      } catch (error) {
+        console.log('Registration status check failed, allowing registration');
+        setRegistrationDisabled(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    checkRegistrationStatus();
+  }, []);
 
   // Password validation function
   const validatePassword = (password) => {
@@ -136,6 +148,45 @@ const Signup = () => {
   };
   
   const handleLogin = () => navigate('/Login');
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="w-screen h-screen bg-[#121212] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#CD7F32] mx-auto mb-4"></div>
+          <p className="text-white">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show registration disabled message
+  if (registrationDisabled) {
+    return (
+      <div className="w-screen h-screen bg-[#121212] flex items-center justify-center">
+        <div className="max-w-md mx-auto text-center p-8">
+          <div className="mb-6">
+            <img src={Logo} alt="Brand Logo" className="w-32 mx-auto mb-4" />
+          </div>
+          <div className="bg-[#181818] rounded-lg p-8 border border-red-500/30">
+            <div className="text-red-500 text-6xl mb-4">🚫</div>
+            <h2 className="text-2xl font-bold text-white mb-4">Registration Disabled</h2>
+            <p className="text-gray-300 mb-6">
+              New user registration is currently disabled by the administrator. 
+              Please contact support or try again later.
+            </p>
+            <button
+              onClick={handleLogin}
+              className="w-full py-3 bg-[#CD7F32] hover:bg-[#b46f2a] text-white rounded-lg font-semibold transition-colors"
+            >
+              Go to Login
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-screen h-screen bg-[#121212] flex items-center justify-center overflow-hidden">
