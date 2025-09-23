@@ -302,7 +302,7 @@ const Home = () => {
         spotifyPreview: item.preview_url
       });
 
-      // Priority order: 1. Spotify preview, 2. Deezer, 3. YouTube, 4. Sample
+      // Priority order: 1. Spotify preview, 2. YouTube, 3. Deezer, 4. Sample
       if (playableTrack.audioUrl) {
         console.log('✅ Using Spotify preview URL:', playableTrack.audioUrl);
         showNotification('Playing Spotify Preview', playableTrack.title, 'success');
@@ -310,54 +310,61 @@ const Home = () => {
         console.log('🎵 No Spotify preview available, trying external sources...');
         
         try {
-          // Try Deezer first (usually faster and more reliable)
-          console.log('🎵 Trying Deezer (5 sec timeout)...');
-          const dzTimeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Deezer timeout')), 5000)
+          // Try YouTube first (was working earlier)
+          console.log('🎵 Trying YouTube (15 sec timeout)...');
+          const ytTimeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('YouTube timeout')), 15000)
           );
 
-          const dzPromise = fetch(`http://localhost:5000/api/deezer/preview?trackName=${encodeURIComponent(playableTrack.title)}&artistName=${encodeURIComponent(playableTrack.artist)}`)
-            .then(res => {
-              if (!res.ok) throw new Error(`Deezer API error: ${res.status}`);
-              return res.json();
+          const ytPromise = fetch(`http://localhost:5000/api/youtube/preview?trackName=${encodeURIComponent(playableTrack.title)}&artistName=${encodeURIComponent(playableTrack.artist)}`)
+            .then(async res => {
+              console.log('🔍 YouTube API response status:', res.status);
+              if (!res.ok) {
+                const errorText = await res.text();
+                console.error('❌ YouTube API error details:', errorText);
+                throw new Error(`YouTube API error: ${res.status} - ${errorText}`);
+              }
+              const data = await res.json();
+              console.log('🔍 YouTube API response:', data);
+              return data;
             });
 
-          const dzResult = await Promise.race([dzPromise, dzTimeoutPromise]);
+          const ytResult = await Promise.race([ytPromise, ytTimeoutPromise]);
 
-          if (dzResult && dzResult.found && dzResult.preview_url) {
-            playableTrack.audioUrl = dzResult.preview_url;
-            console.log('✅ Deezer preview found:', dzResult.title || playableTrack.title);
-            showNotification('Playing Deezer Preview', dzResult.title || playableTrack.title, 'success');
+          if (ytResult && ytResult.found && ytResult.preview_url) {
+            playableTrack.audioUrl = ytResult.preview_url;
+            console.log('✅ YouTube preview found:', ytResult.title || playableTrack.title);
+            showNotification('Playing YouTube Preview', ytResult.title || playableTrack.title, 'success');
           } else {
-            throw new Error('Deezer no preview');
+            throw new Error('YouTube no preview');
           }
-        } catch (deezerError) {
-          console.log('❌ Deezer failed, trying YouTube...', deezerError.message);
+        } catch (youtubeError) {
+          console.log('❌ YouTube failed, trying Deezer...', youtubeError.message);
           
-          // Fallback to YouTube if Deezer fails
+          // Fallback to Deezer if YouTube fails
           try {
-            console.log('🎵 Trying YouTube (5 sec timeout)...');
-            const ytTimeoutPromise = new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('YouTube timeout')), 5000)
+            console.log('🎵 Trying Deezer (8 sec timeout)...');
+            const dzTimeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Deezer timeout')), 8000)
             );
 
-            const ytPromise = fetch(`http://localhost:5000/api/youtube/preview?trackName=${encodeURIComponent(playableTrack.title)}&artistName=${encodeURIComponent(playableTrack.artist)}`)
+            const dzPromise = fetch(`http://localhost:5000/api/deezer/preview?trackName=${encodeURIComponent(playableTrack.title)}&artistName=${encodeURIComponent(playableTrack.artist)}`)
               .then(res => {
-                if (!res.ok) throw new Error(`YouTube API error: ${res.status}`);
+                if (!res.ok) throw new Error(`Deezer API error: ${res.status}`);
                 return res.json();
               });
 
-            const ytResult = await Promise.race([ytPromise, ytTimeoutPromise]);
+            const dzResult = await Promise.race([dzPromise, dzTimeoutPromise]);
 
-            if (ytResult && ytResult.found && ytResult.preview_url) {
-              playableTrack.audioUrl = ytResult.preview_url;
-              console.log('✅ YouTube preview found:', ytResult.title || playableTrack.title);
-              showNotification('Playing YouTube Preview', ytResult.title || playableTrack.title, 'success');
+            if (dzResult && dzResult.found && dzResult.preview_url) {
+              playableTrack.audioUrl = dzResult.preview_url;
+              console.log('✅ Deezer preview found:', dzResult.title || playableTrack.title);
+              showNotification('Playing Deezer Preview', dzResult.title || playableTrack.title, 'success');
             } else {
-              throw new Error('YouTube no preview');
+              throw new Error('Deezer no preview');
             }
-          } catch (youtubeError) {
-            console.log('❌ Both Deezer and YouTube failed:', youtubeError.message);
+          } catch (deezerError) {
+            console.log('❌ Both YouTube and Deezer failed:', deezerError.message);
             console.log('⚠️ Will use sample audio as final fallback');
           }
         }
