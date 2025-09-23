@@ -127,11 +127,11 @@ const NowPlayingSidebar = ({
 
   return (
     <div
-      className={`fixed top-[60px] bottom-16 right-0 bg-transparent text-[#F5F5F5] z-40 transition-transform duration-300 ease-in-out ${
+      className={`fixed top-[60px] bottom-20 right-0 bg-transparent text-[#F5F5F5] z-40 transition-transform duration-300 ease-in-out ${
         isOpen ? "translate-x-0" : "translate-x-full"
       } w-[18rem] md:w-[20rem] lg:w-[22rem]`}
     >
-      <div className="m-1.5 w-full h-[calc(100%-12px)] rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.45)] bg-[#0e0e0e] p-2">
+      <div className="m-1.5 h-[calc(100%-12px)] rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.45)] bg-[#0e0e0e] p-2">
         <div className="w-full h-full rounded-2xl bg-[#181818] overflow-y-auto p-4 group scrollbar-thin scrollbar-thumb-transparent hover:scrollbar-thumb-[#CD7F32] scrollbar-track-transparent scrollbar-thumb-rounded-full">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-base font-semibold line-clamp-1">
