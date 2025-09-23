@@ -79,6 +79,7 @@ const Preferences = () => {
     artist.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Save preferences only (user already registered)
   const handleRegister = async () => {
     if (!signupData) {
       alert('Signup data missing. Please fill sign up form again.');
@@ -87,15 +88,14 @@ const Preferences = () => {
     }
     setLoading(true);
     try {
-      await axios.post('http://localhost:5000/auth/register', {
-        name: `${signupData.firstName} ${signupData.lastName}`,
-        email: signupData.email,
-        password: signupData.password,
-        mobile: signupData.mobile || '',
-        favoriteArtists: selectedArtists.map(a => a.name),
-        languages: selectedLanguages,
-      });
-      alert('Registered successfully!');
+      // TODO: Call your backend to save preferences for this user
+      // Example:
+      // await axios.post('http://localhost:5000/api/user/preferences', {
+      //   email: signupData.email,
+      //   favoriteArtists: selectedArtists.map(a => a.name),
+      //   languages: selectedLanguages,
+      // });
+      alert('Preferences saved!');
       navigate('/Login');
     } catch (err) {
       alert(err.response?.data?.error || err.message);

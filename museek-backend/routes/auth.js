@@ -6,20 +6,10 @@ import Admin from "../models/admin.js";
 const router = express.Router();
 const otpStore = new Map();
 
-// Helper: generate 6-digit OTP
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// Debug: print email credentials
-// console.log("[Museek DEBUG] EMAIL_USER:", process.env.EMAIL_USER);
-// console.log("[Museek DEBUG] EMAIL_PASS:", process.env.EMAIL_PASS ? '[HIDDEN]' : '[MISSING]');
-
-// if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-//   console.error("[Museek ERROR] EMAIL_USER or EMAIL_PASS is missing from environment variables. Nodemailer will not work!");
-// }
-
-// Helper: create nodemailer transporter with error handling
 let transporter;
 try {
   transporter = nodemailer.createTransport({
@@ -124,7 +114,6 @@ router.post("/reset-password", async (req, res) => {
     res.json({ message: "Password reset successful" });
   } catch (err) {
     res.status(500).json({ message: err.message });
-
   }});
 
   // }
@@ -140,5 +129,32 @@ router.post("/dashboard", async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
+
+// Update admin name by ID
+router.patch("/:id", async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ error: "Name is required" });
+    }
+
+    const updatedAdmin = await Admin.findByIdAndUpdate(
+      req.params.id,
+      { name },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedAdmin) {
+      return res.status(404).json({ error: "Admin not found" });
+    }
+
+    res.json(updatedAdmin);
+  } catch (err) {
+    console.error("Error updating admin:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 
 export default router;

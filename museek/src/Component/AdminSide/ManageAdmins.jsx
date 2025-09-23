@@ -9,7 +9,6 @@ import AdminDetailsPopup from "./AdminDetailsPopup"; // similar to UserDetailsPo
 import EditAdminPopup from "./EditAdminPopup"; // optional, if edit required
 import ConfirmPopup from "./ConfirmPop-up";
 import AddAdminPopup from "./AddAdminPopup";
-import AddAdminPopup2 from "./AddAdminPopup2";
 import ConfirmAdminPopup from "./ConfirmAdminPop-up";
 
 const ManageAdmins = () => {
@@ -110,7 +109,7 @@ const ManageAdmins = () => {
                       {admins.map((admin, index) => (
                         <tr
                           key={admin._id}
-                          className="hover:bg-[#CD7F32]/5 transition cursor-pointer"
+                          className={`hover:bg-[#CD7F32]/5 transition cursor-pointer ${admin.is_active === 0 ? 'opacity-60' : ''}`}
                           onClick={() => setSelectedAdmin(admin)}
                         >
                           <td className="px-6 py-4 whitespace-nowrap font-medium">{index + 1}</td>
@@ -187,7 +186,7 @@ const ManageAdmins = () => {
       )}
 
       {showAddAdmin && (
-        <AddAdminPopup2
+        <AddAdminPopup
           showPopup={showAddAdmin}
           setShowPopup={setShowAddAdmin}
         />

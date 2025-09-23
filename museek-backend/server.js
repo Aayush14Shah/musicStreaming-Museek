@@ -2632,6 +2632,90 @@ app.get("/api/debug/track-previews", async (req, res) => {
   }
 });
 
+// GET artist details (photo, followers, description/genres)
+app.get("/api/artist/:id", async (req, res) => {
+  try {
+    const { access_token } = await getAppToken();
+    const artistId = req.params.id;
+    const { data } = await axios.get(`https://api.spotify.com/v1/artists/${artistId}`, {
+      headers: { Authorization: `Bearer ${access_token}` }
+    });
+    return res.json({
+      id: data.id,
+      name: data.name,
+      photo: data.images?.[0]?.url || null,
+      listeners: data.followers?.total || 0,
+      genres: data.genres || []
+    });
+  } catch (error) {
+    console.error("Error /api/artist/:id", error?.response?.data || error.message);
+    res.status(500).json({ error: "Failed to fetch artist details" });
+  }
+});
+
+app.get("/api/artist/search", async (req, res) => {
+  try {
+    const name = (req.query.name || "").trim();
+    if (!name) return res.status(400).json({ error: "name query required" });
+
+    const { access_token } = await getAppToken();
+    const { data } = await axios.get("https://api.spotify.com/v1/search", {
+      headers: { Authorization: `Bearer ${access_token}` },
+      params: { q: name, type: "artist", limit: 1 }
+    });
+
+    const artist = data.artists?.items?.[0] || null;
+    if (!artist) return res.json({ found: false });
+
+    return res.json({
+      found: true,
+      id: artist.id,
+      name: artist.name,
+      photo: artist.images?.[0]?.url || null,
+      listeners: artist.followers?.total || 0,
+      genres: artist.genres || []
+    });
+  } catch (error) {
+    console.error("Error /api/artist/search", error?.response?.data || error.message);
+    res.status(500).json({ error: "Failed to search artist" });
+  }
+});
+
+app.get("/api/track/search", async (req, res) => {
+  try {
+    const title = (req.query.title || "").trim();
+    if (!title) return res.status(400).json({ error: "title query required" });
+
+    const artist = (req.query.artist || "").trim();
+    // Build spotify search query. Use exact phrase qualifiers where possible.
+    let q = `track:"${title}"`;
+    if (artist) q += ` artist:"${artist}"`;
+
+    const { access_token } = await getAppToken();
+    const { data } = await axios.get("https://api.spotify.com/v1/search", {
+      headers: { Authorization: `Bearer ${access_token}` },
+      params: { q, type: "track", limit: 1, market: "US" }
+    });
+
+    const track = data.tracks?.items?.[0] || null;
+    if (!track) return res.json({ found: false });
+
+    return res.json({
+      found: true,
+      id: track.id,
+      name: track.name,
+      artists: track.artists,
+      album: track.album?.name,
+      image: track.album?.images?.[0]?.url || null,
+      preview_url: track.preview_url || null
+    });
+  } catch (error) {
+    console.error("Error /api/track/search", error?.response?.data || error.message);
+    res.status(500).json({ error: "Failed to search track" });
+  }
+});
+
+
 // PATCH user avatar
 app.patch("/api/user/:id/avatar", async (req, res) => {
   try {
@@ -2746,7 +2830,6 @@ app.get("/api/admins", async (req, res) => {
   }
 });
 
-// PATCH user by id (for editing name or deactivating)
 app.patch("/api/admins/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -2759,6 +2842,28 @@ app.patch("/api/admins/:id", async (req, res) => {
     res.json(updatedUser);
   } catch (err) {
     res.status(500).json({ error: "Failed to update user" });
+  }
+});
+
+app.patch("/api/admins/:id", async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name) return res.status(400).json({ error: "Name is required" });
+
+    const updatedAdmin = await Admin.findByIdAndUpdate(
+      req.params.id,
+      { name },
+      { new: true } // return updated document
+    );
+
+    if (!updatedAdmin) {
+      return res.status(404).json({ error: "Admin not found" });
+    }
+
+    res.json(updatedAdmin);
+  } catch (err) {
+    console.error("Error updating admin:", err);
+    res.status(500).json({ error: "Server error" });
   }
 });
 

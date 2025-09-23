@@ -169,7 +169,6 @@ const Login = () => {
         </div>
       </div>
 
-      {/* ✅ Stunning Success Popup */}
       {showPopup && (
         <div className="absolute inset-0 flex items-center justify-center z-50">
           {/* Blurred background overlay */}
@@ -180,7 +179,7 @@ const Login = () => {
             <div className="flex justify-center mb-6">
               <div className="bg-green-500/20 rounded-full p-4">
                 <CheckCircleIcon style={{ fontSize: "3rem" }} className="text-green-400" />
-              </div>
+              </div>  
             </div>
             <h1 className="text-2xl font-bold text-[#F5F5F5] mb-2">Login Successful!</h1>
             <p className="text-gray-300 text-lg mb-6">{randomLine}</p>
