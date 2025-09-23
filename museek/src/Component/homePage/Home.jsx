@@ -759,7 +759,7 @@ const Home = () => {
     >
       <Navbar />
       <LeftSidebar onLikedSongsClick={handleLikedSongsClick} onPlaylistClick={handleUserPlaylistClick} />
-      <div className={`layout-container flex h-full grow flex-col min-h-screen w-full transition-all duration-300 ease-in-out pt-[60px] pb-16 md:pb-20 md:pl-[16.5rem] lg:pl-[18rem] ${isPlaying ? 'md:pr-[20.5rem] lg:pr-[22.5rem]' : 'pr-0'}`}>
+      <div className={`layout-container flex h-full grow flex-col min-h-screen w-full transition-all duration-300 ease-in-out pt-[60px] pb-16 md:pb-20 md:pl-[16.5rem] lg:pl-[18rem] ${isSidebarVisible ? 'md:pr-[20.5rem] lg:pr-[22.5rem]' : 'pr-0'}`}>
         <div className="m-1.5 md:mx-2 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.45)] bg-[#0e0e0e] p-2">
           <div className="rounded-2xl bg-[#181818] p-4 md:p-6">
             {/* CONDITIONAL RENDER */}
@@ -820,18 +820,17 @@ const Home = () => {
         </div>
       </div>
       {/* Spotify Music Player */}
-      <MusicPlayer currentTrack={currentTrack} isPlaying={isPlaying} onTogglePlay={() => setIsPlaying(prev => !prev)} />
-      <NowPlayingSidebar currentTrack={currentTrack} onClose={handleCloseSidebar} isOpen={isPlaying} />
-      
-      {/* Custom Songs Audio Player */}
-      {currentCustomSong && (
-        <CustomAudioPlayer 
-          currentSong={currentCustomSong}
-          isPlaying={isCustomSongPlaying}
-          onPlayPause={handleCustomSongPlay}
-        />
-      )}
-
+      <MusicPlayer
+        currentTrack={currentTrack}
+        isPlaying={isPlaying}
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+      />
+      <NowPlayingSidebar
+        currentTrack={currentTrack}
+        onClose={() => setIsSidebarVisible(false)}
+        isOpen={isSidebarVisible}
+      />
       {!isSidebarVisible && (
         <button
           onClick={() => setIsSidebarVisible(true)}
