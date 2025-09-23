@@ -9,7 +9,6 @@ import AdminDetailsPopup from "./AdminDetailsPopup"; // similar to UserDetailsPo
 import EditAdminPopup from "./EditAdminPopup"; // optional, if edit required
 import ConfirmPopup from "./ConfirmPop-up";
 import AddAdminPopup from "./AddAdminPopup";
-import AddAdminPopup2 from "./AddAdminPopup2";
 import ConfirmAdminPopup from "./ConfirmAdminPop-up";
 
 const ManageAdmins = () => {
@@ -187,7 +186,7 @@ const ManageAdmins = () => {
       )}
 
       {showAddAdmin && (
-        <AddAdminPopup2
+        <AddAdminPopup
           showPopup={showAddAdmin}
           setShowPopup={setShowAddAdmin}
         />

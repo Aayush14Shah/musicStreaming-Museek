@@ -14,6 +14,7 @@ import ManageUser from './Component/AdminSide/ManageUser';
 import ManageAdmins from './Component/AdminSide/ManageAdmins';
 import ManageSongs from './Component/AdminSide/ManageSongs';
 import AddSong from './Component/AdminSide/AddSong';
+import PageNotFound from './Component/AdminSide/PageNotFound';
 
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
             <Route path="/admin/manageAdmin" element={<ManageAdmins />} />
             <Route path="/admin/songs" element={<ManageSongs />} />
             <Route path="/admin/songs/add" element={<AddSong />} />
+            <Route path="*" element={<PageNotFound />} />
         </Routes>
     </div>
   ); 
