@@ -63,6 +63,62 @@ router.post("/login", async (req, res) => {
 });
 
 
+// Send OTP for signup or password reset
+router.post("/send-otp", async (req, res) => {
+  const { email, purpose } = req.body;
+  if (!email) return res.status(400).json({ message: "Email required" });
+  
+  try {
+    // If this is for signup, check if registration is allowed
+    if (purpose === 'signup') {
+      try {
+        const settingsResponse = await fetch('http://localhost:5000/api/registration-status');
+        const settings = await settingsResponse.json();
+        
+        if (!settings.allowRegistration) {
+          return res.status(403).json({ 
+            error: "Registration is currently disabled by the administrator" 
+          });
+        }
+      } catch (settingsError) {
+        console.log('Settings check failed, allowing registration by default');
+      }
+      
+      // Check if user already exists for signup
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(409).json({ message: "User already exists with this email" });
+      }
+    } else {
+      // For password reset, check if user exists
+      const user = await User.findOne({ email });
+      if (!user) return res.status(404).json({ message: "User not found" });
+    }
+    
+    // Generate OTP and expiry (5 min)
+    const otp = generateOTP();
+    const otpExpiry = Date.now() + 5 * 60 * 1000;
+    otpStore.set(email, { otp, otpExpiry, purpose });
+
+    // Send OTP email
+    const subject = purpose === 'signup' ? 'Museek Account Verification OTP' : 'Museek Password Reset OTP';
+    const text = purpose === 'signup' 
+      ? `Your OTP for account verification is: ${otp}. It is valid for 5 minutes.`
+      : `Your OTP for password reset is: ${otp}. It is valid for 5 minutes.`;
+      
+    await transporter.sendMail({
+      from: "ankbizzcorp@gmail.com",
+      to: email,
+      subject,
+      text
+    });
+
+    res.json({ message: "OTP sent to email" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Forgot Password - send OTP (real email logic)
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;

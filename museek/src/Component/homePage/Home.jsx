@@ -302,7 +302,7 @@ const Home = () => {
         spotifyPreview: item.preview_url
       });
 
-      // Priority order: 1. Spotify preview, 2. Deezer, 3. YouTube, 4. Sample
+      // Priority order: 1. Spotify preview, 2. YouTube, 3. Deezer, 4. Sample
       if (playableTrack.audioUrl) {
         console.log('✅ Using Spotify preview URL:', playableTrack.audioUrl);
         showNotification('Playing Spotify Preview', playableTrack.title, 'success');
@@ -310,54 +310,61 @@ const Home = () => {
         console.log('🎵 No Spotify preview available, trying external sources...');
         
         try {
-          // Try Deezer first (usually faster and more reliable)
-          console.log('🎵 Trying Deezer (5 sec timeout)...');
-          const dzTimeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Deezer timeout')), 5000)
+          // Try YouTube first (was working earlier)
+          console.log('🎵 Trying YouTube (15 sec timeout)...');
+          const ytTimeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('YouTube timeout')), 15000)
           );
 
-          const dzPromise = fetch(`http://localhost:5000/api/deezer/preview?trackName=${encodeURIComponent(playableTrack.title)}&artistName=${encodeURIComponent(playableTrack.artist)}`)
-            .then(res => {
-              if (!res.ok) throw new Error(`Deezer API error: ${res.status}`);
-              return res.json();
+          const ytPromise = fetch(`http://localhost:5000/api/youtube/preview?trackName=${encodeURIComponent(playableTrack.title)}&artistName=${encodeURIComponent(playableTrack.artist)}`)
+            .then(async res => {
+              console.log('🔍 YouTube API response status:', res.status);
+              if (!res.ok) {
+                const errorText = await res.text();
+                console.error('❌ YouTube API error details:', errorText);
+                throw new Error(`YouTube API error: ${res.status} - ${errorText}`);
+              }
+              const data = await res.json();
+              console.log('🔍 YouTube API response:', data);
+              return data;
             });
 
-          const dzResult = await Promise.race([dzPromise, dzTimeoutPromise]);
+          const ytResult = await Promise.race([ytPromise, ytTimeoutPromise]);
 
-          if (dzResult && dzResult.found && dzResult.preview_url) {
-            playableTrack.audioUrl = dzResult.preview_url;
-            console.log('✅ Deezer preview found:', dzResult.title || playableTrack.title);
-            showNotification('Playing Deezer Preview', dzResult.title || playableTrack.title, 'success');
+          if (ytResult && ytResult.found && ytResult.preview_url) {
+            playableTrack.audioUrl = ytResult.preview_url;
+            console.log('✅ YouTube preview found:', ytResult.title || playableTrack.title);
+            showNotification('Playing YouTube Preview', ytResult.title || playableTrack.title, 'success');
           } else {
-            throw new Error('Deezer no preview');
+            throw new Error('YouTube no preview');
           }
-        } catch (deezerError) {
-          console.log('❌ Deezer failed, trying YouTube...', deezerError.message);
+        } catch (youtubeError) {
+          console.log('❌ YouTube failed, trying Deezer...', youtubeError.message);
           
-          // Fallback to YouTube if Deezer fails
+          // Fallback to Deezer if YouTube fails
           try {
-            console.log('🎵 Trying YouTube (5 sec timeout)...');
-            const ytTimeoutPromise = new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('YouTube timeout')), 5000)
+            console.log('🎵 Trying Deezer (8 sec timeout)...');
+            const dzTimeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Deezer timeout')), 8000)
             );
 
-            const ytPromise = fetch(`http://localhost:5000/api/youtube/preview?trackName=${encodeURIComponent(playableTrack.title)}&artistName=${encodeURIComponent(playableTrack.artist)}`)
+            const dzPromise = fetch(`http://localhost:5000/api/deezer/preview?trackName=${encodeURIComponent(playableTrack.title)}&artistName=${encodeURIComponent(playableTrack.artist)}`)
               .then(res => {
-                if (!res.ok) throw new Error(`YouTube API error: ${res.status}`);
+                if (!res.ok) throw new Error(`Deezer API error: ${res.status}`);
                 return res.json();
               });
 
-            const ytResult = await Promise.race([ytPromise, ytTimeoutPromise]);
+            const dzResult = await Promise.race([dzPromise, dzTimeoutPromise]);
 
-            if (ytResult && ytResult.found && ytResult.preview_url) {
-              playableTrack.audioUrl = ytResult.preview_url;
-              console.log('✅ YouTube preview found:', ytResult.title || playableTrack.title);
-              showNotification('Playing YouTube Preview', ytResult.title || playableTrack.title, 'success');
+            if (dzResult && dzResult.found && dzResult.preview_url) {
+              playableTrack.audioUrl = dzResult.preview_url;
+              console.log('✅ Deezer preview found:', dzResult.title || playableTrack.title);
+              showNotification('Playing Deezer Preview', dzResult.title || playableTrack.title, 'success');
             } else {
-              throw new Error('YouTube no preview');
+              throw new Error('Deezer no preview');
             }
-          } catch (youtubeError) {
-            console.log('❌ Both Deezer and YouTube failed:', youtubeError.message);
+          } catch (deezerError) {
+            console.log('❌ Both YouTube and Deezer failed:', deezerError.message);
             console.log('⚠️ Will use sample audio as final fallback');
           }
         }
@@ -491,7 +498,7 @@ const Home = () => {
     <div className="relative flex size-full min-h-screen flex-col bg-gradient-to-br from-[#121212] via-[#1a1a1a] to-[#0e0e0e] dark group/design-root overflow-x-hidden" style={{ fontFamily: 'Inter, "Noto Sans", sans-serif' }}>
       <Navbar />
       <LeftSidebar onLikedSongsClick={handleLikedSongsClick} onPlaylistClick={handleUserPlaylistClick} />
-      <div className={`layout-container flex h-full grow flex-col min-h-screen w-full transition-all duration-300 ease-in-out pt-[60px] pb-16 md:pb-20 md:pl-[16.5rem] lg:pl-[18rem] ${isPlaying ? 'md:pr-[20.5rem] lg:pr-[22.5rem]' : 'pr-0'}`}>
+      <div className={`layout-container flex h-full grow flex-col min-h-screen w-full transition-all duration-300 ease-in-out pt-[60px] pb-16 md:pb-20 md:pl-[16.5rem] lg:pl-[18rem] ${isSidebarVisible ? 'md:pr-[20.5rem] lg:pr-[22.5rem]' : 'pr-0'}`}>
         <div className="m-1.5 md:mx-2 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.45)] bg-[#0e0e0e] p-2">
           <div className="rounded-2xl bg-[#181818] p-4 md:p-6">
 
@@ -545,19 +552,18 @@ const Home = () => {
         </div>
       </div>
       {/* Spotify Music Player */}
-      <MusicPlayer currentTrack={currentTrack} isPlaying={isPlaying} onTogglePlay={() => setIsPlaying(prev => !prev)} />
-      <NowPlayingSidebar currentTrack={currentTrack} onClose={handleCloseSidebar} isOpen={isPlaying} />
-      
-      {/* Custom Songs Audio Player */}
-      {currentCustomSong && (
-        <CustomAudioPlayer 
-          currentSong={currentCustomSong}
-          isPlaying={isCustomSongPlaying}
-          onPlayPause={handleCustomSongPlay}
-        />
-      )}
-
-      {!isPlaying && (
+      <MusicPlayer
+        currentTrack={currentTrack}
+        isPlaying={isPlaying}
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+      />
+      <NowPlayingSidebar
+        currentTrack={currentTrack}
+        onClose={() => setIsSidebarVisible(false)}
+        isOpen={isSidebarVisible}
+      />
+      {!isSidebarVisible && (
         <button
           onClick={() => setIsPlaying(true)}
           className="hidden md:flex fixed right-1.5 bottom-24 items-center gap-2 px-4 py-2 rounded-full bg-[#0e0e0e]/95 text-[#F5F5F5] shadow-[0_8px_20px_rgba(0,0,0,0.35)] z-40 hover:bg-[#151515]/95 transition-colors"

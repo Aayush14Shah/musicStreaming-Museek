@@ -902,10 +902,10 @@ app.get("/api/analytics/songs", async (req, res) => {
 let appSettings = {
   maxFileSize: 50,
   allowedFormats: ['MP3', 'WAV', 'FLAC'],
-  allowRegistration: true,
   maxPlaylistsPerUser: 50,
   sessionTimeout: 24,
-  enableAuditLogs: true
+  enableAuditLogs: true,
+  allowRegistration: true
 };
 
 // Audit logs storage (in production, use database)
