@@ -26,20 +26,21 @@ const AddAdminPopup = ({ showPopup, setShowPopup }) => {
 
   // Step 1: Send OTP to email
   const handleSendOtp = async () => {
-    if (!formData.email) {
-      setError("Email is required.");
-      return;
-    }
-    setLoading(true);
-    setError("");
-    try {
-      await axios.post(`${API_BASE}/auth/forgot-password`, { email: formData.email });
-      setStep(2);
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to send OTP.");
-    }
-    setLoading(false);
-  };
+  if (!formData.email) {
+    setError("Email is required.");
+    return;
+  }
+  setLoading(true);
+  setError("");
+  try {
+    // Use send-otp with purpose: 'signup'
+    await axios.post(`${API_BASE}/auth/send-otp`, { email: formData.email, purpose: 'signup' });
+    setStep(2);
+  } catch (err) {
+    setError(err.response?.data?.message || "Failed to send OTP.");
+  }
+  setLoading(false);
+};
 
   // Step 2: Verify OTP
   const handleVerifyOtp = async () => {
@@ -60,26 +61,26 @@ const AddAdminPopup = ({ showPopup, setShowPopup }) => {
 
   // Step 3: Register admin
   const handleSubmit = async () => {
-    if (!formData.password) {
-      setError("Password is required.");
-      return;
-    }
-    setLoading(true);
-    setError("");
-    try {
-      await axios.post(`${API_BASE}/auth/dashboard`, {
-        email: formData.email,
-        password: formData.password,
-      });
-      setShowPopup(false);
-      setStep(1);
-      setFormData({ email: "", password: "", otp: "" });
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to create admin.");
-    }
-    setLoading(false);
-  };
-
+  if (!formData.password) {
+    setError("Password is required.");
+    return;
+  }
+  setLoading(true);
+  setError("");
+  try {
+    await axios.post(`${API_BASE}/auth/dashboard`, {
+      name: formData.email.split("@")[0], // Use email prefix as name, or add a name input if you want
+      email: formData.email,
+      password: formData.password,
+    });
+    setShowPopup(false);
+    setStep(1);
+    setFormData({ email: "", password: "", otp: "" });
+  } catch (err) {
+    setError(err.response?.data?.message || "Failed to create admin.");
+  }
+  setLoading(false);
+};
   const handleClose = () => {
     setShowPopup(false);
     setStep(1);
