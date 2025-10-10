@@ -754,14 +754,14 @@ const Home = () => {
 
   return (
     <div
-      className="relative flex size-full min-h-screen flex-col bg-gradient-to-br from-[#121212] via-[#1a1a1a] to-[#0e0e0e] dark group/design-root overflow-x-hidden"
+      className="relative flex size-full min-h-screen flex-col bg-gradient-to-br from-[var(--bg-secondary)] via-[var(--bg-primary)] to-[var(--bg-secondary)] dark group/design-root overflow-x-hidden"
       style={{ fontFamily: 'Inter, "Noto Sans", sans-serif' }}
     >
       <Navbar />
       <LeftSidebar onLikedSongsClick={handleLikedSongsClick} onPlaylistClick={handleUserPlaylistClick} />
-      <div className={`layout-container flex h-full grow flex-col min-h-screen w-full transition-all duration-300 ease-in-out pt-[60px] pb-16 md:pb-20 md:pl-[16.5rem] lg:pl-[18rem] ${isSidebarVisible ? 'md:pr-[20.5rem] lg:pr-[22.5rem]' : 'pr-0'}`}>
-        <div className="m-1.5 md:mx-2 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.45)] bg-[#0e0e0e] p-2">
-          <div className="rounded-2xl bg-[#181818] p-4 md:p-6">
+      <div className={`layout-container flex h-full grow flex-col min-h-screen w-full transition-all duration-300 ease-in-out pt-[60px] pb-16 md:pb-20 md:pl-[16.5rem] lg:pl-[18rem] ${isSidebarVisible ? 'md:pr-[20.5rem] lg:pr-[22.5rem]' : 'pr-0'}`}> 
+        <div className="m-1.5 md:mx-2 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.45)] bg-[var(--bg-secondary)] p-2">
+          <div className="rounded-2xl bg-[var(--bg-primary)] p-4 md:p-6">
             {/* CONDITIONAL RENDER */}
             {currentView === 'liked-songs' ? (
               <LikedSongs 
@@ -789,7 +789,7 @@ const Home = () => {
             ) : (
               <>
                 {isLoading && (
-                  <p className="text-[#F5F5F5] text-center py-8 text-lg">
+                  <p className="text-[var(--text-primary)] text-center py-8 text-lg">
                     Loading...
                   </p>
                 )}
@@ -799,7 +799,7 @@ const Home = () => {
                   </p>
                 )}
 
-                <HeroBanner featured={heroFeatured} />
+                <HeroBanner featured={heroFeatured} forceWhiteText={true} />
                 
                 {/* Custom Songs Section - Your Offline Library */}
                 <CustomSongsSection 
@@ -834,9 +834,9 @@ const Home = () => {
       {!isSidebarVisible && (
         <button
           onClick={() => setIsSidebarVisible(true)}
-          className="hidden md:flex fixed right-4 bottom-24 items-center gap-2 px-4 py-2 rounded-full bg-[#0e0e0e]/95 text-[#F5F5F5] shadow-[0_8px_20px_rgba(0,0,0,0.35)] z-50 hover:bg-[#151515]/95 transition-colors"
+          className="hidden md:flex fixed right-4 bottom-24 items-center gap-2 px-4 py-2 rounded-full bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-[0_8px_20px_rgba(0,0,0,0.35)] z-50 hover:bg-[var(--bg-tertiary)] transition-colors"
         >
-          <span className="inline-block w-2 h-2 rounded-full bg-[#CD7F32]"></span>
+          <span className="inline-block w-2 h-2 rounded-full bg-[var(--accent-primary)]"></span>
           Show Now Playing
         </button>
       )}

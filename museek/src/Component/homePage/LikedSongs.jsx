@@ -96,7 +96,7 @@ const LikedSongs = ({ onTrackClick, currentTrack, isPlaying }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#CD7F32]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent-primary)]"></div>
       </div>
     );
   }
@@ -104,9 +104,9 @@ const LikedSongs = ({ onTrackClick, currentTrack, isPlaying }) => {
   if (!userId) {
     return (
       <div className="text-center py-12">
-        <FavoriteIcon className="text-[#CD7F32] mb-4" style={{ fontSize: 48 }} />
+        <FavoriteIcon className="text-[var(--accent-primary)] mb-4" style={{ fontSize: 48 }} />
         <h3 className="text-lg font-semibold mb-2">Please log in</h3>
-        <p className="text-gray-400">Log in to see your liked songs</p>
+        <p className="text-[var(--text-secondary)]">Log in to see your liked songs</p>
       </div>
     );
   }
@@ -114,9 +114,9 @@ const LikedSongs = ({ onTrackClick, currentTrack, isPlaying }) => {
   if (likedSongs.length === 0) {
     return (
       <div className="text-center py-12">
-        <FavoriteIcon className="text-[#CD7F32] mb-4" style={{ fontSize: 48 }} />
+        <FavoriteIcon className="text-[var(--accent-primary)] mb-4" style={{ fontSize: 48 }} />
         <h3 className="text-lg font-semibold mb-2">No liked songs yet</h3>
-        <p className="text-gray-400">Songs you like will appear here</p>
+        <p className="text-[var(--text-secondary)]">Songs you like will appear here</p>
       </div>
     );
   }
@@ -124,19 +124,19 @@ const LikedSongs = ({ onTrackClick, currentTrack, isPlaying }) => {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Liked Songs</h1>
-        <p className="text-gray-400">{likedSongs.length} songs</p>
+        <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-2">Liked Songs</h1>
+        <p className="text-[var(--text-secondary)]">{likedSongs.length} songs</p>
       </div>
 
       <div className="space-y-2">
         {likedSongs.map((like, index) => (
           <div
             key={`${like.songId}_${like.songType}`}
-            className={`group flex items-center gap-4 p-3 rounded-lg hover:bg-[#242424] transition-colors ${
-              isCurrentTrack(like.songId) ? 'bg-[#242424]' : ''
+            className={`group flex items-center gap-4 p-3 rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors ${
+              isCurrentTrack(like.songId) ? 'bg-[var(--bg-tertiary)]' : ''
             }`}
           >
-            <div className="flex items-center justify-center w-10 h-10 text-gray-400 group-hover:text-white cursor-pointer" onClick={() => handleTrackClick(like)}>
+            <div className="flex items-center justify-center w-10 h-10 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] cursor-pointer" onClick={() => handleTrackClick(like)}>
               {isCurrentTrack(like.songId) && isPlaying ? (
                 <PauseIcon />
               ) : (
@@ -155,18 +155,18 @@ const LikedSongs = ({ onTrackClick, currentTrack, isPlaying }) => {
 
             <div className="flex-1 min-w-0 cursor-pointer" onClick={() => handleTrackClick(like)}>
               <h3 className={`font-medium truncate ${
-                isCurrentTrack(like.songId) ? 'text-[#CD7F32]' : 'text-white'
+                isCurrentTrack(like.songId) ? 'text-[var(--accent-primary)]' : 'text-[var(--text-primary)]'
               }`}>
                 {like.songTitle}
               </h3>
-              <p className="text-sm text-gray-400 truncate">{like.songArtist}</p>
+              <p className="text-sm text-[var(--text-secondary)] truncate">{like.songArtist}</p>
             </div>
 
             <div className="flex-1 min-w-0 hidden md:block cursor-pointer" onClick={() => handleTrackClick(like)}>
-              <p className="text-sm text-gray-400 truncate">{like.songAlbum}</p>
+              <p className="text-sm text-[var(--text-secondary)] truncate">{like.songAlbum}</p>
             </div>
 
-            <div className="text-sm text-gray-400 cursor-pointer" onClick={() => handleTrackClick(like)}>
+            <div className="text-sm text-[var(--text-secondary)] cursor-pointer" onClick={() => handleTrackClick(like)}>
               {new Date(like.createdAt).toLocaleDateString()}
             </div>
 
@@ -191,7 +191,7 @@ const LikedSongs = ({ onTrackClick, currentTrack, isPlaying }) => {
               </Tooltip>
               
               <div className="w-8 flex justify-center">
-                <FavoriteIcon className="text-[#CD7F32]" fontSize="small" />
+                <FavoriteIcon className="text-[var(--accent-primary)]" fontSize="small" />
               </div>
             </div>
           </div>
@@ -204,24 +204,24 @@ const LikedSongs = ({ onTrackClick, currentTrack, isPlaying }) => {
         onClose={() => setShowRemoveDialog(false)}
         PaperProps={{
           sx: {
-            bgcolor: '#181818',
-            color: '#F5F5F5',
+            bgcolor: 'var(--bg-primary)',
+            color: 'var(--text-primary)',
             borderRadius: 2
           }
         }}
       >
-        <DialogTitle sx={{ color: '#F5F5F5' }}>
+        <DialogTitle sx={{ color: 'var(--text-primary)' }}>
           Remove from Liked Songs
         </DialogTitle>
         <DialogContent>
-          <p className="text-gray-300">
+          <p className="text-[var(--text-secondary)]">
             Are you sure you want to remove "{songToRemove?.songTitle}" by {songToRemove?.songArtist} from your liked songs?
           </p>
         </DialogContent>
         <DialogActions sx={{ p: 3 }}>
           <Button 
             onClick={() => setShowRemoveDialog(false)}
-            sx={{ color: '#F5F5F5', textTransform: 'none' }}
+            sx={{ color: 'var(--text-primary)', textTransform: 'none' }}
           >
             Cancel
           </Button>

@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import Logo from '../Images/LogoFinalDarkModeFrameResized.png';
+import LogoDark from '../Images/LogoFinalDarkModeFrameResized.png';
+import LogoLight from '../Images/LogoFinalLightModeFrameResized.png';
 import loginSideImage from '../Images/login_side_image.jpg';
 
 const Signup = () => {
@@ -25,6 +26,7 @@ const Signup = () => {
   const [loading, setLoading] = useState(true); // Start with loading true
   const [registrationDisabled, setRegistrationDisabled] = useState(false);
   const otpRefs = useRef([]);
+  const [theme] = useState(localStorage.getItem('theme') || 'dark');
 
   // Check registration status on component mount
   useEffect(() => {
@@ -158,8 +160,8 @@ const Signup = () => {
   const handleLogin = () => navigate('/Login');
 
   return (
-    <div className="w-screen h-screen bg-[#121212] flex items-center justify-center overflow-hidden">
-      <div className="flex w-full h-full bg-gradient-to-br from-[#121212] via-[#1a1a1a] to-[#0e0e0e] overflow-hidden">
+    <div className="w-screen h-screen bg-[var(--bg-primary)] flex items-center justify-center overflow-hidden">
+      <div className="flex w-full h-full bg-gradient-to-br from-[var(--bg-primary)] via-[var(--bg-tertiary)] to-[var(--bg-secondary)] overflow-hidden">
         {/* Left Panel - Visual/Marketing */}
         <div className="hidden lg:flex lg:w-1/2 relative">
           {/* Black shadow overlay for better text readability */}
@@ -182,14 +184,14 @@ const Signup = () => {
         </div>
 
         {/* Right Panel - Sign Up Form */}
-        <div className="w-full lg:w-1/2 bg-[#181818] p-8 lg:p-16 flex flex-col justify-center relative">
+        <div className="w-full lg:w-1/2 bg-[var(--bg-primary)] p-8 lg:p-16 flex flex-col justify-center relative">
           <div className="max-w-lg mx-auto w-full">
             {/* Logo positioned above Sign Up text */}
             <div className="flex justify-center mb-8">
-              <img src={Logo} alt="Brand Logo" className="w-40" />
+              <img src={theme === 'dark' ? LogoDark : LogoLight} alt="Brand Logo" className="w-40" />
             </div>
             
-            <h2 className="text-4xl font-bold text-center mb-10 text-[#F5F5F5]">Sign Up</h2>
+            <h2 className="text-4xl font-bold text-center mb-10 text-[var(--text-primary)]">Sign Up</h2>
             
             {/* Show OTP form if sent, else show signup form */}
             {!otpSent ? (
@@ -202,7 +204,7 @@ const Signup = () => {
                       type="text"
                       value={form.firstName}
                       onChange={handleChange}
-                      className="w-full px-5 py-4 bg-[#0e0e0e] border-2 border-gray-600 rounded-xl text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#CD7F32]/20 focus:border-[#CD7F32] transition-all duration-300 shadow-sm hover:shadow-md"
+                      className="w-full px-5 py-4 bg-[var(--bg-secondary)] border-2 border-[var(--border-secondary)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-4 focus:ring-[var(--accent-primary)]/20 focus:border-[var(--accent-primary)] transition-all duration-300 shadow-sm hover:shadow-md"
                       placeholder="First name"
                       required
                     />
@@ -215,7 +217,7 @@ const Signup = () => {
                       type="text"
                       value={form.lastName}
                       onChange={handleChange}
-                      className="w-full px-5 py-4 bg-[#0e0e0e] border-2 border-gray-600 rounded-xl text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#CD7F32]/20 focus:border-[#CD7F32] transition-all duration-300 shadow-sm hover:shadow-md"
+                      className="w-full px-5 py-4 bg-[var(--bg-secondary)] border-2 border-[var(--border-secondary)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-4 focus:ring-[var(--accent-primary)]/20 focus:border-[var(--accent-primary)] transition-all duration-300 shadow-sm hover:shadow-md"
                       placeholder="Last name"
                       required
                     />
@@ -229,7 +231,7 @@ const Signup = () => {
                     type="email"
                     value={form.email}
                     onChange={handleChange}
-                    className="w-full px-5 py-4 bg-[#0e0e0e] border-2 border-gray-600 rounded-xl text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#CD7F32]/20 focus:border-[#CD7F32] transition-all duration-300 shadow-sm hover:shadow-md"
+                    className="w-full px-5 py-4 bg-[var(--bg-secondary)] border-2 border-[var(--border-secondary)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-4 focus:ring-[var(--accent-primary)]/20 focus:border-[var(--accent-primary)] transition-all duration-300 shadow-sm hover:shadow-md"
                     placeholder="Email address"
                     required
                   />
@@ -245,14 +247,14 @@ const Signup = () => {
                     type={showPassword ? "text" : "password"}
                     value={form.password}
                     onChange={handleChange}
-                    className="w-full px-5 py-4 pr-12 bg-[#0e0e0e] border-2 border-gray-600 rounded-xl text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#CD7F32]/20 focus:border-[#CD7F32] transition-all duration-300 shadow-sm hover:shadow-md"
+                    className="w-full px-5 py-4 pr-12 bg-[var(--bg-secondary)] border-2 border-[var(--border-secondary)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-4 focus:ring-[var(--accent-primary)]/20 focus:border-[var(--accent-primary)] transition-all duration-300 shadow-sm hover:shadow-md"
                     placeholder="Password"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-[#CD7F32] transition-colors duration-200"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-[var(--text-secondary)] hover:text-[var(--accent-primary)] transition-colors duration-200"
                   >
                     {showPassword ? (
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -282,16 +284,16 @@ const Signup = () => {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-5 h-5 text-[#CD7F32] border-2 border-gray-300 rounded-lg focus:ring-4 focus:ring-[#CD7F32]/20 focus:ring-offset-0 transition-all duration-200"
+                    className="w-5 h-5 text-[var(--accent-primary)] border-2 border-[var(--border-secondary)] rounded-lg focus:ring-4 focus:ring-[var(--accent-primary)]/20 focus:ring-offset-0 transition-all duration-200"
                   />
-                  <label htmlFor="rememberMe" className="ml-3 text-base text-[#F5F5F5] font-medium">
+                  <label htmlFor="rememberMe" className="ml-3 text-base text-[var(--text-primary)] font-medium">
                     Remember me
                   </label>
                 </div>
                 {otpError && <div className="text-red-500 text-sm text-center">{otpError}</div>}
                 <button
                   type="submit"
-                  className="w-full py-4 bg-gradient-to-r from-[#CD7F32] to-[#b06f2d] text-white rounded-xl font-bold text-lg hover:from-[#b06f2d] hover:to-[#CD7F32] transform hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98]"
+                  className="w-full py-4 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white rounded-xl font-bold text-lg hover:from-[var(--accent-secondary)] hover:to-[var(--accent-primary)] transform hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98]"
                   disabled={loading}
                 >
                   {loading ? 'Sending OTP...' : 'Verify'}
@@ -300,7 +302,7 @@ const Signup = () => {
             ) : (
               <form className="space-y-6" onSubmit={handleOtpVerify}>
                 <div className="flex flex-col items-center gap-4">
-                  <label className="text-lg text-[#F5F5F5]">Enter the 6-digit OTP sent to your email</label>
+                  <label className="text-lg text-[var(--text-primary)]">Enter the 6-digit OTP sent to your email</label>
                   <div className="flex gap-2" onPaszzte={handleOtpPaste}>
                     {otp.map((digit, idx) => (
                       <input
@@ -311,7 +313,7 @@ const Signup = () => {
                         maxLength={1}
                         value={digit}
                         onChange={e => handleOtpChange(e, idx)}
-                        className="w-12 h-14 text-2xl text-center bg-[#0e0e0e] border-2 border-gray-600 rounded-xl text-[#F5F5F5] focus:outline-none focus:ring-4 focus:ring-[#CD7F32]/20 focus:border-[#CD7F32] transition-all duration-300"
+                        className="w-12 h-14 text-2xl text-center bg-[var(--bg-secondary)] border-2 border-[var(--border-secondary)] rounded-xl text-[var(--text-primary)] focus:outline-none focus:ring-4 focus:ring-[var(--accent-primary)]/20 focus:border-[var(--accent-primary)] transition-all duration-300"
                         autoFocus={idx === 0}
                       />
                     ))}
@@ -320,7 +322,7 @@ const Signup = () => {
                 {otpError && <div className="text-red-500 text-sm text-center">{otpError}</div>}
                 <button
                   type="submit"
-                  className="w-full py-4 bg-gradient-to-r from-[#CD7F32] to-[#b06f2d] text-white rounded-xl font-bold text-lg hover:from-[#b06f2d] hover:to-[#CD7F32] transform hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98]"
+                  className="w-full py-4 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white rounded-xl font-bold text-lg hover:from-[var(--accent-secondary)] hover:to-[var(--accent-primary)] transform hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98]"
                   disabled={loading}
                 >
                   {loading ? 'Verifying...' : 'Verify OTP'}
@@ -329,11 +331,11 @@ const Signup = () => {
             )}
             
             <div className="mt-10 text-center">
-              <p className="text-base text-gray-300">
+              <p className="text-base text-[var(--text-secondary)]">
                 Already have an account?{' '}
                 <button 
                   onClick={handleLogin} 
-                  className="text-[#CD7F32] hover:text-[#b06f2d] font-semibold transition duration-200 hover:underline"
+                  className="text-[var(--accent-primary)] hover:text-[var(--accent-secondary)] font-semibold transition duration-200 hover:underline"
                 >
                   Login
                 </button>

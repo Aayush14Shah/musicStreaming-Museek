@@ -115,7 +115,7 @@ const PlaylistView = ({ playlist, onBack, onTrackClick, currentTrack, isPlaying 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#CD7F32]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent-primary)]"></div>
       </div>
     );
   }
@@ -123,8 +123,8 @@ const PlaylistView = ({ playlist, onBack, onTrackClick, currentTrack, isPlaying 
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-400 mb-4">Error loading playlist: {error}</p>
-        <Button onClick={loadPlaylistSongs} sx={{ color: '#CD7F32' }}>
+        <p className="text-red-400 mb-4">Error loading playlist: {error}</p> 
+        <Button onClick={loadPlaylistSongs} sx={{ color: 'var(--accent-primary)' }}>
           Try Again
         </Button>
       </div>
@@ -139,8 +139,8 @@ const PlaylistView = ({ playlist, onBack, onTrackClick, currentTrack, isPlaying 
           startIcon={<ArrowBack />}
           onClick={onBack}
           sx={{
-            color: '#F5F5F5',
-            '&:hover': { bgcolor: '#CD7F32/10' },
+            color: 'var(--text-primary)',
+            '&:hover': { bgcolor: 'var(--accent-primary)/10' },
             textTransform: 'none',
             mb: 2
           }}
@@ -151,17 +151,17 @@ const PlaylistView = ({ playlist, onBack, onTrackClick, currentTrack, isPlaying 
 
       {/* Playlist Info */}
       <div className="flex items-end gap-6">
-        <div className="w-48 h-48 bg-gradient-to-br from-[#CD7F32] to-[#8B5A2B] rounded-lg flex items-center justify-center shadow-lg">
+        <div className="w-48 h-48 bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] rounded-lg flex items-center justify-center shadow-lg">
           <PlaylistAddIcon sx={{ fontSize: 80, color: 'white', opacity: 0.8 }} />
         </div>
         
         <div className="flex-1">
-          <p className="text-sm text-gray-400 uppercase tracking-wide mb-2">Playlist</p>
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">{playlist.name}</h1>
+          <p className="text-sm text-[var(--text-secondary)] uppercase tracking-wide mb-2">Playlist</p>
+          <h1 className="text-4xl md:text-6xl font-bold text-[var(--text-primary)] mb-4">{playlist.name}</h1>
           {playlist.description && (
-            <p className="text-gray-300 mb-4">{playlist.description}</p>
+            <p className="text-[var(--text-secondary)] mb-4">{playlist.description}</p>
           )}
-          <div className="flex items-center gap-2 text-sm text-gray-400">
+          <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
             <span>{playlist.songCount} songs</span>
             <span>•</span>
             <span>{formatTotalDuration(playlist.totalDuration)}</span>
@@ -177,10 +177,10 @@ const PlaylistView = ({ playlist, onBack, onTrackClick, currentTrack, isPlaying 
           disabled={!playlistSongs || playlistSongs.length === 0}
           onClick={() => playlistSongs && playlistSongs.length > 0 && handleTrackClick(playlistSongs[0])}
           sx={{
-            bgcolor: '#CD7F32',
-            color: '#121212',
-            '&:hover': { bgcolor: '#CD7F32/90' },
-            '&:disabled': { bgcolor: '#CD7F32/30' },
+            bgcolor: 'var(--accent-primary)',
+            color: 'var(--bg-primary)',
+            '&:hover': { bgcolor: 'var(--accent-secondary)' },
+            '&:disabled': { bgcolor: 'var(--accent-primary)/30' },
             borderRadius: '50px',
             px: 4,
             py: 1.5,
@@ -192,7 +192,7 @@ const PlaylistView = ({ playlist, onBack, onTrackClick, currentTrack, isPlaying 
         </Button>
         
         <Tooltip title="More options">
-          <IconButton sx={{ color: '#F5F5F5' }}>
+          <IconButton sx={{ color: 'var(--text-primary)' }}>
             <MoreVert />
           </IconButton>
         </Tooltip>
@@ -202,14 +202,14 @@ const PlaylistView = ({ playlist, onBack, onTrackClick, currentTrack, isPlaying 
       <div className="space-y-2">
         {!playlistSongs || playlistSongs.length === 0 ? (
           <div className="text-center py-12">
-            <PlaylistAddIcon sx={{ fontSize: 48, color: '#CD7F32', mb: 2 }} />
-            <h3 className="text-lg font-semibold mb-2">No songs in this playlist</h3>
-            <p className="text-gray-400">Add songs by clicking the + icon when playing music</p>
+            <PlaylistAddIcon sx={{ fontSize: 48, color: 'var(--accent-primary)', mb: 2 }} />
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">No songs in this playlist</h3>
+            <p className="text-[var(--text-secondary)]">Add songs by clicking the + icon when playing music</p>
           </div>
         ) : (
           <>
             {/* Table Header */}
-            <div className="grid grid-cols-12 gap-4 px-4 py-2 text-sm text-gray-400 border-b border-gray-700">
+            <div className="grid grid-cols-12 gap-4 px-4 py-2 text-sm text-[var(--text-secondary)] border-b border-[var(--border-primary)]">
               <div className="col-span-1">#</div>
               <div className="col-span-4">Title</div>
               <div className="col-span-2 hidden md:block">Album</div>
@@ -222,13 +222,13 @@ const PlaylistView = ({ playlist, onBack, onTrackClick, currentTrack, isPlaying 
             {playlistSongs && playlistSongs.map((song, index) => (
               <div
                 key={`${song.songId}_${song.songType}`}
-                className={`group grid grid-cols-12 gap-4 px-4 py-3 rounded-lg hover:bg-[#242424] transition-colors ${
-                  isCurrentTrack(song.songId) ? 'bg-[#242424]' : ''
+                className={`group grid grid-cols-12 gap-4 px-4 py-3 rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors ${
+                  isCurrentTrack(song.songId) ? 'bg-[var(--bg-tertiary)]' : ''
                 }`}
               >
-                <div className="col-span-1 flex items-center justify-center text-gray-400 group-hover:text-white">
-                  {isCurrentTrack(song.songId) && isPlaying ? (
-                    <Pause className="text-[#CD7F32]" />
+                <div className="col-span-1 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
+                  {isCurrentTrack(song.songId) && isPlaying ? ( 
+                    <Pause className="text-[var(--accent-primary)]" />
                   ) : (
                     <>
                       <span className="group-hover:hidden text-sm">{index + 1}</span>
@@ -245,26 +245,26 @@ const PlaylistView = ({ playlist, onBack, onTrackClick, currentTrack, isPlaying 
                   />
                   <div className="min-w-0">
                     <h3 className={`font-medium truncate ${
-                      isCurrentTrack(song.songId) ? 'text-[#CD7F32]' : 'text-white'
+                      isCurrentTrack(song.songId) ? 'text-[var(--accent-primary)]' : 'text-[var(--text-primary)]'
                     }`}>
                       {song.songTitle}
                     </h3>
-                    <p className="text-sm text-gray-400 truncate">{song.songArtist}</p>
+                    <p className="text-sm text-[var(--text-secondary)] truncate">{song.songArtist}</p>
                   </div>
                 </div>
 
                 <div className="col-span-2 hidden md:flex items-center" onClick={() => handleTrackClick(song)}>
-                  <p className="text-sm text-gray-400 truncate">{song.songAlbum}</p>
+                  <p className="text-sm text-[var(--text-secondary)] truncate">{song.songAlbum}</p>
                 </div>
 
                 <div className="col-span-2 hidden lg:flex items-center" onClick={() => handleTrackClick(song)}>
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-[var(--text-secondary)]">
                     {new Date(song.createdAt).toLocaleDateString()}
                   </p>
                 </div>
 
                 <div className="col-span-1 flex items-center justify-end" onClick={() => handleTrackClick(song)}>
-                  <p className="text-sm text-gray-400">{formatDuration(song.songDuration)}</p>
+                  <p className="text-sm text-[var(--text-secondary)]">{formatDuration(song.songDuration)}</p>
                 </div>
 
                 <div className="col-span-2 flex items-center justify-end gap-2">
@@ -275,7 +275,7 @@ const PlaylistView = ({ playlist, onBack, onTrackClick, currentTrack, isPlaying 
                         handleRemoveSong(song);
                       }}
                       sx={{
-                        color: '#888',
+                        color: 'var(--text-tertiary)',
                         '&:hover': { color: '#ff4444' },
                         opacity: 0,
                         transition: 'opacity 0.2s',
@@ -299,24 +299,24 @@ const PlaylistView = ({ playlist, onBack, onTrackClick, currentTrack, isPlaying 
         onClose={() => setShowRemoveDialog(false)}
         PaperProps={{
           sx: {
-            bgcolor: '#181818',
-            color: '#F5F5F5',
+            bgcolor: 'var(--bg-primary)',
+            color: 'var(--text-primary)',
             borderRadius: 2
           }
         }}
       >
-        <DialogTitle sx={{ color: '#F5F5F5' }}>
+        <DialogTitle sx={{ color: 'var(--text-primary)' }}>
           Remove Song from Playlist
         </DialogTitle>
         <DialogContent>
-          <p className="text-gray-300">
+          <p className="text-[var(--text-secondary)]">
             Are you sure you want to remove "{songToRemove?.songTitle}" by {songToRemove?.songArtist} from this playlist?
           </p>
         </DialogContent>
         <DialogActions sx={{ p: 3 }}>
           <Button 
             onClick={() => setShowRemoveDialog(false)}
-            sx={{ color: '#F5F5F5', textTransform: 'none' }}
+            sx={{ color: 'var(--text-primary)', textTransform: 'none' }}
           >
             Cancel
           </Button>
