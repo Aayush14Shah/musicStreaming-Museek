@@ -30,10 +30,112 @@ const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
 /* Width reserved for the NowPlayingSidebar (adjust if your sidebar width differs) */
 const SIDEBAR_WIDTH_PX = 360;
 
-/* Avatars placeholder - replace URLs with your actual assets if needed */
-const AVATARS = Array.from({ length: 12 }).map(
-  (_, i) => `https://avatars.dicebear.com/api/avataaars/seed${i + 1}.png`
-);
+/**
+ * Beautiful gradient avatars for music streaming app
+ * Using CSS gradients with bright, vibrant colors
+ * 12 unique gradient styles that look modern and professional
+ */
+
+// 12 beautiful gradient combinations with bright colors (2 rows × 6 columns)
+const GRADIENT_AVATARS = [
+  {
+    id: 0,
+    name: 'Sunset Vibes',
+    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    theme: 'Purple Sunset'
+  },
+  {
+    id: 1,
+    name: 'Ocean Waves',
+    gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    theme: 'Pink Coral'
+  },
+  {
+    id: 2,
+    name: 'Golden Hour',
+    gradient: 'linear-gradient(135deg, #fad961 0%, #f76b1c 100%)',
+    theme: 'Golden Orange'
+  },
+  {
+    id: 3,
+    name: 'Electric Blue',
+    gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+    theme: 'Cyan Blue'
+  },
+  {
+    id: 4,
+    name: 'Forest Green',
+    gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+    theme: 'Emerald Green'
+  },
+  {
+    id: 5,
+    name: 'Royal Purple',
+    gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+    theme: 'Pink Yellow'
+  },
+  {
+    id: 6,
+    name: 'Sunset Orange',
+    gradient: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+    theme: 'Rose Pink'
+  },
+  {
+    id: 7,
+    name: 'Ocean Deep',
+    gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+    theme: 'Mint Rose'
+  },
+  {
+    id: 8,
+    name: 'Fire Red',
+    gradient: 'linear-gradient(135deg, #ff6a00 0%, #ee0979 100%)',
+    theme: 'Red Pink'
+  },
+  {
+    id: 9,
+    name: 'Cosmic Blue',
+    gradient: 'linear-gradient(135deg, #2e3192 0%, #1bffff 100%)',
+    theme: 'Neon Blue'
+  },
+  {
+    id: 10,
+    name: 'Lime Fresh',
+    gradient: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)',
+    theme: 'Lime Blue'
+  },
+  {
+    id: 11,
+    name: 'Violet Dreams',
+    gradient: 'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)',
+    theme: 'Violet Sky'
+  }
+];
+
+/**
+ * Generate gradient avatar with user's first letter in center
+ * Returns avatar data with gradient and style
+ */
+const generateGradientAvatar = (avatarData) => {
+  return {
+    id: avatarData.id,
+    gradient: avatarData.gradient,
+    name: avatarData.name,
+    theme: avatarData.theme,
+    style: {
+      background: avatarData.gradient,
+      width: '100%',
+      height: '100%',
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }
+  };
+};
+
+/* Generate 12 beautiful gradient avatars */
+const AVATARS = GRADIENT_AVATARS.map(avatar => generateGradientAvatar(avatar));
 
 const safeParse = (s, fallback) => {
   if (!s) return fallback;
@@ -98,10 +200,27 @@ export default function UserProfile() {
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [avatarIndex, setAvatarIndex] = useState(() => {
     const v = localStorage.getItem("avatarIndex");
-    return v ? Number(v) : 0;
+    const index = v ? Number(v) : 0;
+    // Clamp to valid range (0 to AVATARS.length - 1)
+    return Math.max(0, Math.min(index, AVATARS.length - 1));
   });
   // temp selection inside modal (discard on cancel)
   const [tempAvatarIndex, setTempAvatarIndex] = useState(avatarIndex);
+
+  /* ---------- Get current avatar style and user initial ---------- */
+  const getCurrentAvatarStyle = useMemo(() => {
+    if (avatarIndex >= 0 && avatarIndex < AVATARS.length) {
+      return AVATARS[avatarIndex].style;
+    }
+    // Fallback to first avatar if index is invalid
+    return AVATARS[0].style;
+  }, [avatarIndex]);
+
+  // Get user's first letter for avatar
+  const userInitial = useMemo(() => {
+    const name = user?.name || localStorage.getItem("userName") || "";
+    return name ? name.charAt(0).toUpperCase() : "U";
+  }, [user]);
 
   /* ---------- Load user ---------- */
   useEffect(() => {
@@ -144,11 +263,12 @@ export default function UserProfile() {
       setUser(fetched);
       setNameInput(fetched?.name || localStorage.getItem("userName") || "");
       setFavoriteArtists(fetched?.favoriteArtists || fetched?.favorite_artists || []);
-      // if server returned avatar index, use it
+      // if server returned avatar index, use it (clamp to valid range 0-11 for 12 avatars)
       const av = Number(fetched?.avatarIndex ?? fetched?.avatar ?? localStorage.getItem("avatarIndex") ?? 0);
       if (!Number.isNaN(av)) {
-        setAvatarIndex(av);
-        setTempAvatarIndex(av);
+        const validIndex = Math.max(0, Math.min(av, AVATARS.length - 1));
+        setAvatarIndex(validIndex);
+        setTempAvatarIndex(validIndex);
       }
       setLoadingUser(false);
     };
@@ -219,8 +339,10 @@ export default function UserProfile() {
       if (e.key === "avatarIndex") {
         const idx = Number(e.newValue ?? 0);
         if (!Number.isNaN(idx)) {
-          setAvatarIndex(idx);
-          setTempAvatarIndex(idx);
+          // Clamp to valid range (0 to AVATARS.length - 1)
+          const validIndex = Math.max(0, Math.min(idx, AVATARS.length - 1));
+          setAvatarIndex(validIndex);
+          setTempAvatarIndex(validIndex);
         }
       }
       if (e.key === "isPlaying") {
@@ -288,6 +410,12 @@ export default function UserProfile() {
     // persist locally
     localStorage.setItem("avatarIndex", String(tempAvatarIndex));
     setAvatarIndex(tempAvatarIndex);
+    
+    // Dispatch custom event to notify Navbar and other components
+    window.dispatchEvent(new CustomEvent('avatarChanged', { 
+      detail: { avatarIndex: tempAvatarIndex } 
+    }));
+    
     // attempt server update (best-effort)
     try {
       await fetch(`${API_BASE}/api/user/${userId}/avatar`, {
@@ -361,11 +489,16 @@ export default function UserProfile() {
             {/* Avatar */}
             <div className="relative flex-shrink-0">
               <div className="w-36 h-36 md:w-44 md:h-44 rounded-full overflow-hidden border-4 border-[#cd7f32] bg-[#111] shadow-lg">
-                <img
-                  src={AVATARS[avatarIndex % AVATARS.length]}
-                  alt="avatar"
-                  className="w-full h-full object-cover"
-                />
+                <div
+                  style={getCurrentAvatarStyle}
+                  className="w-full h-full"
+                  role="img"
+                  aria-label="User avatar"
+                >
+                  <span className="text-white font-bold text-4xl md:text-5xl drop-shadow-lg">
+                    {userInitial}
+                  </span>
+                </div>
               </div>
 
               {/* edit pen icon: properly positioned circular button */}
@@ -622,27 +755,35 @@ export default function UserProfile() {
               </button>
             </div>
 
-            {/* Avatar grid */}
-            <div className="grid grid-cols-4 sm:grid-cols-6 gap-4 mb-6">
-              {AVATARS.map((src, idx) => {
+            {/* Avatar grid - Gradient avatars (2 rows × 6 columns) */}
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-4 mb-6">
+              {AVATARS.map((avatar, idx) => {
                 const selected = idx === tempAvatarIndex;
                 return (
                   <button
-                    key={src}
+                    key={avatar.id}
                     type="button"
                     onClick={() => setTempAvatarIndex(idx)}
-                    className={`relative rounded-xl overflow-hidden border-2 transition-all duration-200 hover:scale-105 ${
+                    className={`relative rounded-full overflow-hidden border-2 transition-all duration-200 hover:scale-105 ${
                       selected 
                         ? "border-[#cd7f32] shadow-lg shadow-[#cd7f32]/30" 
                         : "border-gray-600 hover:border-gray-400"
-                    } focus:outline-none focus:ring-2 focus:ring-[#cd7f32]/50`}
+                    } focus:outline-none focus:ring-2 focus:ring-[#cd7f32]/50 aspect-square`}
+                    title={avatar.name}
                   >
-                    <div className="w-full aspect-square bg-[#181818] flex items-center justify-center p-2">
-                      <img src={src} alt={`avatar-${idx}`} className="max-w-full max-h-full object-contain rounded-lg" />
+                    <div
+                      style={avatar.style}
+                      className="w-full h-full"
+                      role="img"
+                      aria-label={avatar.name}
+                    >
+                      <span className="text-white font-bold text-2xl drop-shadow-lg">
+                        {userInitial}
+                      </span>
                     </div>
                     {selected && (
-                      <div className="absolute top-2 right-2 bg-[#cd7f32] rounded-full p-1 shadow-lg">
-                        <CheckIcon sx={{ color: "#fff", fontSize: 16 }} />
+                      <div className="absolute top-1 right-1 bg-[#cd7f32] rounded-full p-1 shadow-lg">
+                        <CheckIcon sx={{ color: "#fff", fontSize: 14 }} />
                       </div>
                     )}
                   </button>

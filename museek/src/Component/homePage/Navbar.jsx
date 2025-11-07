@@ -1,5 +1,5 @@
 // Updated Navbar.jsx (minor improvements for responsiveness)
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Tooltip } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import PersonIcon from '@mui/icons-material/Person';
@@ -12,17 +12,84 @@ import home_white_variant from '../../Images/Icons/home_white_variant.png';
 import { Navigate,useNavigate } from 'react-router-dom';
 import UserProfile from '../UserProfile';
 
+// Gradient avatars matching UserProfile component
+const GRADIENT_AVATARS = [
+  { id: 0, gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
+  { id: 1, gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
+  { id: 2, gradient: 'linear-gradient(135deg, #fad961 0%, #f76b1c 100%)' },
+  { id: 3, gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
+  { id: 4, gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' },
+  { id: 5, gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' },
+  { id: 6, gradient: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)' },
+  { id: 7, gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' },
+  { id: 8, gradient: 'linear-gradient(135deg, #ff6a00 0%, #ee0979 100%)' },
+  { id: 9, gradient: 'linear-gradient(135deg, #2e3192 0%, #1bffff 100%)' },
+  { id: 10, gradient: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)' },
+  { id: 11, gradient: 'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)' }
+];
+
 const Navbar = () => {
   const [userInitial, setUserInitial] = useState(null);
   const [userEmail, setUserEmail] = useState(null);
   const [open, setOpen] = useState(false);
+  const [avatarIndex, setAvatarIndex] = useState(() => {
+    const v = localStorage.getItem('avatarIndex');
+    const index = v ? Number(v) : 0;
+    return Math.max(0, Math.min(index, GRADIENT_AVATARS.length - 1));
+  });
   const navigate = useNavigate();
+
+  // Get current avatar style
+  const avatarStyle = useMemo(() => {
+    const avatar = GRADIENT_AVATARS[avatarIndex] || GRADIENT_AVATARS[0];
+    return {
+      background: avatar.gradient,
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minWidth: '40px',
+      minHeight: '40px',
+      width: '40px',
+      height: '40px',
+      flexShrink: 0
+    };
+  }, [avatarIndex]);
 
   useEffect(() => {
     const name = localStorage.getItem('userName');
     if (name) setUserInitial(name.charAt(0).toUpperCase());
     const email = localStorage.getItem('userEmail');
     if (email) setUserEmail(email);
+
+    // Listen for avatar changes from UserProfile
+    const handleAvatarChange = (e) => {
+      const newIndex = e.detail?.avatarIndex ?? localStorage.getItem('avatarIndex');
+      if (newIndex !== null && newIndex !== undefined) {
+        const index = Number(newIndex);
+        if (!Number.isNaN(index)) {
+          setAvatarIndex(Math.max(0, Math.min(index, GRADIENT_AVATARS.length - 1)));
+        }
+      }
+    };
+
+    // Listen to storage events (cross-tab sync) and custom events
+    const handleStorageChange = (e) => {
+      if (e.key === 'avatarIndex') {
+        const index = Number(e.newValue ?? 0);
+        if (!Number.isNaN(index)) {
+          setAvatarIndex(Math.max(0, Math.min(index, GRADIENT_AVATARS.length - 1)));
+        }
+      }
+    };
+
+    window.addEventListener('avatarChanged', handleAvatarChange);
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('avatarChanged', handleAvatarChange);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const handleRedirect = () => {
@@ -90,11 +157,11 @@ const Navbar = () => {
           <div className="relative">
           <div
             onClick={() => setOpen(!open)}
-            className="w-10 h-10 flex items-center justify-center rounded-full cursor-pointer border-2 border-[var(--accent-primary)] text-[var(--text-primary)] hover:border-[var(--accent-secondary)] hover:scale-105 transition-all duration-200"
-            style={{ backgroundColor: 'var(--bg-tertiary)' }}
+            className="flex items-center justify-center rounded-full cursor-pointer border-2 border-[var(--accent-primary)] hover:border-[var(--accent-secondary)] hover:scale-105 transition-all duration-200 overflow-hidden flex-shrink-0"
+            style={avatarStyle}
             title={userInitial}
           >
-            <span className="font-semibold text-lg">{userInitial}</span>
+            <span className="font-semibold text-lg text-white drop-shadow-lg leading-none">{userInitial}</span>
           </div>
           {open && (
   <div className="absolute right-0 mt-3 w-56 bg-[var(--bg-tertiary)] border border-[var(--border-primary)] rounded-xl shadow-lg z-50 overflow-hidden">
