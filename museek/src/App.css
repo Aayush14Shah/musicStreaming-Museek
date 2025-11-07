@@ -11,6 +11,9 @@
   --accent-primary: #cd7f32;
   --accent-secondary: #b06f2d;
   --popup-bg: rgba(240, 240, 240, 0.8);
+  --accent-primary-rgb: 205, 127, 50; /* RGB for #cd7f32 */
+  --bg-primary-rgb: 245, 245, 245; /* RGB for #f5f5f5 */
+  --bg-secondary-rgb: 255, 255, 255; /* RGB for #ffffff */
   --popup-border: rgba(205, 127, 50, 0.5); /* Orange popup border */
   --shadow-primary: 0 4px 15px rgba(205, 127, 50, 0.15); /* Orange-tinted shadow */
 }
@@ -27,6 +30,9 @@
   --accent-primary: #cd7f32;
   --accent-secondary: #b06f2d;
   --popup-bg: rgba(40, 40, 40, 0.8);
+  --accent-primary-rgb: 205, 127, 50; /* RGB for #cd7f32 */
+  --bg-primary-rgb: 24, 24, 24; /* RGB for #181818 */
+  --bg-secondary-rgb: 15, 15, 15; /* RGB for #0f0f0f */
   --popup-border: rgba(205, 127, 50, 0.3);
   --shadow-primary: 0 8px 20px rgba(0,0,0,0.35); /* Original dark shadow */
 }
