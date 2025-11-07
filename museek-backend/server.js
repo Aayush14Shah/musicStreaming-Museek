@@ -88,13 +88,54 @@ const upload = multer({
 console.log("CLIENT ID:", process.env.SPOTIFY_CLIENT_ID);
 console.log("CLIENT SECRET:", process.env.SPOTIFY_CLIENT_SECRET);
 
-app.get('/', (req, res) => {
+// Basic route
+app.get("/", (req, res) => {
   res.json({ message: 'Welcome to Museek API. Use /api endpoints like /api/new-releases.' });
 });
 
 // ==================== CUSTOM SONGS CRUD API ====================
 
-// GET all custom songs (with filtering and pagination) - Shows both active and inactive
+// Search custom songs for audio playback
+app.get("/api/custom-songs/search", async (req, res) => {
+  try {
+    const { query, limit = 5 } = req.query;
+    
+    if (!query) {
+      return res.json({ songs: [] });
+    }
+    
+    // Create search regex for title and artist
+    const searchRegex = new RegExp(query.split(' ').join('|'), 'i');
+    
+    const songs = await CustomSong.find({
+      is_active: 1,
+      apiStatus: 'Published',
+      $or: [
+        { title: searchRegex },
+        { artist: searchRegex },
+        { album: searchRegex }
+      ]
+    })
+    .select('title artist album audioFileName coverImageName duration')
+    .limit(parseInt(limit))
+    .sort({ createdAt: -1 });
+    
+    // Add full URLs for audio files
+    const songsWithUrls = songs.map(song => ({
+      ...song.toObject(),
+      audioUrl: `/uploads/audio/${song.audioFileName}`,
+      coverUrl: song.coverImageName ? `/uploads/images/${song.coverImageName}` : null
+    }));
+    
+    console.log(`🔍 Custom song search for "${query}": ${songsWithUrls.length} results`);
+    res.json({ songs: songsWithUrls });
+  } catch (error) {
+    console.error('Error searching custom songs:', error);
+    res.status(500).json({ error: "Failed to search custom songs" });
+  }
+});
+
+// Get all custom songs with pagination and search
 app.get("/api/custom-songs", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -902,10 +943,10 @@ app.get("/api/analytics/songs", async (req, res) => {
 let appSettings = {
   maxFileSize: 50,
   allowedFormats: ['MP3', 'WAV', 'FLAC'],
+  allowRegistration: true,
   maxPlaylistsPerUser: 50,
   sessionTimeout: 24,
-  enableAuditLogs: true,
-  allowRegistration: true
+  enableAuditLogs: true
 };
 
 // Audit logs storage (in production, use database)
@@ -1892,7 +1933,49 @@ app.get("/api/alternative-audio", async (req, res) => {
   }
 });
 
-// YouTube preview endpoint (no auth required)
+// Helper function to check yt-dlp version and provide update instructions
+const checkYtDlpVersion = async () => {
+  try {
+    const versionInfo = await ytdlp('--version');
+    console.log('📦 yt-dlp version:', versionInfo);
+    return versionInfo;
+  } catch (error) {
+    console.log('❌ Could not get yt-dlp version:', error.message);
+    return null;
+  }
+};
+
+// Endpoint to check yt-dlp status and provide update instructions
+app.get("/api/youtube/status", async (req, res) => {
+  try {
+    const version = await checkYtDlpVersion();
+    
+    res.json({
+      status: 'operational',
+      version: version,
+      updateInstructions: {
+        windows: 'pip install --upgrade yt-dlp',
+        linux: 'pip install --upgrade yt-dlp',
+        mac: 'pip install --upgrade yt-dlp',
+        npm: 'npm update yt-dlp-exec'
+      },
+      troubleshooting: [
+        'YouTube frequently updates their API, requiring yt-dlp updates',
+        'Try updating yt-dlp to the latest version',
+        'Some videos may be geo-blocked or have restricted access',
+        'Consider using custom songs for offline functionality'
+      ]
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      error: error.message,
+      recommendation: 'Update yt-dlp or use custom songs for reliable audio'
+    });
+  }
+});
+
+// YouTube preview endpoint - 
 app.get("/api/youtube/preview", async (req, res) => {
   try {
     const trackName = req.query.trackName;
@@ -1903,60 +1986,38 @@ app.get("/api/youtube/preview", async (req, res) => {
     console.log('🔍 YouTube search query:', query);
     
     const searchRes = await ytSearch(query);
-    console.log('🔍 YouTube search results:', searchRes.videos?.length || 0, 'videos found');
-    
     const video = searchRes.videos && searchRes.videos.length ? searchRes.videos[0] : null;
-    if (!video) {
-      console.log('❌ No YouTube video found for:', query);
-      return res.json({ found: false, message: "No YouTube result" });
-    }
-
-    console.log('✅ Found YouTube video:', video.title, 'ID:', video.videoId);
-
-    const info = await ytdlp(`https://www.youtube.com/watch?v=${video.videoId}`, {
-      dumpSingleJson: true,
-      noWarnings: true,
-      noCheckCertificates: true,
-      preferFreeFormats: true,
-      youtubeSkipDashManifest: true
-    });
-
-    if (!info || !info.formats) {
-      console.log('❌ yt-dlp returned no formats for:', video.videoId);
-      return res.json({ found: false, message: "yt-dlp returned no formats" });
-    }
     
-    console.log('🔍 Available formats:', info.formats.length);
-    const audio = info.formats.find(f => f.ext === 'm4a' && f.url);
-    if (!audio) {
-      console.log('❌ No m4a audio format found, trying any audio format...');
-      const anyAudio = info.formats.find(f => f.acodec && f.acodec !== 'none' && f.url);
-      if (anyAudio) {
-        console.log('✅ Found alternative audio format:', anyAudio.ext);
+    if (!video) {
+      return res.json({ found: false });
+    }
+
+    console.log('🎵 Found:', video.title);
+
+    // Try ONE simple method - if it works, great. If not, just fail.
+    try {
+      const info = await ytdlp(`https://www.youtube.com/watch?v=${video.videoId}`, {
+        dumpSingleJson: true,
+        noWarnings: true,
+        format: 'worst'
+      });
+
+      if (info && info.url) {
+        console.log('✅ SUCCESS - Got audio URL');
         return res.json({
           found: true,
-          source: "youtube",
-          title: info.title,
+          title: video.title,
           artist: artistName,
-          preview_url: anyAudio.url,
-          youtube_video_id: video.videoId,
-          format: anyAudio.ext
+          preview_url: info.url,
+          duration: video.duration?.seconds || 180
         });
       }
-      console.log('❌ No audio format found at all');
-      return res.json({ found: false, message: "No audio-only format" });
+    } catch (error) {
+      console.log('❌ YouTube blocked - no audio available');
     }
 
-    console.log('✅ YouTube preview URL found:', audio.url.substring(0, 50) + '...');
-    return res.json({
-      found: true,
-      source: "youtube",
-      title: info.title,
-      artist: artistName,
-      preview_url: audio.url,
-      youtube_video_id: video.videoId,
-      duration: info.duration
-    });
+    // If YouTube doesn't work, just fail cleanly
+    return res.json({ found: false });
   } catch (error) {
     console.error("❌ YouTube preview error:", error.message);
     return res.status(500).json({ error: error.message });

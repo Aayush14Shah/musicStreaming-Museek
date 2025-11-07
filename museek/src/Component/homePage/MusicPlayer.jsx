@@ -45,7 +45,11 @@ const MusicPlayer = ({ currentTrack, isPlaying, onPlay, onPause }) => {
 
     setProgress(0); // reset progress for new track
 
-    const audio = new Audio(currentTrack.audioUrl);
+    // Use the audio URL directly (backend now handles YouTube conversion)
+    const audioUrl = currentTrack.audioUrl;
+    console.log('🎵 Loading audio from:', audioUrl);
+
+    const audio = new Audio(audioUrl);
     audioRef.current = audio;
 
     const handleTimeUpdate = () => setProgress(audio.currentTime);
