@@ -129,7 +129,7 @@ const Dashboard = () => {
               </div>
 
               {/* Quick Actions - Centered */}
-              <div className="flex justify-center">
+              <div className="flex justify-start">
                 <div className="bg-[#181818] border border-[#CD7F32]/20 rounded-lg p-6 shadow-lg w-full max-w-md">
                   <h3 className="text-lg font-semibold mb-4 text-center">Quick Actions</h3>
                   <div className="space-y-4">
