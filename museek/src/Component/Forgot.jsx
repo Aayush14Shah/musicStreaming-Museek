@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import Logo from '../Images/LogoFinalDarkModeFrameResized.png';
+import LogoDark from '../Images/LogoFinalDarkModeFrameResized.png';
+import LogoLight from '../Images/LogoFinalLightModeFrameResized.png';
 import ForgotPageImage from '../Images/ForgotPageImage.jpg';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
@@ -19,6 +20,7 @@ const Forgot = () => {
   const [passwordWarnings, setPasswordWarnings] = useState([]);
   const otpRefs = useRef([]);
   const [showPassword, setShowPassword] = useState(false);
+  const [theme] = useState(localStorage.getItem('theme') || 'dark');
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
@@ -124,8 +126,8 @@ const Forgot = () => {
   const handleRedirect = () => navigate('/Signup');
 
   return (
-    <div className="w-screen h-screen bg-[#121212] flex items-center justify-center overflow-hidden relative">
-      <div className="flex w-full h-full bg-gradient-to-br from-[#121212] via-[#1a1a1a] to-[#0e0e0e] overflow-hidden">
+    <div className="w-screen h-screen bg-[var(--bg-primary)] flex items-center justify-center overflow-hidden relative">
+      <div className="flex w-full h-full bg-gradient-to-br from-[var(--bg-primary)] via-[var(--bg-tertiary)] to-[var(--bg-secondary)] overflow-hidden">
         <div className="hidden lg:flex lg:w-1/2 relative">
           <div className="absolute inset-0 bg-black/40 z-10"></div>
           <img 
@@ -143,13 +145,13 @@ const Forgot = () => {
           </div>
         </div>
 
-        <div className="w-full lg:w-1/2 bg-[#181818] p-8 lg:p-16 flex flex-col justify-center relative">
+        <div className="w-full lg:w-1/2 bg-[var(--bg-primary)] p-8 lg:p-16 flex flex-col justify-center relative">
           <div className="max-w-lg mx-auto w-full">
-            <div className="flex justify-center mb-8">
-              <img src={Logo} alt="Brand Logo" className="w-40" />
+            <div className="flex justify-center mb-8"> 
+              <img src={theme === 'dark' ? LogoDark : LogoLight} alt="Brand Logo" className="w-40" />
             </div>
 
-            <h2 className="text-4xl font-bold text-center mb-10 text-[#F5F5F5]">Forgot Password</h2>
+            <h2 className="text-4xl font-bold text-center mb-10 text-[var(--text-primary)]">Forgot Password</h2>
 
             {!emailSent && !otpVerified && (
               <form className="space-y-6" onSubmit={handleSendOtp}>
@@ -160,7 +162,7 @@ const Forgot = () => {
                     type="email"
                     value={email}
                     onChange={handleEmailChange}
-                    className="w-full px-5 py-4 bg-[#0e0e0e] border-2 border-gray-600 rounded-xl text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#CD7F32]/20 focus:border-[#CD7F32] transition-all duration-300 shadow-sm hover:shadow-md"
+                    className="w-full px-5 py-4 bg-[var(--bg-secondary)] border-2 border-[var(--border-secondary)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-4 focus:ring-[var(--accent-primary)]/20 focus:border-[var(--accent-primary)] transition-all duration-300 shadow-sm hover:shadow-md"
                     placeholder="Enter your email address"
                     required
                   />
@@ -168,7 +170,7 @@ const Forgot = () => {
                 {error && <div className="text-red-500 text-sm text-center">{error}</div>}
                 <button
                   type="submit"
-                  className="w-full py-4 bg-gradient-to-r from-[#CD7F32] to-[#b06f2d] text-white rounded-xl font-bold text-lg hover:from-[#b06f2d] hover:to-[#CD7F32] transform hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98]"
+                  className="w-full py-4 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white rounded-xl font-bold text-lg hover:from-[var(--accent-secondary)] hover:to-[var(--accent-primary)] transform hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98]"
                   disabled={loading}
                 >
                   {loading ? 'Sending OTP...' : 'Send OTP'}
@@ -178,8 +180,8 @@ const Forgot = () => {
 
             {emailSent && !otpVerified && (
               <form className="space-y-6" onSubmit={handleOtpSubmit}>
-                <div className="flex flex-col items-center gap-4">
-                  <label className="text-lg text-[#F5F5F5]">Enter the 6-digit OTP sent to your email</label>
+                <div className="flex flex-col items-center gap-4"> 
+                  <label className="text-lg text-[var(--text-primary)]">Enter the 6-digit OTP sent to your email</label>
                   <div className="flex gap-2" onPaste={handleOtpPaste}>
                     {otp.map((digit, idx) => (
                       <input
@@ -190,7 +192,7 @@ const Forgot = () => {
                         maxLength={1}
                         value={digit}
                         onChange={e => handleOtpChange(e, idx)}
-                        className="w-12 h-14 text-2xl text-center bg-[#0e0e0e] border-2 border-gray-600 rounded-xl text-[#F5F5F5] focus:outline-none focus:ring-4 focus:ring-[#CD7F32]/20 focus:border-[#CD7F32] transition-all duration-300"
+                        className="w-12 h-14 text-2xl text-center bg-[var(--bg-secondary)] border-2 border-[var(--border-secondary)] rounded-xl text-[var(--text-primary)] focus:outline-none focus:ring-4 focus:ring-[var(--accent-primary)]/20 focus:border-[var(--accent-primary)] transition-all duration-300"
                         autoFocus={idx === 0}
                       />
                     ))}
@@ -199,7 +201,7 @@ const Forgot = () => {
                 {error && <div className="text-red-500 text-sm text-center">{error}</div>}
                 <button
                   type="submit"
-                  className="w-full py-4 bg-gradient-to-r from-[#CD7F32] to-[#b06f2d] text-white rounded-xl font-bold text-lg hover:from-[#b06f2d] hover:to-[#CD7F32] transform hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98]"
+                  className="w-full py-4 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white rounded-xl font-bold text-lg hover:from-[var(--accent-secondary)] hover:to-[var(--accent-primary)] transform hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98]"
                   disabled={loading}
                 >
                   {loading ? 'Verifying...' : 'Verify OTP'}
@@ -215,7 +217,7 @@ const Forgot = () => {
                     <input
                       type={showPassword ? "text" : "password"}
                       placeholder="New Password"
-                      className="w-full   px-5 py-4 bg-[#0e0e0e] border-2 border-gray-600 rounded-xl text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#CD7F32]/20 focus:border-[#CD7F32] transition-all duration-300 shadow-sm hover:shadow-md"
+                      className="w-full px-5 py-4 bg-[var(--bg-secondary)] border-2 border-[var(--border-secondary)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-4 focus:ring-[var(--accent-primary)]/20 focus:border-[var(--accent-primary)] transition-all duration-300 shadow-sm hover:shadow-md"
                       value={resetPassword}
                       onChange={e => {
                         setResetPassword(e.target.value);
@@ -226,7 +228,7 @@ const Forgot = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-[#CD7F32] transition-colors duration-200"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-[var(--text-secondary)] hover:text-[var(--accent-primary)] transition-colors duration-200"
                       tabIndex={-1}
                     >
                       {showPassword ? (
@@ -254,7 +256,7 @@ const Forgot = () => {
                     <input
                       type={showPassword ? "text" : "password"}
                       placeholder="Confirm New Password"
-                      className="w-full px-5 py-4 bg-[#0e0e0e] border-2 border-gray-600 rounded-xl text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#CD7F32]/20 focus:border-[#CD7F32] transition-all duration-300 shadow-sm hover:shadow-md"
+                      className="w-full px-5 py-4 bg-[var(--bg-secondary)] border-2 border-[var(--border-secondary)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-4 focus:ring-[var(--accent-primary)]/20 focus:border-[var(--accent-primary)] transition-all duration-300 shadow-sm hover:shadow-md"
                       value={resetConfirm}
                       onChange={e => setResetConfirm(e.target.value)}
                       required
@@ -262,7 +264,7 @@ const Forgot = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-[#CD7F32] transition-colors duration-200"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-[var(--text-secondary)] hover:text-[var(--accent-primary)] transition-colors duration-200"
                     >
                       {showPassword ? (
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -280,7 +282,7 @@ const Forgot = () => {
                 {error && <div className="text-red-500 text-sm text-center">{error}</div>}
                 <button
                   type="submit"
-                  className="w-full py-4 bg-gradient-to-r from-[#CD7F32] to-[#b06f2d] text-white rounded-xl font-bold text-lg hover:from-[#b06f2d] hover:to-[#CD7F32] transform hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98]"
+                  className="w-full py-4 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white rounded-xl font-bold text-lg hover:from-[var(--accent-secondary)] hover:to-[var(--accent-primary)] transform hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98]"
                   disabled={loading}
                 >
                   {loading ? 'Resetting...' : 'Reset Password'}
@@ -289,11 +291,11 @@ const Forgot = () => {
             )}
 
             <div className="mt-10 text-center">
-              <p className="text-base text-gray-300">
+              <p className="text-base text-[var(--text-secondary)]">
                 Don't have an account?{' '}
                 <button 
                   onClick={handleRedirect} 
-                  className="text-[#CD7F32] hover:text-[#b06f2d] font-semibold transition duration-200 hover:underline"
+                  className="text-[var(--accent-primary)] hover:text-[var(--accent-secondary)] font-semibold transition duration-200 hover:underline"
                 >
                   Sign Up
                 </button>
@@ -307,17 +309,17 @@ const Forgot = () => {
       {showPopup && (
         <div className="absolute inset-0 flex items-center justify-center z-50">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-          <div className="relative bg-[#282828]/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center border border-[#CD7F32]/30">
+          <div className="relative bg-[var(--popup-bg)] backdrop-blur-md rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center border border-[var(--popup-border)]">
             <div className="flex justify-center mb-6">
               <div className="bg-green-500/20 rounded-full p-4">
                 <CheckCircleIcon style={{ fontSize: "3rem" }} className="text-green-400" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-[#F5F5F5] mb-2">Password Reset Successful!</h1>
-            <p className="text-[#F5F5F5] mb-4">You can now log in with your new password.</p>
+            <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Password Reset Successful!</h1>
+            <p className="text-[var(--text-primary)] mb-4">You can now log in with your new password.</p>
             <button 
               onClick={() => navigate('/Login')}
-              className="w-full bg-gradient-to-r from-[#CD7F32] to-[#b06f2d] text-white font-bold py-3 px-6 rounded-lg hover:from-[#b06f2d] hover:to-[#CD7F32] transition-colors duration-300"
+              className="w-full bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white font-bold py-3 px-6 rounded-lg hover:from-[var(--accent-secondary)] hover:to-[var(--accent-primary)] transition-colors duration-300"
             >
               Go to Login
             </button>

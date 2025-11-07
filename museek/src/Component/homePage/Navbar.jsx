@@ -7,7 +7,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 // Assume images are imported as in the original
-import CircularLogoFinalDarkMode from '../../Images/CircularLogoFinalLightMode.png';
+import CircularLogoDark from '../../Images/CircularLogoFinalDarkMode.png'; 
 import home_white_variant from '../../Images/Icons/home_white_variant.png';
 import { Navigate,useNavigate } from 'react-router-dom';
 import UserProfile from '../UserProfile';
@@ -47,11 +47,11 @@ const Navbar = () => {
     navigate('/');
   };
   return (
-    <div className="fixed top-0 left-0 right-0 h-[60px] flex items-center justify-between px-4 md:px-6 py-3 text-[#F5F5F5] bg-[#121212] border-b border-[#1C2B2D] z-50">
+    <div className="fixed top-0 left-0 right-0 h-[60px] flex items-center justify-between px-4 md:px-6 py-3 text-[var(--text-primary)] bg-[var(--bg-secondary)] border-b border-[var(--border-primary)] z-50">
       {/* Left - Brand Logo */}
       <div className="flex-shrink-0">
         <img
-          src={CircularLogoFinalDarkMode}
+          src={CircularLogoDark}
           alt="Brand Logo"
           className="w-8 md:w-10 object-cover"
         />
@@ -63,7 +63,7 @@ const Navbar = () => {
           <Tooltip title="Go to Home" arrow>
             <button 
               onClick={() => navigate("/")}
-              className="w-10 h-10 flex items-center justify-center bg-[#1C2B2D] opacity-80 hover:opacity-100 transition rounded-full"
+              className="w-10 h-10 flex items-center justify-center bg-[var(--bg-tertiary)] opacity-80 hover:opacity-100 transition rounded-full"
             >
               <img
                 src={home_white_variant}
@@ -76,9 +76,9 @@ const Navbar = () => {
             <input
               type="text"
               placeholder="What do you want to play?"
-              className="w-full px-4 py-2 md:py-3 rounded-full outline-none border-none text-[#F5F5F5] bg-[#181818] placeholder:text-[#CD7F32] pl-10 md:pl-12 text-sm md:text-base"
+              className="w-full px-4 py-2 md:py-3 rounded-full outline-none border-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder:text-[var(--accent-primary)] pl-10 md:pl-12 text-sm md:text-base"
             />
-            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#CD7F32] opacity-70 w-5 h-5 md:w-6 md:h-6" />
+            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--accent-primary)] opacity-70 w-5 h-5 md:w-6 md:h-6" />
           </div>
         </div>
       </div>
@@ -90,24 +90,24 @@ const Navbar = () => {
           <div className="relative">
           <div
             onClick={() => setOpen(!open)}
-            className="w-10 h-10 flex items-center justify-center rounded-full cursor-pointer border-2 border-[#CD7F32] text-[#F5F5F5] hover:border-[#b06f2d] hover:scale-105 transition-all duration-200"
-            style={{ backgroundColor: '#1C2B2D' }}
+            className="w-10 h-10 flex items-center justify-center rounded-full cursor-pointer border-2 border-[var(--accent-primary)] text-[var(--text-primary)] hover:border-[var(--accent-secondary)] hover:scale-105 transition-all duration-200"
+            style={{ backgroundColor: 'var(--bg-tertiary)' }}
             title={userInitial}
           >
             <span className="font-semibold text-lg">{userInitial}</span>
           </div>
           {open && (
-  <div className="absolute right-0 mt-3 w-56 bg-[#1C1C1C]/95 backdrop-blur-md border border-[#2a2a2a] rounded-xl shadow-lg z-50 overflow-hidden">
+  <div className="absolute right-0 mt-3 w-56 bg-[var(--bg-tertiary)] border border-[var(--border-primary)] rounded-xl shadow-lg z-50 overflow-hidden">
     {/* Arrow */}
-    <div className="absolute -top-2 right-4 w-4 h-4 bg-[#1C1C1C]/95 border-l border-t border-[#2a2a2a] rotate-45"></div>
+    <div className="absolute -top-2 right-4 w-4 h-4 bg-[var(--bg-tertiary)] border-l border-t border-[var(--border-primary)] rotate-45"></div>
 
     {/* User Info */}
     {userEmail && (
-      <div className="px-4 py-3 border-b border-[#2a2a2a]">
-        <div className="text-sm font-semibold text-[#F5F5F5]">
+      <div className="px-4 py-3 border-b border-[var(--border-primary)]">
+        <div className="text-sm font-semibold text-[var(--text-primary)]">
           {userInitial}
         </div>
-        <div className="text-xs text-[#CD7F32] truncate" title={userEmail}>
+        <div className="text-xs text-[var(--accent-primary)] truncate" title={userEmail}>
           {userEmail}
         </div>
       </div>
@@ -117,25 +117,25 @@ const Navbar = () => {
     <div className="flex flex-col py-1">
       <button
         onClick={() => { setOpen(false); navigate('/profile'); }}
-        className="flex items-center gap-3 px-4 py-2 text-sm text-[#F5F5F5] hover:bg-[#CD7F32]/10 hover:text-[#CD7F32] transition-colors"
+        className="flex items-center gap-3 px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--accent-primary)]/10 hover:text-[var(--accent-primary)] transition-colors"
       >
-        <AccountCircleIcon fontSize="small" className="text-[#CD7F32]/70" />
+        <AccountCircleIcon fontSize="small" className="text-[var(--accent-primary)]/70" />
         Profile
       </button>
 
       <button
         onClick={() => { setOpen(false); navigate('/settings'); }}
-        className="flex items-center gap-3 px-4 py-2 text-sm text-[#F5F5F5] hover:bg-[#CD7F32]/10 hover:text-[#CD7F32] transition-colors"
+        className="flex items-center gap-3 px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--accent-primary)]/10 hover:text-[var(--accent-primary)] transition-colors"
       >
-        <SettingsIcon fontSize="small" className="text-[#CD7F32]/70" />
+        <SettingsIcon fontSize="small" className="text-[var(--accent-primary)]/70" />
         Settings
       </button>
 
       <button
         onClick={handleLogout}
-        className="flex items-center gap-3 px-4 py-2 text-sm text-[#F5F5F5] hover:bg-[#CD7F32]/10 hover:text-[#CD7F32] transition-colors"
+        className="flex items-center gap-3 px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--accent-primary)]/10 hover:text-[var(--accent-primary)] transition-colors"
       >
-        <LogoutIcon fontSize="small" className="text-[#CD7F32]/70" />
+        <LogoutIcon fontSize="small" className="text-[var(--accent-primary)]/70" />
         Logout
       </button>
     </div>
@@ -145,7 +145,7 @@ const Navbar = () => {
         ) : (
           <button
             onClick={handleRedirect}
-            className="px-4 py-2 bg-[#CD7F32] hover:bg-[#b06f2d] text-[#F5F5F5] rounded-md font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg"
+            className="px-4 py-2 bg-[var(--accent-primary)] hover:bg-[var(--accent-secondary)] text-white rounded-md font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg"
           >
             Login
           </button>

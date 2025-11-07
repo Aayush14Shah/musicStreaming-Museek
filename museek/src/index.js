@@ -5,6 +5,17 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from 'react-router-dom';
 
+const setTheme = (theme) => {
+  document.documentElement.setAttribute('data-theme', theme);
+};
+
+const theme = localStorage.getItem('theme') || 'dark';
+setTheme(theme);
+
+window.addEventListener('storage', (e) => {
+  if (e.key === 'theme') setTheme(e.newValue || 'dark');
+});
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>

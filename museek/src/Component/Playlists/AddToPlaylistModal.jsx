@@ -103,19 +103,19 @@ const AddToPlaylistModal = ({ open, onClose, song, userId }) => {
       fullWidth
       PaperProps={{
         sx: {
-          bgcolor: '#181818',
-          color: '#F5F5F5',
+          bgcolor: 'var(--bg-primary)',
+          color: 'var(--text-primary)',
           borderRadius: 2
         }
       }}
     >
-      <DialogTitle sx={{ color: '#F5F5F5', borderBottom: '1px solid #CD7F32/20' }}>
+      <DialogTitle sx={{ color: 'var(--text-primary)', borderBottom: '1px solid var(--popup-border)' }}>
         Add to Playlist
       </DialogTitle>
       
       <DialogContent sx={{ p: 0 }}>
         {/* Song Info */}
-        <div className="p-4 border-b border-[#CD7F32]/20">
+        <div className="p-4 border-b border-[var(--popup-border)]">
           <div className="flex items-center gap-3">
             <img 
               src={song.image || song.album?.images?.[0]?.url || '/default-album.png'} 
@@ -123,21 +123,21 @@ const AddToPlaylistModal = ({ open, onClose, song, userId }) => {
               className="w-12 h-12 rounded object-cover"
             />
             <div>
-              <h3 className="font-medium text-white">{song.title || song.name}</h3>
-              <p className="text-sm text-gray-400">{song.artist || song.artists?.[0]?.name}</p>
+              <h3 className="font-medium text-[var(--text-primary)]">{song.title || song.name}</h3>
+              <p className="text-sm text-[var(--text-secondary)]">{song.artist || song.artists?.[0]?.name}</p>
             </div>
           </div>
         </div>
 
-        {/* Create New Playlist */}
-        <div className="p-4 border-b border-[#CD7F32]/20">
+        {/* Create New Playlist */} 
+        <div className="p-4 border-b border-[var(--popup-border)]">
           {!showCreateForm ? (
             <Button
               startIcon={<AddIcon />}
               onClick={() => setShowCreateForm(true)}
               sx={{
-                color: '#CD7F32',
-                '&:hover': { bgcolor: '#CD7F32/10' },
+                color: 'var(--accent-primary)',
+                '&:hover': { bgcolor: 'var(--accent-primary)/10' },
                 textTransform: 'none',
                 justifyContent: 'flex-start',
                 width: '100%'
@@ -156,11 +156,11 @@ const AddToPlaylistModal = ({ open, onClose, song, userId }) => {
                 size="small"
                 sx={{
                   '& .MuiOutlinedInput-root': {
-                    bgcolor: '#242424',
-                    color: '#F5F5F5',
-                    '& fieldset': { borderColor: '#CD7F32/40' },
-                    '&:hover fieldset': { borderColor: '#CD7F32/60' },
-                    '&.Mui-focused fieldset': { borderColor: '#CD7F32' }
+                    bgcolor: 'var(--bg-tertiary)',
+                    color: 'var(--text-primary)',
+                    '& fieldset': { borderColor: 'var(--accent-primary)/40' },
+                    '&:hover fieldset': { borderColor: 'var(--accent-primary)/60' },
+                    '&.Mui-focused fieldset': { borderColor: 'var(--accent-primary)' }
                   }
                 }}
               />
@@ -175,11 +175,11 @@ const AddToPlaylistModal = ({ open, onClose, song, userId }) => {
                 rows={2}
                 sx={{
                   '& .MuiOutlinedInput-root': {
-                    bgcolor: '#242424',
-                    color: '#F5F5F5',
-                    '& fieldset': { borderColor: '#CD7F32/40' },
-                    '&:hover fieldset': { borderColor: '#CD7F32/60' },
-                    '&.Mui-focused fieldset': { borderColor: '#CD7F32' }
+                    bgcolor: 'var(--bg-tertiary)',
+                    color: 'var(--text-primary)',
+                    '& fieldset': { borderColor: 'var(--accent-primary)/40' },
+                    '&:hover fieldset': { borderColor: 'var(--accent-primary)/60' },
+                    '&.Mui-focused fieldset': { borderColor: 'var(--accent-primary)' }
                   }
                 }}
               />
@@ -188,9 +188,9 @@ const AddToPlaylistModal = ({ open, onClose, song, userId }) => {
                   onClick={handleCreatePlaylist}
                   disabled={!newPlaylistName.trim() || loading}
                   sx={{
-                    bgcolor: '#CD7F32',
-                    color: '#121212',
-                    '&:hover': { bgcolor: '#CD7F32/90' },
+                    bgcolor: 'var(--accent-primary)',
+                    color: 'var(--bg-primary)',
+                    '&:hover': { bgcolor: 'var(--accent-secondary)' },
                     textTransform: 'none'
                   }}
                 >
@@ -203,9 +203,9 @@ const AddToPlaylistModal = ({ open, onClose, song, userId }) => {
                     setNewPlaylistDescription('');
                   }}
                   sx={{
-                    color: '#F5F5F5',
-                    border: '1px solid #CD7F32/40',
-                    '&:hover': { bgcolor: '#CD7F32/10' },
+                    color: 'var(--text-primary)',
+                    border: '1px solid var(--accent-primary)/40',
+                    '&:hover': { bgcolor: 'var(--accent-primary)/10' },
                     textTransform: 'none'
                   }}
                 >
@@ -220,10 +220,10 @@ const AddToPlaylistModal = ({ open, onClose, song, userId }) => {
         <div className="max-h-64 overflow-y-auto">
           {loading ? (
             <div className="flex justify-center p-4">
-              <CircularProgress size={24} sx={{ color: '#CD7F32' }} />
+              <CircularProgress size={24} sx={{ color: 'var(--accent-primary)' }} />
             </div>
           ) : playlists.length === 0 ? (
-            <div className="p-4 text-center text-gray-400">
+            <div className="p-4 text-center text-[var(--text-secondary)]">
               No playlists yet. Create your first playlist above!
             </div>
           ) : (
@@ -234,27 +234,27 @@ const AddToPlaylistModal = ({ open, onClose, song, userId }) => {
                   button
                   onClick={() => handlePlaylistToggle(playlist._id)}
                   sx={{
-                    '&:hover': { bgcolor: '#242424' },
-                    borderBottom: '1px solid #CD7F32/10'
+                    '&:hover': { bgcolor: 'var(--bg-tertiary)' },
+                    borderBottom: '1px solid var(--border-primary)'
                   }}
                 >
                   <ListItemIcon>
                     <Checkbox
                       checked={selectedPlaylists.has(playlist._id)}
                       sx={{
-                        color: '#CD7F32/60',
-                        '&.Mui-checked': { color: '#CD7F32' }
+                        color: 'var(--accent-primary)/60',
+                        '&.Mui-checked': { color: 'var(--accent-primary)' }
                       }}
                     />
                   </ListItemIcon>
                   <ListItemIcon>
-                    <PlaylistIcon sx={{ color: '#CD7F32' }} />
+                    <PlaylistIcon sx={{ color: 'var(--accent-primary)' }} />
                   </ListItemIcon>
                   <ListItemText
                     primary={playlist.name}
                     secondary={`${playlist.songCount} songs`}
-                    primaryTypographyProps={{ color: '#F5F5F5' }}
-                    secondaryTypographyProps={{ color: '#888' }}
+                    primaryTypographyProps={{ color: 'var(--text-primary)' }}
+                    secondaryTypographyProps={{ color: 'var(--text-tertiary)' }}
                   />
                 </ListItem>
               ))}
@@ -263,10 +263,10 @@ const AddToPlaylistModal = ({ open, onClose, song, userId }) => {
         </div>
       </DialogContent>
 
-      <DialogActions sx={{ p: 3, borderTop: '1px solid #CD7F32/20' }}>
+      <DialogActions sx={{ p: 3, borderTop: '1px solid var(--popup-border)' }}>
         <Button 
           onClick={handleClose}
-          sx={{ color: '#F5F5F5', textTransform: 'none' }}
+          sx={{ color: 'var(--text-primary)', textTransform: 'none' }}
         >
           Cancel
         </Button>
@@ -274,16 +274,16 @@ const AddToPlaylistModal = ({ open, onClose, song, userId }) => {
           onClick={handleAddToPlaylists}
           disabled={selectedPlaylists.size === 0 || isSubmitting}
           sx={{
-            bgcolor: '#CD7F32',
-            color: '#121212',
-            '&:hover': { bgcolor: '#CD7F32/90' },
-            '&:disabled': { bgcolor: '#CD7F32/30' },
+            bgcolor: 'var(--accent-primary)',
+            color: 'var(--bg-primary)',
+            '&:hover': { bgcolor: 'var(--accent-secondary)' },
+            '&:disabled': { bgcolor: 'var(--accent-primary)/30' },
             textTransform: 'none'
           }}
         >
           {isSubmitting ? (
             <>
-              <CircularProgress size={16} sx={{ mr: 1, color: '#121212' }} />
+              <CircularProgress size={16} sx={{ mr: 1, color: 'var(--bg-primary)' }} />
               Adding...
             </>
           ) : (
