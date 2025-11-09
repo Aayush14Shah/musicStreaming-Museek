@@ -1903,32 +1903,31 @@ app.get("/api/alternative-audio", async (req, res) => {
           title: bestMatch.name,
           artist: bestMatch.artist?.name,
           duration: bestMatch.duration,
-          thumbnail: bestMatch.thumbnails?.[0]?.url,
-          // Note: Actual streaming requires additional processing
-          preview_url: `https://www.youtube.com/watch?v=${videoId}`,
-          warning: 'YouTube streaming requires proper licensing and ToS compliance'
+          thumbnail: bestMatch.thumbnails?.[0]?.url
         });
       }
-    } catch (ytError) {
-      console.log(`❌ YouTube Music search failed:`, ytError.message);
-    }
-    
-    // Fallback: Try SoundCloud API (if you have API key)
-    // This would require SoundCloud API integration
-    
-    // If no alternative found, return structured response
-    res.json({
-      found: false,
-      message: 'No alternative audio source found',
-      trackName,
-      artistName
-    });
+      // No alternative found in YouTube Music
+      return res.json({
+        found: false,
+        message: 'No alternative audio source found',
+        trackName,
+        artistName
+      });
     
   } catch (error) {
     console.error(`❌ Alternative audio search error:`, error.message);
     res.status(500).json({ 
       error: 'Failed to search for alternative audio',
       message: error.message 
+    });
+  }
+   
+    // outer catch
+  } catch (error) {
+    console.error("❌ Alternative-audio endpoint error:", error.message);
+    res.status(500).json({
+      error: "Failed to search for alternative audio (outer)",
+      message: error.message
     });
   }
 });
@@ -1994,30 +1993,80 @@ app.get("/api/youtube/preview", async (req, res) => {
 
     console.log('🎵 Found:', video.title);
 
-    // Try ONE simple method - if it works, great. If not, just fail.
-    try {
-      const info = await ytdlp(`https://www.youtube.com/watch?v=${video.videoId}`, {
-        dumpSingleJson: true,
-        noWarnings: true,
-        format: 'worst'
-      });
+    // Try multiple format strategies to get audio
+    const formatStrategies = [
+      'bestaudio/best',           // Best audio available
+      'bestaudio[ext=m4a]/bestaudio', // M4A audio
+      'worstaudio/worst',         // Lowest quality (more likely to work)
+      'best',                     // Best overall (video+audio)
+      'worst'                     // Worst overall (last resort)
+    ];
 
-      if (info && info.url) {
-        console.log('✅ SUCCESS - Got audio URL');
-        return res.json({
-          found: true,
-          title: video.title,
-          artist: artistName,
-          preview_url: info.url,
-          duration: video.duration?.seconds || 180
+    for (const format of formatStrategies) {
+      try {
+        console.log(`🔄 Trying format: ${format}`);
+        const info = await ytdlp(`https://www.youtube.com/watch?v=${video.videoId}`, {
+          dumpSingleJson: true,
+          noWarnings: true,
+          format: format
         });
+
+        if (info && (info.url || info.requested_formats)) {
+          // Get the audio URL from info
+          const audioUrl = info.url || 
+                         (info.requested_formats && info.requested_formats.find(f => f.acodec !== 'none')?.url) ||
+                         (info.formats && info.formats.find(f => f.acodec !== 'none' && f.url)?.url);
+
+          if (audioUrl) {
+            console.log(`✅ SUCCESS - Got audio URL with format: ${format}`);
+            return res.json({
+              found: true,
+              title: video.title,
+              artist: artistName,
+              preview_url: audioUrl,
+              duration: info.duration || video.duration?.seconds || 180
+            });
+          }
+        }
+      } catch (error) {
+        // Try next format if this one fails
+        console.log(`❌ Format ${format} failed:`, error?.message?.substring(0, 100));
+        continue;
       }
-    } catch (error) {
-      console.log('❌ YouTube blocked - no audio available');
     }
 
-    // If YouTube doesn't work, just fail cleanly
-    return res.json({ found: false });
+    // If all yt-dlp format strategies failed, try Piped as a last resort
+    try {
+      console.log('🔍 All yt-dlp formats failed, trying Piped API fallback...');
+      const pipedResponse = await axios.get(`https://piped.video/watch`, {
+        params: { v: video.videoId, local: true, hl: 'en' },
+        timeout: 10000,
+        headers: { 'User-Agent': 'Mozilla/5.0' }
+      });
+      const audioStreams = pipedResponse.data?.audioStreams || [];
+      if (audioStreams.length) {
+        // choose highest bitrate
+        const best = audioStreams.sort((a,b)=> (b.bitrate||0)-(a.bitrate||0))[0];
+        if (best?.url) {
+          console.log('✅ Piped fallback succeeded');
+          return res.json({
+            found: true,
+            source: 'piped',
+            title: video.title,
+            artist: artistName,
+            preview_url: best.url,
+            duration: video.duration?.seconds || 180
+          });
+        }
+      }
+      console.log('❌ Piped fallback returned no usable audio streams');
+    } catch (pipedErr) {
+      console.log('❌ Piped fallback failed:', pipedErr.message);
+    }
+
+    // If everything failed, log and return failure
+    console.error('❌ All YouTube extraction methods failed for:', video.videoId);
+    return res.json({ found: false, message: 'No audio available from YouTube (SABR streaming restriction)' });
   } catch (error) {
     console.error("❌ YouTube preview error:", error.message);
     return res.status(500).json({ error: error.message });
@@ -2069,6 +2118,173 @@ app.get("/api/deezer/preview", async (req, res) => {
   } catch (error) {
     console.error("❌ Deezer preview error:", error.message);
     return res.status(500).json({ error: error.message });
+  }
+});
+
+// Jamendo preview endpoint (requires API credentials)
+app.get("/api/jamendo/preview", async (req, res) => {
+  try {
+    const trackName = req.query.trackName;
+    const artistName = req.query.artistName || "";
+
+    if (!trackName) {
+      return res.status(400).json({ error: "trackName query param required" });
+    }
+
+    if (!process.env.JAMENDO_CLIENT_ID) {
+      return res.status(503).json({ found: false, message: "Jamendo client ID not configured" });
+    }
+
+    const query = `${trackName} ${artistName}`.trim();
+    console.log('🔎 Jamendo search query:', query);
+
+    const params = {
+      client_id: process.env.JAMENDO_CLIENT_ID,
+      format: "json",
+      limit: 10,
+      search: query,
+      audioformat: "mp32",
+      include: "musicinfo",
+      order: "popularity_total_desc"
+    };
+
+    if (process.env.JAMENDO_CLIENT_SECRET) {
+      params.client_secret = process.env.JAMENDO_CLIENT_SECRET;
+    }
+
+    const { data } = await axios.get("https://api.jamendo.com/v3.0/tracks", { params });
+    const results = data?.results || [];
+
+    if (!results.length) {
+      return res.json({ found: false, message: "No tracks returned by Jamendo" });
+    }
+
+    const normalize = (value) =>
+      value ? value.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim() : "";
+
+    const normalizedTrackName = normalize(trackName);
+    const normalizedTrackArtists = normalize(artistName);
+
+    const matchesRequestedTrack = (candidate) => {
+      if (!candidate) return false;
+      const candidateTitle = normalize(candidate.name || candidate.title);
+      const candidateArtist = normalize(candidate.artist_name || candidate.artist);
+
+      if (!candidateTitle) return false;
+
+      if (normalizedTrackName && candidateTitle.includes(normalizedTrackName)) {
+        return true;
+      }
+
+      const trackTokens = normalizedTrackName.split(" ").filter(Boolean);
+      const candidateTokens = candidateTitle.split(" ").filter(Boolean);
+      const sharedTokens = trackTokens.filter((token) => candidateTokens.includes(token));
+      const tokenCoverage = trackTokens.length ? sharedTokens.length / trackTokens.length : 0;
+
+      const artistMatches =
+        candidateArtist && normalizedTrackArtists && (
+          candidateArtist.includes(normalizedTrackArtists) || normalizedTrackArtists.includes(candidateArtist)
+        );
+
+      return tokenCoverage >= 0.6 && artistMatches;
+    };
+
+    const playable = results.find(
+      (track) => (track?.audio || track?.audiodownload) && matchesRequestedTrack(track)
+    );
+
+    if (playable) {
+      return res.json({
+        found: true,
+        source: "jamendo",
+        title: playable.name,
+        artist: playable.artist_name,
+        preview_url: playable.audio || playable.audiodownload,
+        duration: playable.duration,
+        jamendo_track_id: playable.id,
+        album_cover: playable.image || playable.album_image,
+        license: playable.license_ccurl
+      });
+    }
+
+    return res.json({ found: false, message: "No closely matching audio found on Jamendo" });
+  } catch (error) {
+    console.error("❌ Jamendo preview error:", error.message);
+    return res.status(error.response?.status || 500).json({
+      error: "Failed to fetch preview from Jamendo",
+      message: error.message
+    });
+  }
+});
+
+// ==================== JioSaavn preview endpoint (unofficial) ====================
+// Example: /api/saavn/preview?query=apna%20bana%20le
+// Returns {found:true, preview_url:'http://...', title, artist, duration}
+app.get("/api/saavn/preview", async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query) return res.status(400).json({ error: "query required" });
+
+    // Mirrors in case one domain fails to resolve
+    const SAAVN_BASES = [
+      "https://saavn.dev/api",
+      "https://saavncloud.grey.software/api"
+    ];
+
+    const saavnRequest = async (path, params = {}) => {
+      for (const base of SAAVN_BASES) {
+        try {
+          const res = await axios.get(`${base}/${path}`, {
+            params,
+            timeout: 10000,
+          });
+          return res.data;
+        } catch (err) {
+          console.log(`Saavn mirror ${base} failed:`, err.code || err.message);
+        }
+      }
+      throw new Error("All Saavn mirrors unreachable");
+    };
+
+    // 1) search for songs (different proxies use different paths)
+    let search;
+    try {
+      search = await saavnRequest("search", { query, type: "song" });
+    } catch (ignore) {
+      // try alternate path used by sumit.co proxy
+      search = await saavnRequest("search/songs", { query, page: 0, limit: 1 });
+    }
+    const song = search?.data?.results?.[0];
+    if (!song) return res.json({ found: false, message: "No Saavn result" });
+
+    // 2) fetch details
+    let details;
+    try {
+      details = await saavnRequest("songs", { id: song.id });
+    } catch (ignore) {
+      details = await saavnRequest("song", { id: song.id });
+    }
+
+    const link = details?.data?.downloadUrl?.[2]?.url // may be array of objects
+              || details?.data?.download_links?.[2]    // legacy field
+              || details?.data?.downloadUrl?.[4]?.link
+              || details?.data?.downloadUrl?.[0]?.link;
+
+    if (link) {
+      return res.json({
+        found: true,
+        source: "jiosaavn",
+        title: song.name,
+        artist: song.primaryArtists,
+        preview_url: link,
+        duration: song.duration,
+        saavn_song_id: song.id,
+      });
+    }
+    return res.json({ found: false, message: "Saavn song has no streamable link" });
+  } catch (error) {
+    console.error("❌ Saavn preview error:", error.message);
+    res.status(500).json({ error: error.message });
   }
 });
 

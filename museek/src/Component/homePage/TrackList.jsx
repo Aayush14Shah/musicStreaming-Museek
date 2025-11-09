@@ -7,7 +7,7 @@ const formatDuration = (ms = 0) => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
 
-const TrackList = ({ items = [], onTrackClick }) => {
+const TrackList = ({ title = 'Recommended Tracks', items = [], onTrackClick }) => {
   // Backend now sends mixed content - prioritize tracks with previews
   const tracks = items.filter(t => {
     const track = t.track || t; // Handle both playlist items and direct tracks
@@ -32,7 +32,7 @@ const TrackList = ({ items = [], onTrackClick }) => {
   return (
     <section className="w-full py-8 md:py-12 bg-[#121212]">
       <div className="px-4 md:px-8 flex items-end justify-between mb-6">
-        <h2 className="text-2xl md:text-3xl font-bold text-[#F5F5F5]">Recommended Tracks</h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-[#F5F5F5]">{title}</h2>
       </div>
 
       {/* Mobile-first: card list */}

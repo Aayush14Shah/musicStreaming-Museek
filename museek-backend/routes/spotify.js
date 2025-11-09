@@ -93,6 +93,33 @@ router.get('/search-artists/:query', async (req, res) => {
   }
 });
 
+// Search tracks by query
+router.get('/search-tracks', async (req, res) => {
+  try {
+    const { query, limit = 20, market = 'US' } = req.query;
+    if (!query || query.trim() === '') {
+      return res.status(400).json({ error: 'query parameter required' });
+    }
+    await getAccessToken();
+    const data = await spotifyApi.searchTracks(query, { limit: Math.min(parseInt(limit,10), 30), market });
+    const tracks = data.body.tracks.items.map(t => ({
+      id: t.id,
+      name: t.name,
+      artists: t.artists.map(a=>({ name: a.name })),
+      album: {
+        name: t.album.name,
+        images: t.album.images
+      },
+      duration_ms: t.duration_ms,
+      preview_url: t.preview_url
+    }));
+    res.json({ tracks });
+  } catch (err) {
+    console.error('Error searching tracks:', err);
+    res.status(500).json({ error: 'Failed to search tracks' });
+  }
+});
+
 // Get single track details (including preview_url)
 router.get('/track', async (req, res) => {
   try {

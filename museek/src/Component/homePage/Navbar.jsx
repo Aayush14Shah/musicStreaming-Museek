@@ -12,11 +12,12 @@ import home_white_variant from '../../Images/Icons/home_white_variant.png';
 import { Navigate,useNavigate } from 'react-router-dom';
 import UserProfile from '../UserProfile';
 
-const Navbar = () => {
+const Navbar = ({ onSearch }) => {
   const [userInitial, setUserInitial] = useState(null);
   const [userEmail, setUserEmail] = useState(null);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     const name = localStorage.getItem('userName');
@@ -75,6 +76,13 @@ const Navbar = () => {
           <div className="relative flex-1">
             <input
               type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && query.trim() && onSearch) {
+                  onSearch(query.trim());
+                }
+              }}
               placeholder="What do you want to play?"
               className="w-full px-4 py-2 md:py-3 rounded-full outline-none border-none text-[#F5F5F5] bg-[#181818] placeholder:text-[#CD7F32] pl-10 md:pl-12 text-sm md:text-base"
             />

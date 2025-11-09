@@ -5,7 +5,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-const LikedSongs = ({ onTrackClick, currentTrack, isPlaying }) => {
+const LikedSongs = ({ onBack, onTrackClick, currentTrack, isPlaying }) => {
   const [likedSongs, setLikedSongs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
@@ -123,6 +123,17 @@ const LikedSongs = ({ onTrackClick, currentTrack, isPlaying }) => {
 
   return (
     <div className="p-6">
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="mb-6 flex items-center gap-2 text-[#F5F5F5] hover:text-[#CD7F32] transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" className="w-4 h-4">
+            <path fillRule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+          </svg>
+          <span className="text-sm font-medium">Back to Home</span>
+        </button>
+      )}
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">Liked Songs</h1>
         <p className="text-gray-400">{likedSongs.length} songs</p>

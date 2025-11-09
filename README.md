@@ -14,3 +14,8 @@ nodemon → Auto-restart server during dev
 -> Spotify responds with an access token (a string).
 -> You use that access token to fetch data (songs, albums, playlists, etc.).
 -> Token usually expires in 1 hour, so you’ll need to refresh it automatically.
+
+## Jamendo API Setup
+- Create a Jamendo developer application and copy the `client_id` and `client_secret`.
+- Store them in `museek-backend/.env` as `JAMENDO_CLIENT_ID` and `JAMENDO_CLIENT_SECRET` (do not commit the file).
+- The backend uses these credentials to power `/api/jamendo/preview`, giving the frontend a legal fallback when other preview sources fail.
