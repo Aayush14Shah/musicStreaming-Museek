@@ -7,7 +7,7 @@ const formatDuration = (ms = 0) => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
 
-const TrackList = ({ items = [], onTrackClick }) => {
+const TrackList = ({ title = 'Recommended Tracks', items = [], onTrackClick }) => {
   // Backend now sends mixed content - prioritize tracks with previews
   const tracks = items.filter(t => {
     const track = t.track || t; // Handle both playlist items and direct tracks
