@@ -20,7 +20,10 @@ const Home = () => {
   console.log("Home.jsx userId from localStorage:", userId);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrack, setCurrentTrack] = useState(null);
-  const [isSidebarVisible, setIsSidebarVisible] = useState(false); // New state for sidebar visibility
+  // Sidebar visibility - sync with localStorage for cross-page persistence
+  const [isSidebarVisible, setIsSidebarVisible] = useState(
+    () => localStorage.getItem("isPlaying") === "true"
+  );
   // const [newReleases, setNewReleases] = useState([]);
   const [featuredPlaylists, setFeaturedPlaylists] = useState([]);
   const [topTracks, setTopTracks] = useState([]);
@@ -78,6 +81,31 @@ const Home = () => {
         console.error("Error parsing last played track:", error);
       }
     }
+  }, []);
+
+  /* ---------- Sidebar toggle function ---------- */
+  const toggleSidebar = (open) => {
+    setIsSidebarVisible(open);
+    localStorage.setItem("isPlaying", open ? "true" : "false");
+  };
+
+  /* ---------- Storage event sync (other tab updates) ---------- */
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (!e) return;
+      if (e.key === "isPlaying") {
+        setIsSidebarVisible(e.newValue === "true");
+      }
+      if (e.key === "lastPlayedTrack") {
+        try {
+          setCurrentTrack(e.newValue ? JSON.parse(e.newValue) : null);
+        } catch {
+          setCurrentTrack(null);
+        }
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
   useEffect(() => {
@@ -638,13 +666,10 @@ const Home = () => {
       setRecentlyPlayed(newRecentlyPlayed);
       localStorage.setItem("recentlyPlayed", JSON.stringify(newRecentlyPlayed));
 
-      // Auto-start playing the preview
+      // Auto-start playing the preview and show sidebar
       setIsPlaying(true);
+      toggleSidebar(true);
     }
-  };
-
-  const handleCloseSidebar = () => {
-    setIsPlaying(false);
   };
 
   const handlePlaylistClick = async (playlist) => {
@@ -689,7 +714,13 @@ const Home = () => {
     >
       <Navbar />
       <LeftSidebar onLikedSongsClick={handleLikedSongsClick} onPlaylistClick={handleUserPlaylistClick} />
-      <div className={`layout-container flex h-full grow flex-col min-h-screen w-full transition-all duration-300 ease-in-out pt-[60px] pb-16 md:pb-20 md:pl-[16.5rem] lg:pl-[18rem] ${isSidebarVisible ? 'md:pr-[20.5rem] lg:pr-[22.5rem]' : 'pr-0'}`}> 
+      <div 
+        className="layout-container flex h-full grow flex-col min-h-screen w-full transition-all duration-300 ease-in-out pt-[60px] pb-16 md:pb-20 md:pl-[16.5rem] lg:pl-[18rem]"
+        style={{ 
+          paddingRight: isSidebarVisible ? '360px' : '0px',
+          transition: 'padding-right 0.3s ease-in-out'
+        }}
+      > 
         <div className="m-1.5 md:mx-2 rounded-2xl shadow-[var(--shadow-primary)] bg-[var(--bg-secondary)] border border-[var(--border-tertiary)] p-2">
           <div className="rounded-2xl bg-[var(--bg-primary)] border border-[var(--card-border)] p-4 md:p-6">
             {/* CONDITIONAL RENDER */}
@@ -753,8 +784,18 @@ const Home = () => {
         </div>
       </div>
       {/* Spotify Music Player */}
-      <MusicPlayer currentTrack={currentTrack} isPlaying={isPlaying} onTogglePlay={() => setIsPlaying(prev => !prev)} />
-      <NowPlayingSidebar currentTrack={currentTrack} onClose={handleCloseSidebar} isOpen={isPlaying} />
+      <MusicPlayer 
+        currentTrack={currentTrack} 
+        isPlaying={isPlaying} 
+        onTogglePlay={() => setIsPlaying(prev => !prev)} 
+      />
+      
+      {/* Now Playing Sidebar */}
+      <NowPlayingSidebar 
+        currentTrack={currentTrack} 
+        onClose={() => toggleSidebar(false)} 
+        isOpen={isSidebarVisible} 
+      />
       
       {/* Custom Songs Audio Player */}
       {currentCustomSong && (
@@ -765,14 +806,18 @@ const Home = () => {
         />
       )}
 
-      {!isPlaying && (
-        <button
-          onClick={() => setIsSidebarVisible(true)}
-          className="hidden md:flex fixed right-4 bottom-24 items-center gap-2 px-4 py-2 rounded-full bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-[0_8px_20px_rgba(0,0,0,0.35)] z-50 hover:bg-[var(--bg-tertiary)] transition-colors"
-        >
-          <span className="inline-block w-2 h-2 rounded-full bg-[var(--accent-primary)]"></span>
-          Show Now Playing
-        </button>
+      {/* Floating "Show Now Playing" button */}
+      {!isSidebarVisible && currentTrack && (
+        <div className="fixed right-1.5 bottom-24 z-50">
+          <button
+            onClick={() => toggleSidebar(true)}
+            className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full show-now-playing-btn text-[var(--text-primary)] shadow-[var(--shadow-secondary)] z-40 transition-all duration-200 hover:scale-105"
+            aria-label="Show Now Playing"
+          >
+            <span className="inline-block w-2 h-2 rounded-full bg-[var(--accent-primary)]"></span>
+            Show Now Playing
+          </button>
+        </div>
       )}
     </div>
   );

@@ -184,11 +184,10 @@ const Signup = () => {
                       type="text"
                       value={form.firstName}
                       onChange={handleChange}
-                      className="w-full px-5 py-4 bg-[var(--bg-secondary)] border-2 border-[var(--border-secondary)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-4 focus:ring-[var(--accent-primary)]/20 focus:border-[var(--accent-primary)] transition-all duration-300 shadow-sm hover:shadow-md"
+                      className="w-full px-5 py-4 bg-[var(--bg-secondary)] border border-[var(--input-border)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/10 focus:border-[var(--input-border-focus)] transition-all duration-200 shadow-sm hover:shadow-[var(--shadow-card)]"
                       placeholder="First name"
                       required
                     />
-                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#CD7F32]/0 via-[#CD7F32]/0 to-[#CD7F32]/0 group-hover:from-[#CD7F32]/5 group-hover:via-[#CD7F32]/3 group-hover:to-[#CD7F32]/5 transition-all duration-300 pointer-events-none"></div>
                   </div>
                   <div className="relative group">
                     <input
@@ -197,11 +196,10 @@ const Signup = () => {
                       type="text"
                       value={form.lastName}
                       onChange={handleChange}
-                      className="w-full px-5 py-4 bg-[var(--bg-secondary)] border-2 border-[var(--border-secondary)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-4 focus:ring-[var(--accent-primary)]/20 focus:border-[var(--accent-primary)] transition-all duration-300 shadow-sm hover:shadow-md"
+                      className="w-full px-5 py-4 bg-[var(--bg-secondary)] border border-[var(--input-border)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/10 focus:border-[var(--input-border-focus)] transition-all duration-200 shadow-sm hover:shadow-[var(--shadow-card)]"
                       placeholder="Last name"
                       required
                     />
-                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#CD7F32]/0 via-[#CD7F32]/0 to-[#CD7F32]/0 group-hover:from-[#CD7F32]/5 group-hover:via-[#CD7F32]/3 group-hover:to-[#CD7F32]/5 transition-all duration-300 pointer-events-none"></div>
                   </div>
                 </div>
                 <div className="relative group">
@@ -211,13 +209,12 @@ const Signup = () => {
                     type="email"
                     value={form.email}
                     onChange={handleChange}
-                    className="w-full px-5 py-4 bg-[var(--bg-secondary)] border-2 border-[var(--border-secondary)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-4 focus:ring-[var(--accent-primary)]/20 focus:border-[var(--accent-primary)] transition-all duration-300 shadow-sm hover:shadow-md"
+                    className="w-full px-5 py-4 bg-[var(--bg-secondary)] border border-[var(--input-border)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/10 focus:border-[var(--input-border-focus)] transition-all duration-200 shadow-sm hover:shadow-[var(--shadow-card)]"
                     placeholder="Email address"
                     required
                   />
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#CD7F32]/0 via-[#CD7F32]/0 to-[#CD7F32]/0 group-hover:from-[#CD7F32]/5 group-hover:via-[#CD7F32]/3 group-hover:to-[#CD7F32]/5 transition-all duration-300 pointer-events-none"></div>
                   {showWarnings && emailWarning && (
-                    <div className="text-yellow-400 text-sm mt-2 pl-1">{emailWarning}</div>
+                    <div className="text-yellow-500 text-sm mt-2 pl-1">{emailWarning}</div>
                   )}
                 </div>
                 <div className="relative group">
@@ -227,7 +224,7 @@ const Signup = () => {
                     type={showPassword ? "text" : "password"}
                     value={form.password}
                     onChange={handleChange}
-                    className="w-full px-5 py-4 pr-12 bg-[var(--bg-secondary)] border-2 border-[var(--border-secondary)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-4 focus:ring-[var(--accent-primary)]/20 focus:border-[var(--accent-primary)] transition-all duration-300 shadow-sm hover:shadow-md"
+                    className="w-full px-5 py-4 pr-12 bg-[var(--bg-secondary)] border border-[var(--input-border)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/10 focus:border-[var(--input-border-focus)] transition-all duration-200 shadow-sm hover:shadow-[var(--shadow-card)]"
                     placeholder="Password"
                     required
                   />
@@ -247,10 +244,9 @@ const Signup = () => {
                       </svg>
                     )}
                   </button>
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#CD7F32]/0 via-[#CD7F32]/0 to-[#CD7F32]/0 group-hover:from-[#CD7F32]/5 group-hover:via-[#CD7F32]/3 group-hover:to-[#CD7F32]/5 transition-all duration-300 pointer-events-none"></div>
                   {/* Password requirements warnings */}
                   {showWarnings && passwordWarnings.length > 0 && (
-                    <ul className="text-yellow-400 text-sm pl-4 list-disc mt-2">
+                    <ul className="text-yellow-500 text-sm pl-4 list-disc mt-2">
                       {passwordWarnings.map((w, i) => (
                         <li key={i}>{w}</li>
                       ))}
@@ -264,7 +260,7 @@ const Signup = () => {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-5 h-5 text-[var(--accent-primary)] border-2 border-[var(--border-secondary)] rounded-lg focus:ring-4 focus:ring-[var(--accent-primary)]/20 focus:ring-offset-0 transition-all duration-200"
+                    className="w-5 h-5 text-[var(--accent-primary)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-[var(--accent-primary)]/20 focus:ring-offset-0 transition-all duration-200"
                   />
                   <label htmlFor="rememberMe" className="ml-3 text-base text-[var(--text-primary)] font-medium">
                     Remember me
@@ -293,7 +289,7 @@ const Signup = () => {
                         maxLength={1}
                         value={digit}
                         onChange={e => handleOtpChange(e, idx)}
-                        className="w-12 h-14 text-2xl text-center bg-[var(--bg-secondary)] border-2 border-[var(--border-secondary)] rounded-xl text-[var(--text-primary)] focus:outline-none focus:ring-4 focus:ring-[var(--accent-primary)]/20 focus:border-[var(--accent-primary)] transition-all duration-300"
+                        className="w-12 h-14 text-2xl text-center bg-[var(--bg-secondary)] border border-[var(--input-border)] rounded-xl text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/10 focus:border-[var(--input-border-focus)] transition-all duration-200"
                         autoFocus={idx === 0}
                       />
                     ))}

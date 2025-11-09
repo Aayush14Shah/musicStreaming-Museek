@@ -46,10 +46,13 @@ export default function Settings() {
   const [user, setUser] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
-  // layout: whether NowPlayingSidebar is open
+  // layout: whether NowPlayingSidebar is open (sync with localStorage)
   const [isSidebarOpen, setIsSidebarOpen] = useState(
     () => localStorage.getItem("isPlaying") === "true"
   );
+
+  // Audio playback state (separate from sidebar visibility)
+  const [isPlaying, setIsPlaying] = useState(false);
 
   // last played track
   const [currentTrack, setCurrentTrack] = useState(() => {
@@ -127,7 +130,7 @@ export default function Settings() {
     };
   }, [userId]);
 
-  /* ---------- Storage event sync ---------- */
+  /* ---------- Storage event sync (other tab updates) ---------- */
   useEffect(() => {
     const onStorage = (e) => {
       if (!e) return;
@@ -230,7 +233,7 @@ export default function Settings() {
             <p className="text-[var(--text-secondary)] text-lg mb-6">Your password was updated successfully.</p>
             <button 
               onClick={() => setShowPasswordPopup(false)}
-              className="w-full bg-gradient-to-r from-[#CD7F32] to-[#b06f2d] text-white font-bold py-3 px-6 rounded-lg hover:from-[#b06f2d] hover:to-[#CD7F32] transition-colors duration-300"
+              className="w-full bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white font-bold py-3 px-6 rounded-lg hover:from-[var(--accent-secondary)] hover:to-[var(--accent-primary)] transition-all duration-300 shadow-[var(--shadow-secondary)] hover:shadow-[var(--shadow-hover)]"
             >
               Close
             </button>
@@ -283,13 +286,13 @@ export default function Settings() {
       {/* main area - content starts from left, only right part resizes */}
       <div className="pt-[64px] pb-28">
         <div 
-          className="transition-all duration-200"
+          className="transition-all duration-300 ease-in-out"
           style={{ 
-            marginRight: isSidebarOpen ? `${SIDEBAR_WIDTH_PX}px` : '0px'
+            paddingRight: isSidebarOpen ? `${SIDEBAR_WIDTH_PX}px` : '0px'
           }}
         >
-          {/* Gray background box like sidebars */}
-          <div className="bg-[var(--bg-secondary)] min-h-screen mx-4 rounded-lg shadow-lg mt-4">
+          {/* Main content background box */}
+          <div className="bg-[var(--bg-secondary)] min-h-screen mx-4 rounded-lg shadow-[var(--shadow-primary)] border border-[var(--border-tertiary)] mt-4">
             <div className="p-6 md:p-8">
               {/* Back Button */}
               <div className="mb-6">
@@ -439,10 +442,8 @@ export default function Settings() {
       {/* Music Player */}
       <MusicPlayer
         currentTrack={currentTrack}
-        isPlaying={isSidebarOpen}
-        onTogglePlay={() => {
-          toggleSidebar(!isSidebarOpen);
-        }}
+        isPlaying={isPlaying}
+        onTogglePlay={() => setIsPlaying(prev => !prev)}
       />
 
       {/* Now Playing Sidebar */}
@@ -453,14 +454,14 @@ export default function Settings() {
       />
 
       {/* Floating "Show Now Playing" button */}
-      {!isSidebarOpen && (
+      {!isSidebarOpen && currentTrack && (
         <div className="fixed right-1.5 bottom-24 z-50">
           <button
             onClick={() => toggleSidebar(true)}
-            className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--bg-secondary)]/95 text-[var(--text-primary)] shadow-[0_8px_20px_rgba(0,0,0,0.35)] z-40 hover:bg-[var(--bg-tertiary)]/95 transition-colors"
+            className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full show-now-playing-btn text-[var(--text-primary)] shadow-[var(--shadow-secondary)] z-40 transition-all duration-200 hover:scale-105"
             aria-label="Show Now Playing"
           >
-            <span className="inline-block w-2 h-2 rounded-full bg-[#CD7F32]"></span>
+            <span className="inline-block w-2 h-2 rounded-full bg-[var(--accent-primary)]"></span>
             Show Now Playing
           </button>
         </div>

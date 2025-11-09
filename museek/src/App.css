@@ -57,22 +57,60 @@
 }
 
 :root[data-theme="dark"] {
+  /* Background Colors - Original dark mode */
   --bg-primary: #181818;
   --bg-secondary: #0f0f0f;
   --bg-tertiary: #282828;
+  --bg-quaternary: #1a1a1a; /* For cards and sections */
+  
+  /* Text Colors - Original dark mode */
   --text-primary: #f5f5f5;
   --text-secondary: #b3b3b3;
   --text-tertiary: #757575;
-  --border-primary: #333333;
-  --border-secondary: #555555;
+  --text-quaternary: #6c6c6c; /* Lighter text for hints */
+  
+  /* Border Colors - Almost invisible in dark mode (original dark mode had minimal borders) */
+  --border-primary: transparent; /* No visible border */
+  --border-secondary: transparent; /* No visible border */
+  --border-tertiary: transparent; /* No visible border */
+  --border-accent: rgba(205, 127, 50, 0.15); /* Very subtle accent border only when needed */
+  
+  /* Accent Colors */
   --accent-primary: #cd7f32;
   --accent-secondary: #b06f2d;
-  --popup-bg: rgba(40, 40, 40, 0.8);
-  --accent-primary-rgb: 205, 127, 50; /* RGB for #cd7f32 */
-  --bg-primary-rgb: 24, 24, 24; /* RGB for #181818 */
-  --bg-secondary-rgb: 15, 15, 15; /* RGB for #0f0f0f */
+  --accent-hover: #d8904a; /* Lighter on hover */
+  
+  /* Card and Section Backgrounds */
+  --card-bg: #181818;
+  --card-border: transparent; /* No visible card border in dark mode */
+  --section-bg: #1a1a1a; /* Subtle background for sections */
+  
+  /* Popup and Modal */
+  --popup-bg: rgba(40, 40, 40, 0.95);
   --popup-border: rgba(205, 127, 50, 0.3);
-  --shadow-primary: 0 8px 20px rgba(0,0,0,0.35); /* Original dark shadow */
+  --backdrop-bg: rgba(0, 0, 0, 0.7);
+  
+  /* Shadows - Original dark shadows */
+  --shadow-primary: 0 8px 20px rgba(0,0,0,0.35);
+  --shadow-secondary: 0 4px 12px rgba(0,0,0,0.25);
+  --shadow-hover: 0 6px 16px rgba(0,0,0,0.4);
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.2);
+  
+  /* Input Fields */
+  --input-bg: #282828;
+  --input-border: rgba(255, 255, 255, 0.1);
+  --input-border-focus: rgba(205, 127, 50, 0.5);
+  --input-shadow-focus: 0 0 0 3px rgba(205, 127, 50, 0.2);
+  
+  /* Button States */
+  --button-hover-bg: rgba(205, 127, 50, 0.9);
+  --button-active-bg: rgba(176, 111, 45, 0.9);
+  
+  /* RGB values for rgba() usage */
+  --accent-primary-rgb: 205, 127, 50;
+  --bg-primary-rgb: 24, 24, 24;
+  --bg-secondary-rgb: 15, 15, 15;
+  --bg-tertiary-rgb: 40, 40, 40;
 }
 .App {
   text-align: center;
@@ -226,4 +264,263 @@
 
 [data-theme="light"] .border-accent-soft {
   border: 1px solid var(--border-primary);
+}
+
+/* ==========================================================================
+   Dark Mode Specific Styles - Minimal borders (original dark mode style)
+   ========================================================================== */
+
+/* Dark mode - original style with minimal/no visible borders */
+[data-theme="dark"] {
+  /* Remove all borders from sidebars and main containers */
+  aside,
+  [class*="sidebar"] {
+    border: none !important;
+  }
+  
+  /* Navbar dropdown - no border in dark mode */
+  .dropdown-menu {
+    border: none !important;
+  }
+  
+  .dropdown-arrow {
+    border: none !important;
+  }
+  
+  .dropdown-divider {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  }
+  
+  /* Remove borders from buttons (home icon, etc.) */
+  button[class*="border"] {
+    border: none !important;
+  }
+  
+  /* Input fields - no border in dark mode, only show on focus */
+  input:not(:focus),
+  textarea:not(:focus),
+  select:not(:focus) {
+    border: none !important;
+  }
+  
+  /* Cards and containers - remove borders */
+  [class*="bg-\[var\(--bg-secondary\)\]"],
+  [class*="bg-\[var\(--bg-primary\)\]"],
+  [class*="bg-\[var\(--bg-tertiary\)\]"] {
+    border-color: transparent !important;
+  }
+  
+  /* Remove border from navbar */
+  .navbar-container {
+    border-bottom: none !important;
+  }
+  
+  /* Remove all border-b classes in dark mode */
+  [class*="border-b"]:not(.dropdown-divider) {
+    border-bottom: none !important;
+  }
+  
+  /* Exception: Keep very subtle divider for dropdown user info */
+  .dropdown-divider {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  }
+}
+
+/* Light mode - restore borders and show borders for dropdown */
+[data-theme="light"] {
+  .navbar-container {
+    border-bottom: 1px solid var(--border-primary);
+  }
+  
+  .dropdown-menu {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-accent);
+  }
+  
+  .dropdown-arrow {
+    background: var(--bg-secondary);
+    border-left: 1px solid var(--border-accent);
+    border-top: 1px solid var(--border-accent);
+  }
+  
+  .dropdown-user-info {
+    background: var(--bg-tertiary);
+  }
+  
+  .dropdown-divider {
+    border-bottom: 1px solid var(--border-tertiary);
+  }
+  
+  .dropdown-menu-item:hover {
+    background: var(--bg-tertiary);
+    color: var(--accent-primary);
+  }
+  
+  .dropdown-menu-icon {
+    color: var(--accent-primary);
+    opacity: 0.7;
+  }
+  
+  .dropdown-menu-item:hover .dropdown-menu-icon {
+    opacity: 1;
+  }
+  
+  /* Show Now Playing button */
+  .show-now-playing-btn {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-tertiary);
+  }
+  
+  .show-now-playing-btn:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--border-primary);
+  }
+  
+  /* Home Icon Button - More visible in light theme */
+  .home-icon-btn {
+    background: var(--bg-secondary) !important; /* White background */
+    border: 1.5px solid var(--border-primary) !important; /* Stronger border */
+    box-shadow: var(--shadow-card) !important;
+    opacity: 1 !important;
+  }
+  
+  .home-icon-btn:hover {
+    background: var(--bg-tertiary) !important;
+    border-color: var(--accent-primary) !important;
+    box-shadow: var(--shadow-secondary) !important;
+    transform: scale(1.05);
+  }
+  
+  .home-icon-img {
+    opacity: 0.9 !important;
+    filter: brightness(0) saturate(100%) invert(27%) sepia(85%) saturate(1352%) hue-rotate(346deg) brightness(89%) contrast(85%); /* Orange/bronze color */
+  }
+  
+  .home-icon-btn:hover .home-icon-img {
+    opacity: 1 !important;
+    filter: brightness(0) saturate(100%) invert(27%) sepia(85%) saturate(1352%) hue-rotate(346deg) brightness(100%) contrast(95%);
+  }
+  
+  /* Search Bar - More visible in light theme */
+  .navbar-search-input {
+    background: var(--bg-secondary) !important; /* White background */
+    border: 1.5px solid var(--border-primary) !important; /* Stronger border */
+    box-shadow: var(--shadow-card) !important;
+  }
+  
+  .navbar-search-input:focus {
+    border-color: var(--accent-primary) !important;
+    box-shadow: var(--shadow-secondary), 0 0 0 3px rgba(205, 127, 50, 0.1) !important;
+    outline: none;
+  }
+  
+  .navbar-search-input:hover:not(:focus) {
+    border-color: var(--border-accent) !important;
+    box-shadow: var(--shadow-card) !important;
+  }
+  
+  /* Search Icon - More visible */
+  .navbar-search-icon {
+    color: var(--accent-primary) !important;
+    opacity: 0.8 !important;
+  }
+  
+  .navbar-search-input:focus ~ .navbar-search-icon {
+    opacity: 1 !important;
+    color: var(--accent-primary) !important;
+  }
+}
+
+/* Dark mode - better colors for dropdown and button */
+[data-theme="dark"] {
+  .dropdown-menu {
+    background: var(--bg-tertiary); /* Use tertiary instead of pure black */
+    border: none;
+  }
+  
+  .dropdown-arrow {
+    background: var(--bg-tertiary); /* Match dropdown background */
+    border: none;
+  }
+  
+  .dropdown-user-info {
+    background: rgba(255, 255, 255, 0.03); /* Very subtle darker section */
+  }
+  
+  .dropdown-divider {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important; /* Slightly more visible divider */
+  }
+  
+  .dropdown-menu-item:hover {
+    background: rgba(205, 127, 50, 0.15); /* Subtle accent hover */
+    color: var(--accent-primary);
+  }
+  
+  .dropdown-menu-icon {
+    color: var(--accent-primary);
+    opacity: 0.8;
+  }
+  
+  .dropdown-menu-item:hover .dropdown-menu-icon {
+    opacity: 1;
+    color: var(--accent-primary);
+  }
+  
+  /* Show Now Playing button - solid background for visibility */
+  .show-now-playing-btn {
+    background: var(--bg-tertiary); /* Use tertiary (lighter than pure black) */
+    border: none;
+    backdrop-filter: blur(10px);
+  }
+  
+  .show-now-playing-btn:hover {
+    background: rgba(40, 40, 40, 0.95); /* Slightly lighter on hover */
+  }
+  
+  /* Home Icon Button - Dark theme (keep original styling) */
+  .home-icon-btn {
+    background: var(--bg-tertiary) !important;
+    border: none !important;
+    opacity: 0.8 !important;
+  }
+  
+  .home-icon-btn:hover {
+    background: var(--bg-quaternary) !important;
+    opacity: 1 !important;
+    transform: scale(1.05);
+  }
+  
+  .home-icon-img {
+    opacity: 0.8 !important;
+  }
+  
+  .home-icon-btn:hover .home-icon-img {
+    opacity: 1 !important;
+  }
+  
+  /* Search Bar - Dark theme (keep original styling) */
+  .navbar-search-input {
+    background: var(--bg-primary) !important;
+    border: 1px solid transparent !important;
+    box-shadow: none !important;
+  }
+  
+  .navbar-search-input:focus {
+    border-color: var(--accent-primary) !important;
+    box-shadow: 0 0 0 2px rgba(205, 127, 50, 0.2) !important;
+  }
+  
+  .navbar-search-input:hover:not(:focus) {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  /* Search Icon - Dark theme */
+  .navbar-search-icon {
+    color: var(--accent-primary) !important;
+    opacity: 0.7 !important;
+  }
+  
+  .navbar-search-input:focus ~ .navbar-search-icon {
+    opacity: 1 !important;
+  }
 }

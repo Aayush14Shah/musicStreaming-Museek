@@ -101,7 +101,7 @@ const ManageUser = () => {
                     Manage user accounts and permissions
                   </p>
                 </div>
-                <Button
+                {/* <Button
                   variant="contained"
                   sx={{
                     backgroundColor: "#CD7F32",
@@ -113,7 +113,7 @@ const ManageUser = () => {
                   }}
                 >
                   + Add New User
-                </Button>
+                </Button> */}
               </div>
 
               {/* Search Bar */}

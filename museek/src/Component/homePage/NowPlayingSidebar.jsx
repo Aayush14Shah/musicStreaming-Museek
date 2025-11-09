@@ -23,8 +23,8 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
           isOpen ? "translate-x-0" : "translate-x-full"
         } w-[18rem] md:w-[20rem] lg:w-[22rem]`}
       >
-        <div className="m-1.5 w-full h-[calc(100%-12px)] rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.45)] bg-[var(--bg-secondary)] p-2">
-          <div className="w-full h-full rounded-2xl bg-[var(--bg-primary)] overflow-y-auto p-4 group scrollbar-thin scrollbar-thumb-transparent hover:scrollbar-thumb-[var(--accent-primary)] scrollbar-track-transparent scrollbar-thumb-rounded-full">
+        <div className="m-1.5 w-full h-[calc(100%-12px)] rounded-2xl shadow-[var(--shadow-primary)] bg-[var(--bg-secondary)] border border-[var(--border-tertiary)] p-2">
+          <div className="w-full h-full rounded-2xl bg-[var(--bg-primary)] border border-[var(--card-border)] overflow-y-auto p-4 group scrollbar-thin scrollbar-thumb-transparent hover:scrollbar-thumb-[var(--accent-primary)] scrollbar-track-transparent scrollbar-thumb-rounded-full">
             <div className="flex justify-between items-center mb-3">
               <h2 className="text-base font-semibold">{playlistName}</h2>
               <button
@@ -113,8 +113,8 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
         isOpen ? "translate-x-0" : "translate-x-full"
       } w-[18rem] md:w-[20rem] lg:w-[22rem]`}
     >
-      <div className="m-1.5 h-[calc(100%-12px)] rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.45)] bg-[var(--bg-secondary)] p-2">
-        <div className="w-full h-full rounded-2xl bg-[var(--bg-primary)] overflow-y-auto p-4 group scrollbar-thin scrollbar-thumb-transparent hover:scrollbar-thumb-[var(--accent-primary)] scrollbar-track-transparent scrollbar-thumb-rounded-full">
+      <div className="m-1.5 h-[calc(100%-12px)] rounded-2xl shadow-[var(--shadow-primary)] bg-[var(--bg-secondary)] border border-[var(--border-tertiary)] p-2">
+        <div className="w-full h-full rounded-2xl bg-[var(--bg-primary)] border border-[var(--card-border)] overflow-y-auto p-4 group scrollbar-thin scrollbar-thumb-transparent hover:scrollbar-thumb-[var(--accent-primary)] scrollbar-track-transparent scrollbar-thumb-rounded-full">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-base font-semibold line-clamp-1">
               {dynamicPlaylistName}
@@ -143,20 +143,20 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
             </button>
           </div>
           <div className="flex flex-col gap-4">
-            <div className="bg-gradient-to-b from-transparent to-[var(--bg-primary)]/50 rounded-lg p-4 shadow-sm border border-[var(--border-primary)]">
-              <div className="w-full aspect-square mb-3">
+            <div className="bg-gradient-to-b from-[var(--bg-tertiary)]/50 to-[var(--bg-primary)]/30 rounded-lg p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)]">
+              <div className="w-full aspect-square mb-3 rounded-lg overflow-hidden bg-[var(--bg-tertiary)]">
                 <img
                   src={currentTrack.image}
                   alt={currentTrack.title}
-                  className="w-full h-full object-contain rounded-lg"
+                  className="w-full h-full object-contain"
                 />
-                <h2 className="text-lg font-semibold mb-2 mt-4">
-                  {currentTrack.title}
-                </h2>
-                <p className="text-sm text-[var(--accent-primary)] mb-3 font-normal">
-                  {currentTrack.artist}
-                </p>
               </div>
+              <h2 className="text-lg font-semibold mb-2 mt-4 text-[var(--text-primary)]">
+                {currentTrack.title}
+              </h2>
+              <p className="text-sm text-[var(--accent-primary)] mb-3 font-normal">
+                {currentTrack.artist}
+              </p>
               <div className="flex items-center gap-3">
                 <Tooltip title={isLiked(currentTrack?.id, 'spotify') ? 'Remove from Liked Songs' : 'Add to Liked Songs'} arrow>
                   <button
@@ -192,24 +192,24 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
                 </Tooltip>
               </div>
             </div>
-            <div className="bg-gradient-to-b from-transparent to-[var(--bg-primary)]/50 rounded-lg p-4 shadow-sm border border-[var(--popup-border)]">
-              <h3 className="text-base font-semibold mb-2">About the artist</h3>
-              <p className="text-sm leading-tight">{artistInfo.description}</p>
+            <div className="bg-gradient-to-b from-[var(--bg-tertiary)]/50 to-[var(--bg-primary)]/30 rounded-lg p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)]">
+              <h3 className="text-base font-semibold mb-2 text-[var(--text-primary)]">About the artist</h3>
+              <p className="text-sm leading-tight text-[var(--text-secondary)]">{artistInfo.description}</p>
             </div>
-            <div className="bg-gradient-to-b from-transparent to-[var(--bg-primary)]/50 rounded-lg p-4 shadow-sm border border-[var(--popup-border)]">
-              <h3 className="text-base font-semibold mb-2">Credits</h3>
+            <div className="bg-gradient-to-b from-[var(--bg-tertiary)]/50 to-[var(--bg-primary)]/30 rounded-lg p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)]">
+              <h3 className="text-base font-semibold mb-2 text-[var(--text-primary)]">Credits</h3>
               <ul className="list-disc pl-5 space-y-1">
                 {artistInfo.credits.map((credit, index) => (
-                  <li key={index} className="text-sm leading-tight">
+                  <li key={index} className="text-sm leading-tight text-[var(--text-secondary)]">
                     {credit.role}: {credit.name}
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="bg-gradient-to-b from-transparent to-[var(--bg-primary)]/50 rounded-lg p-4 shadow-sm border border-[var(--popup-border)]">
-              <h3 className="text-base font-semibold mb-2">Next in Queue</h3>
-              <div className="bg-[var(--bg-secondary)] p-3 rounded-lg">
-                <p className="text-sm font-medium">{artistInfo.queue.title}</p>
+            <div className="bg-gradient-to-b from-[var(--bg-tertiary)]/50 to-[var(--bg-primary)]/30 rounded-lg p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)]">
+              <h3 className="text-base font-semibold mb-2 text-[var(--text-primary)]">Next in Queue</h3>
+              <div className="bg-[var(--bg-secondary)] border border-[var(--border-tertiary)] p-3 rounded-lg">
+                <p className="text-sm font-medium text-[var(--text-primary)]">{artistInfo.queue.title}</p>
                 <p className="text-sm text-[var(--accent-primary)] leading-tight">
                   {artistInfo.queue.artist}
                 </p>

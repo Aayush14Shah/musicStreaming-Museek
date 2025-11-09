@@ -114,7 +114,7 @@ const Navbar = () => {
     navigate('/');
   };
   return (
-    <div className="fixed top-0 left-0 right-0 h-[60px] flex items-center justify-between px-4 md:px-6 py-3 text-[var(--text-primary)] bg-[var(--bg-secondary)] border-b border-[var(--border-primary)] z-50">
+    <div className="fixed top-0 left-0 right-0 h-[60px] flex items-center justify-between px-4 md:px-6 py-3 text-[var(--text-primary)] bg-[var(--bg-secondary)] z-50 navbar-container">
       {/* Left - Brand Logo */}
       <div className="flex-shrink-0">
         <img
@@ -130,12 +130,12 @@ const Navbar = () => {
           <Tooltip title="Go to Home" arrow>
             <button 
               onClick={() => navigate("/")}
-              className="w-10 h-10 flex items-center justify-center bg-[var(--bg-tertiary)] hover:bg-[var(--bg-quaternary)] border border-[var(--border-tertiary)] hover:border-[var(--border-primary)] opacity-80 hover:opacity-100 transition-all duration-200 rounded-full shadow-sm hover:shadow-md"
+              className="w-10 h-10 flex items-center justify-center home-icon-btn transition-all duration-200 rounded-full"
             >
               <img
                 src={home_white_variant}
                 alt="Home Icon"
-                className="w-5 h-5 object-cover opacity-80"
+                className="w-5 h-5 object-cover home-icon-img"
               />
             </button>
           </Tooltip>
@@ -143,12 +143,9 @@ const Navbar = () => {
             <input
               type="text"
               placeholder="What do you want to play?"
-              className="w-full px-4 py-2 md:py-3 rounded-full outline-none border border-[var(--border-tertiary)] text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder:text-[var(--text-tertiary)] pl-10 md:pl-12 text-sm md:text-base focus:border-[var(--border-accent)] focus:ring-2 focus:ring-[var(--accent-primary)]/10 transition-all duration-200 shadow-sm"
-              style={{
-                borderColor: 'var(--border-tertiary)'
-              }}
+              className="w-full px-4 py-2 md:py-3 rounded-full outline-none navbar-search-input text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] pl-10 md:pl-12 text-sm md:text-base transition-all duration-200"
             />
-            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--accent-primary)] opacity-70 w-5 h-5 md:w-6 md:h-6" />
+            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 navbar-search-icon w-5 h-5 md:w-6 md:h-6" />
           </div>
         </div>
       </div>
@@ -167,13 +164,13 @@ const Navbar = () => {
             <span className="font-semibold text-lg text-white drop-shadow-lg leading-none">{userInitial}</span>
           </div>
           {open && (
-  <div className="absolute right-0 mt-3 w-56 bg-[var(--bg-secondary)] border border-[var(--border-accent)] rounded-xl shadow-[var(--shadow-primary)] z-50 overflow-hidden" style={{ boxShadow: 'var(--shadow-secondary)' }}>
+  <div className="absolute right-0 mt-3 w-56 rounded-xl shadow-[var(--shadow-primary)] z-50 overflow-hidden dropdown-menu">
     {/* Arrow */}
-    <div className="absolute -top-2 right-4 w-4 h-4 bg-[var(--bg-secondary)] border-l border-t border-[var(--border-accent)] rotate-45"></div>
+    <div className="absolute -top-2 right-4 w-4 h-4 rotate-45 dropdown-arrow"></div>
 
     {/* User Info */}
     {userEmail && (
-      <div className="px-4 py-3 border-b border-[var(--border-tertiary)] bg-[var(--bg-tertiary)]">
+      <div className="px-4 py-3 dropdown-user-info dropdown-divider">
         <div className="text-sm font-semibold text-[var(--text-primary)]">
           {userInitial}
         </div>
@@ -184,28 +181,28 @@ const Navbar = () => {
     )}
 
     {/* Menu */}
-    <div className="flex flex-col py-1">
+    <div className="flex flex-col py-1 dropdown-menu-items">
       <button
         onClick={() => { setOpen(false); navigate('/profile'); }}
-        className="flex items-center gap-3 px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--accent-primary)] transition-colors duration-200"
+        className="flex items-center gap-3 px-4 py-2 text-sm text-[var(--text-primary)] dropdown-menu-item transition-colors duration-200"
       >
-        <AccountCircleIcon fontSize="small" className="text-[var(--accent-primary)]/70" />
+        <AccountCircleIcon fontSize="small" className="dropdown-menu-icon" />
         Profile
       </button>
 
       <button
         onClick={() => { setOpen(false); navigate('/settings'); }}
-        className="flex items-center gap-3 px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--accent-primary)] transition-colors duration-200"
+        className="flex items-center gap-3 px-4 py-2 text-sm text-[var(--text-primary)] dropdown-menu-item transition-colors duration-200"
       >
-        <SettingsIcon fontSize="small" className="text-[var(--accent-primary)]/70" />
+        <SettingsIcon fontSize="small" className="dropdown-menu-icon" />
         Settings
       </button>
 
       <button
         onClick={handleLogout}
-        className="flex items-center gap-3 px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--accent-primary)] transition-colors duration-200"
+        className="flex items-center gap-3 px-4 py-2 text-sm text-[var(--text-primary)] dropdown-menu-item transition-colors duration-200"
       >
-        <LogoutIcon fontSize="small" className="text-[var(--accent-primary)]/70" />
+        <LogoutIcon fontSize="small" className="dropdown-menu-icon" />
         Logout
       </button>
     </div>
