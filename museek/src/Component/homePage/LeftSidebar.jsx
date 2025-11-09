@@ -35,9 +35,9 @@ const LeftSidebar = ({ onLikedSongsClick, onPlaylistClick }) => {
   return (
     <aside className="hidden md:flex fixed left-0 top-[60px] bottom-16 w-64 lg:w-72 bg-transparent text-[var(--text-primary)] z-40">
       {/* Outer card */}
-      <div className="m-1.5 w-full h-[calc(100%-12px)] rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.45)] bg-[var(--bg-secondary)] p-2">
+      <div className="m-1.5 w-full h-[calc(100%-12px)] rounded-2xl shadow-[var(--shadow-primary)] bg-[var(--bg-secondary)] border border-[var(--border-tertiary)] p-2">
         {/* Inner card */}
-        <div className="w-full h-full rounded-2xl bg-[var(--bg-primary)] overflow-hidden">
+        <div className="w-full h-full rounded-2xl bg-[var(--bg-primary)] border border-[var(--card-border)] overflow-hidden">
           <div className="flex flex-col h-full overflow-y-auto p-4 gap-4 group scrollbar-thin scrollbar-thumb-transparent hover:scrollbar-thumb-[var(--accent-primary)] scrollbar-track-transparent scrollbar-thumb-rounded-full">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold text-sm uppercase tracking-wide text-[var(--text-secondary)]">Your Library</h2>
@@ -50,11 +50,11 @@ const LeftSidebar = ({ onLikedSongsClick, onPlaylistClick }) => {
             </div>
 
             {showCreate && (
-              <div className="bg-[var(--bg-tertiary)] rounded-lg p-4 border border-[var(--popup-border)]">
+              <div className="bg-[var(--bg-tertiary)] rounded-lg p-4 border border-[var(--border-primary)] shadow-sm">
                 <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">Create New Playlist</h3>
                 <div className="space-y-3">
                   <input
-                    className="w-full bg-[var(--bg-secondary)] border border-[var(--accent-primary)]/40 rounded-md px-3 py-2 outline-none text-sm placeholder-[var(--text-tertiary)] focus:border-[var(--accent-primary)]/60 transition-colors"
+                    className="w-full bg-[var(--bg-secondary)] border border-[var(--input-border)] rounded-md px-3 py-2 outline-none text-sm placeholder-[var(--text-tertiary)] focus:border-[var(--input-border-focus)] focus:ring-2 focus:ring-[var(--accent-primary)]/10 transition-all"
                     placeholder="Playlist name"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
@@ -62,7 +62,7 @@ const LeftSidebar = ({ onLikedSongsClick, onPlaylistClick }) => {
                     autoFocus
                   />
                   <textarea
-                    className="w-full bg-[var(--bg-secondary)] border border-[var(--accent-primary)]/40 rounded-md px-3 py-2 outline-none text-sm placeholder-[var(--text-tertiary)] focus:border-[var(--accent-primary)]/60 transition-colors resize-none"
+                    className="w-full bg-[var(--bg-secondary)] border border-[var(--input-border)] rounded-md px-3 py-2 outline-none text-sm placeholder-[var(--text-tertiary)] focus:border-[var(--input-border-focus)] focus:ring-2 focus:ring-[var(--accent-primary)]/10 transition-all resize-none"
                     placeholder="Description (optional)"
                     value={newDescription}
                     onChange={(e) => setNewDescription(e.target.value)}

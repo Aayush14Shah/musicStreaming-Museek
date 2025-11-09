@@ -3,7 +3,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 
 const PlaylistCard = ({ title, description, image, onClick }) => (
   <div 
-    className="bg-[var(--bg-tertiary)] rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-[var(--border-primary)] hover:border-[var(--accent-primary)]/30 group"
+    className="bg-[var(--bg-tertiary)] rounded-xl overflow-hidden shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-secondary)] transition-all duration-300 cursor-pointer border border-[var(--card-border)] hover:border-[var(--border-accent)] group"
     onClick={onClick}
   >
     <div className="w-full aspect-square overflow-hidden relative min-h-[140px] sm:min-h-[160px] md:min-h-[180px] lg:min-h-[200px] xl:min-h-[220px]">
