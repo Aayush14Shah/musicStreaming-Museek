@@ -846,29 +846,29 @@ const Home = () => {
 
   return (
     <div className="relative flex size-full min-h-screen flex-col bg-gradient-to-br from-[#121212] via-[#1a1a1a] to-[#0e0e0e] dark group/design-root overflow-x-hidden" style={{ fontFamily: 'Inter, \"Noto Sans\", sans-serif' }}>
-      <Navbar onSearch={async (q)=>{
-        if(!q) return;
-        try{
-          const res=await fetch(`http://localhost:5000/api/spotify/search-tracks?query=${encodeURIComponent(q)}&limit=12`);
-          if(res.ok){
-            const data=await res.json();
-            setSearchResults((data.tracks||[]).slice(0,12));
+      <Navbar onSearch={async (q) => {
+        if (!q) return;
+        try {
+          const res = await fetch(`http://localhost:5000/api/spotify/search-tracks?query=${encodeURIComponent(q)}&limit=12`);
+          if (res.ok) {
+            const data = await res.json();
+            setSearchResults((data.tracks || []).slice(0, 12));
           }
-        }catch(err){console.error('search error',err);}
+        } catch (err) { console.error('search error', err); }
       }} />
       <LeftSidebar onLikedSongsClick={handleLikedSongsClick} onPlaylistClick={handleUserPlaylistClick} />
-      <div 
+      <div
         className="layout-container flex h-full grow flex-col min-h-screen w-full transition-all duration-300 ease-in-out pt-[60px] pb-16 md:pb-20 md:pl-[16.5rem] lg:pl-[18rem]"
-        style={{ 
+        style={{
           paddingRight: isSidebarVisible ? '360px' : '0px',
           transition: 'padding-right 0.3s ease-in-out'
         }}
-      > 
+      >
         <div className="m-1.5 md:mx-2 rounded-2xl shadow-[var(--shadow-primary)] bg-[var(--bg-secondary)] border border-[var(--border-tertiary)] p-2">
           <div className="rounded-2xl bg-[var(--bg-primary)] border border-[var(--card-border)] p-4 md:p-6">
             {/* CONDITIONAL RENDER */}
             {currentView === 'liked-songs' ? (
-              <LikedSongs 
+              <LikedSongs
                 onBack={() => setCurrentView('home')}
                 onTrackClick={handleTrackClick}
                 currentTrack={currentTrack}
@@ -904,69 +904,69 @@ const Home = () => {
                   </p>
                 )}
 
-                  <HeroBanner featured={heroFeatured} forceWhiteText={true} />
+                <HeroBanner featured={heroFeatured} forceWhiteText={true} />
 
-                  {/* Custom Songs Section - Your Offline Library */}
-                  <CustomSongsSection
-                    onSongPlay={handleCustomSongPlay}
-                    currentPlayingSong={currentCustomSong}
-                    isPlaying={isCustomSongPlaying}
-                  />
+                {/* Custom Songs Section - Your Offline Library */}
+                <CustomSongsSection
+                  onSongPlay={handleCustomSongPlay}
+                  currentPlayingSong={currentCustomSong}
+                  isPlaying={isCustomSongPlaying}
+                />
 
-                  {/* <CarouselPlaylistRow title="New Releases" items={newReleases} onPlaylistClick={handlePlaylistClick} /> */}
-                  <CarouselPlaylistRow title="Artist Playlists" items={artistPlaylists} onPlaylistClick={handlePlaylistClick} />
-                  {/* <CarouselPlaylistRow title="Featured Playlists" items={featuredPlaylists} onPlaylistClick={handlePlaylistClick} /> */}
-                  {/* <CarouselTrackRow title="Trending Songs" items={topTracks} onTrackClick={handleTrackClick} /> */}
-                  <CarouselPlaylistRow title="Recently Played" items={recentlyPlayed} onPlaylistClick={handlePlaylistClick} />
-                  <CarouselPlaylistRow title="Popular Playlists" items={popularPlaylists} onPlaylistClick={handlePlaylistClick} />
-                  <CarouselPlaylistRow title="Mood Booster" items={moodBooster} onPlaylistClick={handlePlaylistClick} />
-                  {searchResults && (
-                    <TrackList title="Search Results" items={searchResults} onTrackClick={handleTrackClick} />
-                  )}
-                  <TrackList items={recommendedTracks} onTrackClick={handleTrackClick} />
-                </>
-              )}
-            </div>
+                {/* <CarouselPlaylistRow title="New Releases" items={newReleases} onPlaylistClick={handlePlaylistClick} /> */}
+                <CarouselPlaylistRow title="Artist Playlists" items={artistPlaylists} onPlaylistClick={handlePlaylistClick} />
+                {/* <CarouselPlaylistRow title="Featured Playlists" items={featuredPlaylists} onPlaylistClick={handlePlaylistClick} /> */}
+                {/* <CarouselTrackRow title="Trending Songs" items={topTracks} onTrackClick={handleTrackClick} /> */}
+                <CarouselPlaylistRow title="Recently Played" items={recentlyPlayed} onPlaylistClick={handlePlaylistClick} />
+                <CarouselPlaylistRow title="Popular Playlists" items={popularPlaylists} onPlaylistClick={handlePlaylistClick} />
+                <CarouselPlaylistRow title="Mood Booster" items={moodBooster} onPlaylistClick={handlePlaylistClick} />
+                {searchResults && (
+                  <TrackList title="Search Results" items={searchResults} onTrackClick={handleTrackClick} />
+                )}
+                <TrackList items={recommendedTracks} onTrackClick={handleTrackClick} />
+              </>
+            )}
           </div>
         </div>
-        {/* Spotify Music Player */}
-        <MusicPlayer
-          currentTrack={currentTrack}
-          isPlaying={isPlaying}
-          onTogglePlay={() => setIsPlaying(prev => !prev)}
-        />
-
-        {/* Now Playing Sidebar */}
-        <NowPlayingSidebar
-          currentTrack={currentTrack}
-          onClose={() => toggleSidebar(false)}
-          isOpen={isSidebarVisible}
-        />
-
-        {/* Custom Songs Audio Player */}
-        {currentCustomSong && (
-          <CustomAudioPlayer
-            currentSong={currentCustomSong}
-            isPlaying={isCustomSongPlaying}
-            onPlayPause={handleCustomSongPlay}
-          />
-        )}
-
-        {/* Floating "Show Now Playing" button */}
-        {!isSidebarVisible && currentTrack && (
-          <div className="fixed right-1.5 bottom-24 z-50">
-            <button
-              onClick={() => toggleSidebar(true)}
-              className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full show-now-playing-btn text-[var(--text-primary)] shadow-[var(--shadow-secondary)] z-40 transition-all duration-200 hover:scale-105"
-              aria-label="Show Now Playing"
-            >
-              <span className="inline-block w-2 h-2 rounded-full bg-[var(--accent-primary)]"></span>
-              Show Now Playing
-            </button>
-          </div>
-        )}
       </div>
+      {/* Spotify Music Player */}
+      <MusicPlayer
+        currentTrack={currentTrack}
+        isPlaying={isPlaying}
+        onTogglePlay={() => setIsPlaying(prev => !prev)}
+      />
+
+      {/* Now Playing Sidebar */}
+      <NowPlayingSidebar
+        currentTrack={currentTrack}
+        onClose={() => toggleSidebar(false)}
+        isOpen={isSidebarVisible}
+      />
+
+      {/* Custom Songs Audio Player */}
+      {currentCustomSong && (
+        <CustomAudioPlayer
+          currentSong={currentCustomSong}
+          isPlaying={isCustomSongPlaying}
+          onPlayPause={handleCustomSongPlay}
+        />
+      )}
+
+      {/* Floating "Show Now Playing" button */}
+      {!isSidebarVisible && currentTrack && (
+        <div className="fixed right-1.5 bottom-24 z-50">
+          <button
+            onClick={() => toggleSidebar(true)}
+            className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full show-now-playing-btn text-[var(--text-primary)] shadow-[var(--shadow-secondary)] z-40 transition-all duration-200 hover:scale-105"
+            aria-label="Show Now Playing"
+          >
+            <span className="inline-block w-2 h-2 rounded-full bg-[var(--accent-primary)]"></span>
+            Show Now Playing
+          </button>
+        </div>
+      )}
     </div>
+    // </div >
   );
 };
 
