@@ -60,6 +60,15 @@ const ManageUser = () => {
     }
   };
 
+  // Activate inactive user
+  const handleActivateUser = async (user)=>{
+    try{
+      const res= await fetch(`http://localhost:5000/api/users/${user._id}/activate`,{method:'PATCH'});
+      if(!res.ok) throw new Error('Failed to activate user');
+      await fetchUsers();
+    }catch(err){console.error('activate error',err); alert('Error activating user');}
+  };
+
   // Cancel delete action
   const cancelDelete = () => {
     setShowConfirmPopup(false);
@@ -187,7 +196,7 @@ const ManageUser = () => {
                             className={`px-6 py-4 whitespace-nowrap flex gap-2 justify-center ${user.is_active === 0 ? 'opacity-60' : ''}`}
                             onClick={(e) => e.stopPropagation()}
                           >
-                            {user.is_active === 1 && (
+                            {user.is_active === 1 ? (
                               <IconButton
                                 onClick={() => handleDeleteUser(user)}
                                 size="small"
@@ -198,6 +207,17 @@ const ManageUser = () => {
                                 title="Deactivate User"
                               >
                                 <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            ) : (
+                              <IconButton
+                                onClick={() => handleActivateUser(user)}
+                                size="small"
+                                sx={{ color: '#22c55e', '&:hover': { backgroundColor: '#22c55e1a' }}}
+                                title="Activate User"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
                               </IconButton>
                             )}
                           </td>

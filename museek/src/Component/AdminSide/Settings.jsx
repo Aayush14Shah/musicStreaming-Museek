@@ -110,7 +110,7 @@ const Settings = () => {
   const tabs = [
     { id: 'general', label: 'General', icon: SettingsIcon },
     { id: 'users', label: 'Users', icon: Users },
-    { id: 'music', label: 'Music', icon: Music },
+  
     { id: 'security', label: 'Security', icon: Shield }
   ];
 

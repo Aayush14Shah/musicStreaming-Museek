@@ -26,7 +26,14 @@ await connectDB();
 // Initializing app
 const app = express();
 
-app.use(cors()); // lets your React app call this API
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type,Authorization',
+  })
+); // lets your React app call this API
 app.use(express.json()); // parse JSON bodies if you send POST/PUT later
 
 // Create uploads directories if they don't exist
@@ -1692,6 +1699,22 @@ let tokenCache = {
 };
 
 
+
+// Activate inactive user
+app.patch('/api/users/:id/activate', async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { is_active: 1 },
+      { new: true }
+    );
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 // Personalized playlists by user
 app.get("/api/user-playlists", async (req, res) => {

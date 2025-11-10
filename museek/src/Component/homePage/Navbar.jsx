@@ -28,7 +28,6 @@ const GRADIENT_AVATARS = [
   { id: 11, gradient: 'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)' }
 ];
 
-const Navbar = () => {
 const Navbar = ({ onSearch }) => {
   const [userInitial, setUserInitial] = useState(null);
   const [userEmail, setUserEmail] = useState(null);
@@ -217,18 +216,21 @@ const Navbar = ({ onSearch }) => {
     </div>
   </div>
 )}
+
         </div>
-        ) : (
-          <button
+      ) : (
+        <button
             onClick={handleRedirect}
             className="px-4 py-2 bg-[var(--accent-primary)] hover:bg-[var(--accent-secondary)] text-white rounded-md font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg"
           >
             Login
-          </button>
-        )}
-      </div>
+            onClick={handleRedirect}
+          className="px-4 py-2 bg-[var(--accent-primary)] hover:bg-[var(--accent-secondary)] text-white rounded-md font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg"
+     
+          Login
+        </button>
+      )}
     </div>
-  );
-};
-
+  </div>
+);}
 export default Navbar;

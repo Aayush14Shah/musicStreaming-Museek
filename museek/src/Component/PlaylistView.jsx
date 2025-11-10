@@ -118,68 +118,7 @@ export const PlaylistView = ({ playlist, tracks, onTrackClick, onBack }) => {
         </div>
       </div>
 
-      {/* Actions Bar */}
-      <div className="px-6 pb-4 mt-[20px] flex items-center gap-4">
-        <Button
-          variant="contained"
-          className="rounded-full p-3 hover:scale-105 transition-all duration-300"
-          style={{ 
-            backgroundColor: 'var(--accent-primary)',
-            color: 'var(--bg-primary)',
-            textTransform: 'none',
-            fontWeight: 'bold'
-          }}
-          onClick={() => tracks.length > 0 && onTrackClick(tracks[0])}
-        >
-          Play
-        </Button>
-        <Button
-          variant="outlined"
-          className="rounded-full p-3 hover:scale-105 transition-all duration-300"
-          style={{ 
-            color: 'var(--text-primary)',
-            borderColor: 'var(--accent-primary)',
-            textTransform: 'none'
-          }}
-        >
-          <Share className="w-5 h-5 mr-2" /> Share
-        </Button>
-        <Button
-          variant="outlined"
-          className="rounded-full p-3 hover:scale-105 transition-all duration-300"
-          style={{ 
-            color: 'var(--text-primary)',
-            borderColor: 'var(--accent-primary)',
-            textTransform: 'none'
-          }}
-        >
-          <Heart className="w-5 h-5 mr-2" /> Like
-        </Button>
-        <Button
-          variant="outlined"
-          className="rounded-full p-3 hover:scale-105 transition-all duration-300"
-          style={{ 
-            color: 'var(--text-primary)',
-            borderColor: 'var(--accent-primary)',
-            textTransform: 'none'
-          }}
-        >
-          <Download className="w-5 h-5 mr-2" /> Download
-        </Button>
-        <Button
-          variant="outlined"
-          size="small"
-          className="rounded-full p-3 hover:scale-105 transition-all duration-300 ml-auto"
-          style={{ 
-            color: 'var(--text-primary)',
-            borderColor: 'var(--accent-primary)',
-            textTransform: 'none'
-          }}
-        >
-          <MoreHorizontal className="w-5 h-5" />
-        </Button>
-      </div>
-
+     
       {/* Track List Header */}
       <div className="px-6 pb-2 grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_1fr_1fr_auto] items-center gap-4 text-sm uppercase font-semibold" style={{ color: 'var(--text-secondary)' }}>
         <div>#</div>
