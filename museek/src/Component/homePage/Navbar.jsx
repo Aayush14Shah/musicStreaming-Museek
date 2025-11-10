@@ -29,6 +29,7 @@ const GRADIENT_AVATARS = [
 ];
 
 const Navbar = () => {
+const Navbar = ({ onSearch }) => {
   const [userInitial, setUserInitial] = useState(null);
   const [userEmail, setUserEmail] = useState(null);
   const [open, setOpen] = useState(false);
@@ -38,6 +39,7 @@ const Navbar = () => {
     return Math.max(0, Math.min(index, GRADIENT_AVATARS.length - 1));
   });
   const navigate = useNavigate();
+  const [query, setQuery] = useState("");
 
   // Get current avatar style
   const avatarStyle = useMemo(() => {
@@ -142,6 +144,13 @@ const Navbar = () => {
           <div className="relative flex-1">
             <input
               type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && query.trim() && onSearch) {
+                  onSearch(query.trim());
+                }
+              }}
               placeholder="What do you want to play?"
               className="w-full px-4 py-2 md:py-3 rounded-full outline-none navbar-search-input text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] pl-10 md:pl-12 text-sm md:text-base transition-all duration-200"
             />

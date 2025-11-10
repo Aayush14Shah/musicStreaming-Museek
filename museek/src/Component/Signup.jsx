@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import LogoDark from '../Images/LogoFinalDarkModeFrameResized.png';
@@ -26,6 +26,25 @@ const Signup = () => {
   const [registrationDisabled, setRegistrationDisabled] = useState(false);
   const otpRefs = useRef([]);
   const [theme] = useState(localStorage.getItem('theme') || 'dark');
+
+  // Check platform settings to see if registration is allowed
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/settings');
+        if (response.status === 200 && response.data) {
+          if (response.data.allowRegistration === false) {
+            setRegistrationDisabled(true);
+          }
+        }
+      } catch (error) {
+        console.error('Unable to fetch settings:', error);
+        // Fail-safe: keep registration enabled if settings cannot be loaded
+      }
+    };
+
+    fetchSettings();
+  }, []);
 
   // Password validation function
   const validatePassword = (password) => {
