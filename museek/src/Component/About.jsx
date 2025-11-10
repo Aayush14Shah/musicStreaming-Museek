@@ -16,10 +16,10 @@ const About = () => {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4 p-4">
       {albums.map(a => (
-        <div key={a.id} className="rounded-lg bg-neutral-900 p-3 hover:bg-neutral-800 transition">
+        <div key={a.id} className="rounded-lg bg-[var(--bg-tertiary)] p-3 hover:bg-[var(--border-primary)] transition">
           <img src={a.images?.[0]?.url} alt={a.name} className="rounded mb-2" />
-          <div className="font-semibold truncate">{a.name}</div>
-          <div className="text-sm text-neutral-400 truncate">{a.artists?.map(x => x.name).join(", ")}</div>
+          <div className="font-semibold truncate text-[var(--text-primary)]">{a.name}</div>
+          <div className="text-sm text-[var(--text-secondary)] truncate">{a.artists?.map(x => x.name).join(", ")}</div>
         </div>
       ))}
     </div>

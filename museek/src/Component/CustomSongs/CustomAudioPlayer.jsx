@@ -195,7 +195,7 @@ const CustomAudioPlayer = ({
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-[#181818] border-t border-gray-800 p-4 z-50">
+    <div className="fixed bottom-0 left-0 right-0 bg-[var(--bg-primary)] border-t border-[var(--border-primary)] p-4 z-50">
       <audio
         ref={audioRef}
         onLoadedMetadata={handleLoadedMetadata}
@@ -228,20 +228,20 @@ const CustomAudioPlayer = ({
             <div 
               className={`w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-md flex items-center justify-center ${currentSong.coverUrl ? 'hidden' : 'flex'}`}
             >
-              <Music className="w-6 h-6 text-white" />
+              <Music className="w-6 h-6 text-[var(--text-primary)]" />
             </div>
           </div>
           
           <div className="min-w-0 flex-1">
-            <h4 className="text-white font-medium text-sm truncate">
+            <h4 className="text-[var(--text-primary)] font-medium text-sm truncate">
               {currentSong.title}
             </h4>
-            <p className="text-gray-400 text-xs truncate">
+            <p className="text-[var(--text-secondary)] text-xs truncate">
               {currentSong.artist}
             </p>
           </div>
           
-          <button className="text-gray-400 hover:text-white p-1">
+          <button className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1">
             <Heart className="w-4 h-4" />
           </button>
         </div>
@@ -252,7 +252,7 @@ const CustomAudioPlayer = ({
           <div className="flex items-center space-x-4">
             <button
               onClick={() => setIsShuffle(!isShuffle)}
-              className={`p-1 ${isShuffle ? 'text-green-500' : 'text-gray-400 hover:text-white'}`}
+              className={`p-1 ${isShuffle ? 'text-green-500' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
             >
               <Shuffle className="w-4 h-4" />
             </button>
@@ -260,7 +260,7 @@ const CustomAudioPlayer = ({
             <button
               onClick={onPrevious}
               disabled={!onPrevious}
-              className="text-gray-400 hover:text-white disabled:opacity-50 p-1"
+              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-50 p-1"
             >
               <SkipBack className="w-5 h-5" />
             </button>
@@ -268,10 +268,10 @@ const CustomAudioPlayer = ({
             <button
               onClick={() => onPlayPause(currentSong, !isPlaying)}
               disabled={loading}
-              className="bg-white text-black rounded-full p-2 hover:scale-105 transition-transform disabled:opacity-50"
+              className="bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-full p-2 hover:scale-105 transition-transform disabled:opacity-50"
             >
               {loading ? (
-                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-5 h-5 border-2 border-[var(--bg-primary)] border-t-transparent rounded-full animate-spin"></div>
               ) : isPlaying ? (
                 <Pause className="w-5 h-5" />
               ) : (
@@ -282,14 +282,14 @@ const CustomAudioPlayer = ({
             <button
               onClick={onNext}
               disabled={!onNext}
-              className="text-gray-400 hover:text-white disabled:opacity-50 p-1"
+              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-50 p-1"
             >
               <SkipForward className="w-5 h-5" />
             </button>
             
             <button
               onClick={() => setIsRepeat(!isRepeat)}
-              className={`p-1 ${isRepeat ? 'text-green-500' : 'text-gray-400 hover:text-white'}`}
+              className={`p-1 ${isRepeat ? 'text-green-500' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
             >
               <Repeat className="w-4 h-4" />
             </button>
@@ -297,23 +297,23 @@ const CustomAudioPlayer = ({
 
           {/* Progress Bar */}
           <div className="flex items-center space-x-2 w-full">
-            <span className="text-xs text-gray-400 w-10 text-right">
+            <span className="text-xs text-[var(--text-secondary)] w-10 text-right">
               {formatTime(currentTime)}
             </span>
             
             <div
-              className="flex-1 h-1 bg-gray-600 rounded-full cursor-pointer group"
+              className="flex-1 h-1 bg-[var(--border-secondary)] rounded-full cursor-pointer group"
               onClick={handleSeek}
             >
               <div
-                className="h-full bg-white rounded-full relative group-hover:bg-green-500 transition-colors"
+                className="h-full bg-[var(--text-primary)] rounded-full relative group-hover:bg-green-500 transition-colors"
                 style={{ width: `${progressPercentage}%` }}
               >
-                <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-[var(--text-primary)] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </div>
             </div>
             
-            <span className="text-xs text-gray-400 w-10">
+            <span className="text-xs text-[var(--text-secondary)] w-10">
               {formatTime(duration)}
             </span>
           </div>
@@ -321,12 +321,12 @@ const CustomAudioPlayer = ({
 
         {/* Volume and Additional Controls */}
         <div className="flex items-center space-x-4 w-1/4 justify-end">
-          <button className="text-gray-400 hover:text-white p-1">
+          <button className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1">
             <MoreHorizontal className="w-4 h-4" />
           </button>
           
           <div className="flex items-center space-x-2">
-            <button onClick={toggleMute} className="text-gray-400 hover:text-white p-1">
+            <button onClick={toggleMute} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1">
               {isMuted || volume === 0 ? (
                 <VolumeX className="w-4 h-4" />
               ) : (
@@ -341,7 +341,7 @@ const CustomAudioPlayer = ({
               step="0.01"
               value={isMuted ? 0 : volume}
               onChange={handleVolumeChange}
-              className="w-20 h-1 bg-gray-600 rounded-full appearance-none cursor-pointer slider"
+              className="w-20 h-1 bg-[var(--border-secondary)] rounded-full appearance-none cursor-pointer slider"
             />
           </div>
         </div>

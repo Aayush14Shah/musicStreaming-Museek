@@ -46,10 +46,13 @@ export default function Settings() {
   const [user, setUser] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
-  // layout: whether NowPlayingSidebar is open
+  // layout: whether NowPlayingSidebar is open (sync with localStorage)
   const [isSidebarOpen, setIsSidebarOpen] = useState(
     () => localStorage.getItem("isPlaying") === "true"
   );
+
+  // Audio playback state (separate from sidebar visibility)
+  const [isPlaying, setIsPlaying] = useState(false);
 
   // last played track
   const [currentTrack, setCurrentTrack] = useState(() => {
@@ -127,7 +130,7 @@ export default function Settings() {
     };
   }, [userId]);
 
-  /* ---------- Storage event sync ---------- */
+  /* ---------- Storage event sync (other tab updates) ---------- */
   useEffect(() => {
     const onStorage = (e) => {
       if (!e) return;
@@ -145,6 +148,12 @@ export default function Settings() {
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
   }, []);
+
+  /* ---------- Apply theme on mount ---------- */
+  useEffect(() => {
+    // Apply theme to document
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
 
   /* ---------- Theme toggle ---------- */
   const handleThemeToggle = (event) => {
@@ -214,17 +223,17 @@ export default function Settings() {
           {/* Blurred background overlay */}
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
           {/* Popup box */}
-          <div className="relative bg-[#282828]/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center border border-[#CD7F32]/30">
+          <div className="relative bg-[var(--popup-bg)] backdrop-blur-md rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center border border-[var(--popup-border)]">
             <div className="flex justify-center mb-6">
               <div className="bg-green-500/20 rounded-full p-4">
                 <CheckCircleIcon style={{ fontSize: "3rem" }} className="text-green-400" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-[#F5F5F5] mb-2">Password Changed!</h1>
-            <p className="text-gray-300 text-lg mb-6">Your password was updated successfully.</p>
+            <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Password Changed!</h1>
+            <p className="text-[var(--text-secondary)] text-lg mb-6">Your password was updated successfully.</p>
             <button 
               onClick={() => setShowPasswordPopup(false)}
-              className="w-full bg-gradient-to-r from-[#CD7F32] to-[#b06f2d] text-white font-bold py-3 px-6 rounded-lg hover:from-[#b06f2d] hover:to-[#CD7F32] transition-colors duration-300"
+              className="w-full bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white font-bold py-3 px-6 rounded-lg hover:from-[var(--accent-secondary)] hover:to-[var(--accent-primary)] transition-all duration-300 shadow-[var(--shadow-secondary)] hover:shadow-[var(--shadow-hover)]"
             >
               Close
             </button>
@@ -271,25 +280,25 @@ export default function Settings() {
 
   /* ---------- Render UI ---------- */
   return (
-    <div className="min-h-screen bg-[#181818] text-white">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
       <Navbar />
 
       {/* main area - content starts from left, only right part resizes */}
       <div className="pt-[64px] pb-28">
         <div 
-          className="transition-all duration-200"
+          className="transition-all duration-300 ease-in-out"
           style={{ 
-            marginRight: isSidebarOpen ? `${SIDEBAR_WIDTH_PX}px` : '0px'
+            paddingRight: isSidebarOpen ? `${SIDEBAR_WIDTH_PX}px` : '0px'
           }}
         >
-          {/* Gray background box like sidebars */}
-          <div className="bg-[#0f0f0f] min-h-screen mx-4 rounded-lg shadow-lg mt-4">
+          {/* Main content background box */}
+          <div className="bg-[var(--bg-secondary)] min-h-screen mx-4 rounded-lg shadow-[var(--shadow-primary)] border border-[var(--border-tertiary)] mt-4">
             <div className="p-6 md:p-8">
               {/* Back Button */}
               <div className="mb-6">
                 <button
                   onClick={() => navigate("/")}
-                  className="flex items-center gap-2 text-[#cd7f32] hover:text-[#b06f2d] transition-colors"
+                  className="flex items-center gap-2 text-[var(--accent-primary)] hover:text-[var(--accent-secondary)] transition-colors"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -301,7 +310,7 @@ export default function Settings() {
               {/* Header */}
               <div className="mb-8">
                 <h1 className="text-3xl md:text-4xl font-bold mb-2">Settings</h1>
-                <p className="text-gray-400">Manage your account preferences and security settings.</p>
+                <p className="text-[var(--text-secondary)]">Manage your account preferences and security settings.</p>
               </div>
 
               {/* Settings Sections */}
@@ -309,27 +318,27 @@ export default function Settings() {
                 {/* Account Settings */}
                 <div>
                   <div className="flex items-center mb-6">
-                    <div className="w-1 h-8 bg-[#cd7f32] rounded-full mr-4"></div>
+                    <div className="w-1 h-8 bg-[var(--accent-primary)] rounded-full mr-4"></div>
                     <h2 className="text-xl font-semibold">Account Settings</h2>
                   </div>
 
                   <div className="space-y-6">
                     {/* Change Password */}
-                    <div className="flex items-center justify-between py-4 px-6 bg-[#181818] rounded-lg border border-[#333] hover:border-[#cd7f32]/30 transition-colors">
+                    <div className="flex items-center justify-between py-4 px-6 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-primary)] hover:border-[var(--accent-primary)]/30 transition-colors">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <LockIcon sx={{ color: "#cd7f32", fontSize: 20 }} />
+                          <LockIcon sx={{ color: "var(--accent-primary)", fontSize: 20 }} />
                           <h3 className="text-lg font-semibold">Change Password</h3>
                         </div>
-                        <p className="text-gray-400 text-sm">Update your password to keep your account secure.</p>
+                        <p className="text-[var(--text-secondary)] text-sm">Update your password to keep your account secure.</p>
                       </div>
                       <Button
                         variant="contained"
                         onClick={() => setChangePasswordOpen(true)}
                         startIcon={<ArrowIcon />}
                         sx={{
-                          backgroundColor: "#cd7f32",
-                          "&:hover": { backgroundColor: "#b06f2d" },
+                          backgroundColor: "var(--accent-primary)",
+                          "&:hover": { backgroundColor: "var(--accent-secondary)" },
                           borderRadius: "12px",
                           px: 3,
                           py: 1
@@ -342,71 +351,71 @@ export default function Settings() {
                 </div>
 
                 {/* Thin separator line */}
-                <div className="border-t border-[#333]"></div>
+                <div className="border-t border-[var(--border-primary)]"></div>
 
                 {/* Personalization */}
                 <div>
                   <div className="flex items-center mb-6">
-                    <div className="w-1 h-8 bg-[#cd7f32] rounded-full mr-4"></div>
+                    <div className="w-1 h-8 bg-[var(--accent-primary)] rounded-full mr-4"></div>
                     <h2 className="text-xl font-semibold">Personalization</h2>
                   </div>
 
                   <div className="space-y-6">
                     {/* Theme */}
-                    <div className="flex items-center justify-between py-4 px-6 bg-[#181818] rounded-lg border border-[#333] hover:border-[#cd7f32]/30 transition-colors">
+                    <div className="flex items-center justify-between py-4 px-6 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-primary)] hover:border-[var(--accent-primary)]/30 transition-colors">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <PaletteIcon sx={{ color: "#cd7f32", fontSize: 20 }} />
+                          <PaletteIcon sx={{ color: "var(--accent-primary)", fontSize: 20 }} />
                           <h3 className="text-lg font-semibold">Theme</h3>
                         </div>
-                        <p className="text-gray-400 text-sm">Switch between light and dark themes.</p>
+                        <p className="text-[var(--text-secondary)] text-sm">Switch between light and dark themes.</p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-sm text-gray-300">Light</span>
+                        <span className="text-sm text-[var(--text-secondary)]">Light</span>
                         <Switch
                           checked={theme === "dark"}
                           onChange={handleThemeToggle}
                           sx={{
                             "& .MuiSwitch-switchBase.Mui-checked": {
-                              color: "#cd7f32",
+                              color: "var(--accent-primary)",
                             },
                             "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                              backgroundColor: "#cd7f32",
+                              backgroundColor: "var(--accent-primary)",
                             },
                           }}
                         />
-                        <span className="text-sm text-gray-300">Dark</span>
+                        <span className="text-sm text-[var(--text-secondary)]">Dark</span>
                       </div>
                     </div>
 
-                    {/* Language */}
-                    <div className="flex items-center justify-between py-4 px-6 bg-[#181818] rounded-lg border border-[#333] hover:border-[#cd7f32]/30 transition-colors">
+                    {/* Language */} 
+                    <div className="flex items-center justify-between py-4 px-6 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-primary)] hover:border-[var(--accent-primary)]/30 transition-colors">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <LanguageIcon sx={{ color: "#cd7f32", fontSize: 20 }} />
+                          <LanguageIcon sx={{ color: "var(--accent-primary)", fontSize: 20 }} />
                           <h3 className="text-lg font-semibold">Language</h3>
                         </div>
-                        <p className="text-gray-400 text-sm">Choose the language for the website text.</p>
+                        <p className="text-[var(--text-secondary)] text-sm">Choose the language for the website text.</p>
                       </div>
                       <Select
                         value={language}
                         onChange={handleLanguageChange}
                         sx={{
-                          color: "white",
-                          backgroundColor: "#181818",
+                          color: "var(--text-primary)",
+                          backgroundColor: "var(--bg-primary)",
                           borderRadius: "8px",
                           minWidth: 120,
                           "& .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "#333",
+                            borderColor: "var(--border-primary)",
                           },
                           "&:hover .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "#cd7f32",
+                            borderColor: "var(--accent-primary)",
                           },
                           "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "#cd7f32",
+                            borderColor: "var(--accent-primary)",
                           },
                           "& .MuiSvgIcon-root": {
-                            color: "#cd7f32",
+                            color: "var(--accent-primary)",
                           },
                         }}
                       >
@@ -433,10 +442,8 @@ export default function Settings() {
       {/* Music Player */}
       <MusicPlayer
         currentTrack={currentTrack}
-        isPlaying={isSidebarOpen}
-        onTogglePlay={() => {
-          toggleSidebar(!isSidebarOpen);
-        }}
+        isPlaying={isPlaying}
+        onTogglePlay={() => setIsPlaying(prev => !prev)}
       />
 
       {/* Now Playing Sidebar */}
@@ -447,33 +454,44 @@ export default function Settings() {
       />
 
       {/* Floating "Show Now Playing" button */}
-      {!isSidebarOpen && (
+      {!isSidebarOpen && currentTrack && (
         <div className="fixed right-1.5 bottom-24 z-50">
           <button
             onClick={() => toggleSidebar(true)}
-            className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-[#0e0e0e]/95 text-[#F5F5F5] shadow-[0_8px_20px_rgba(0,0,0,0.35)] z-40 hover:bg-[#151515]/95 transition-colors"
+            className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full show-now-playing-btn text-[var(--text-primary)] shadow-[var(--shadow-secondary)] z-40 transition-all duration-200 hover:scale-105"
             aria-label="Show Now Playing"
           >
-            <span className="inline-block w-2 h-2 rounded-full bg-[#CD7F32]"></span>
+            <span className="inline-block w-2 h-2 rounded-full bg-[var(--accent-primary)]"></span>
             Show Now Playing
           </button>
         </div>
       )}
 
       {/* Change Password Dialog */}
-      <Dialog open={changePasswordOpen} onClose={() => setChangePasswordOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ bgcolor: "#121212", color: "#fff", position: "relative" }}>
+      <Dialog 
+        open={changePasswordOpen} 
+        onClose={() => setChangePasswordOpen(false)} 
+        maxWidth="sm" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            bgcolor: 'var(--bg-secondary)',
+            color: 'var(--text-primary)'
+          }
+        }}
+      >
+        <DialogTitle sx={{ position: "relative" }}>
           Change Password
           <IconButton
             onClick={() => setChangePasswordOpen(false)}
-            sx={{ position: "absolute", right: 8, top: 8, color: "#fff" }}
+            sx={{ position: "absolute", right: 8, top: 8, color: "var(--text-secondary)" }}
             aria-label="close"
           >
             <CloseIcon />
           </IconButton>
         </DialogTitle>
 
-        <DialogContent dividers sx={{ bgcolor: "#0b0b0b", display: "flex", flexDirection: "column" }}>
+        <DialogContent dividers sx={{ borderColor: 'var(--border-primary)', display: "flex", flexDirection: "column" }}>
         <div className="space-y-4">
           <TextField
             fullWidth
@@ -483,22 +501,22 @@ export default function Settings() {
             onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
             sx={{
               "& .MuiOutlinedInput-root": {
-                color: "white",
+                color: "var(--text-primary)",
                 "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#333",
+                  borderColor: "var(--border-secondary)",
                 },
                 "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#cd7f32",
+                  borderColor: "var(--accent-primary)",
                 },
                 "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#cd7f32",
+                  borderColor: "var(--accent-primary)",
                 },
               },
               "& .MuiInputLabel-root": {
-                color: "#999",
+                color: "var(--text-secondary)",
               },
               "& .MuiInputLabel-root.Mui-focused": {
-                color: "#cd7f32",
+                color: "var(--accent-primary)",
               },
             }}
           />
@@ -511,22 +529,22 @@ export default function Settings() {
             onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
             sx={{
               "& .MuiOutlinedInput-root": {
-                color: "white",
+                color: "var(--text-primary)",
                 "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#333",
+                  borderColor: "var(--border-secondary)",
                 },
                 "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#cd7f32",
+                  borderColor: "var(--accent-primary)",
                 },
                 "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#cd7f32",
+                  borderColor: "var(--accent-primary)",
                 },
               },
               "& .MuiInputLabel-root": {
-                color: "#999",
+                color: "var(--text-secondary)",
               },
               "& .MuiInputLabel-root.Mui-focused": {
-                color: "#cd7f32",
+                color: "var(--accent-primary)",
               },
             }}
           />
@@ -539,22 +557,22 @@ export default function Settings() {
             onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
             sx={{
               "& .MuiOutlinedInput-root": {
-                color: "white",
+                color: "var(--text-primary)",
                 "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#333",
+                  borderColor: "var(--border-secondary)",
                 },
                 "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#cd7f32",
+                  borderColor: "var(--accent-primary)",
                 },
                 "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#cd7f32",
+                  borderColor: "var(--accent-primary)",
                 },
               },
               "& .MuiInputLabel-root": {
-                color: "#999",
+                color: "var(--text-secondary)",
               },
               "& .MuiInputLabel-root.Mui-focused": {
-                color: "#cd7f32",
+                color: "var(--accent-primary)",
               },
             }}
           />
@@ -564,17 +582,17 @@ export default function Settings() {
           <Button
             onClick={() => navigate('/forgot')}
             variant="contained"
-            sx={{ backgroundColor: "#cd7f32", }}
+            sx={{ backgroundColor: "var(--accent-primary)", "&:hover": { backgroundColor: "var(--accent-secondary)" } }}
           >
             Forgot Password?
           </Button>
         </Box>
       </DialogContent>
 
-        <DialogActions sx={{ bgcolor: "#121212", px: 3, py: 2 }}>
+        <DialogActions sx={{ px: 3, py: 2, borderColor: 'var(--border-primary)' }}>
           <Button
             onClick={() => setChangePasswordOpen(false)}
-            sx={{ color: "#999" }}
+            sx={{ color: "var(--text-secondary)" }}
           >
             Cancel
           </Button>
@@ -582,7 +600,7 @@ export default function Settings() {
             onClick={handlePasswordChange}
             variant="contained"
             startIcon={<SaveIcon />}
-            sx={{ backgroundColor: "#cd7f32" }}
+            sx={{ backgroundColor: "var(--accent-primary)", "&:hover": { backgroundColor: "var(--accent-secondary)" } }}
           >
             Update Password
           </Button>
@@ -590,19 +608,30 @@ export default function Settings() {
       </Dialog>
 
       {/* Update Email Dialog */}
-      <Dialog open={updateEmailOpen} onClose={() => setUpdateEmailOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ bgcolor: "#121212", color: "#fff", position: "relative" }}>
+      <Dialog 
+        open={updateEmailOpen} 
+        onClose={() => setUpdateEmailOpen(false)} 
+        maxWidth="sm" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            bgcolor: 'var(--bg-secondary)',
+            color: 'var(--text-primary)'
+          }
+        }}
+      >
+        <DialogTitle sx={{ position: "relative" }}>
           Update Email
           <IconButton
             onClick={() => setUpdateEmailOpen(false)}
-            sx={{ position: "absolute", right: 8, top: 8, color: "#fff" }}
+            sx={{ position: "absolute", right: 8, top: 8, color: "var(--text-secondary)" }}
             aria-label="close"
           >
             <CloseIcon />
           </IconButton>
         </DialogTitle>
 
-        <DialogContent dividers sx={{ bgcolor: "#0b0b0b" }}>
+        <DialogContent dividers sx={{ borderColor: 'var(--border-primary)' }}>
           <div className="space-y-4">
             <TextField
               fullWidth
@@ -612,22 +641,22 @@ export default function Settings() {
               onChange={(e) => setEmailForm(prev => ({ ...prev, newEmail: e.target.value }))}
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  color: "white",
+                  color: "var(--text-primary)",
                   "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#333",
+                    borderColor: "var(--border-secondary)",
                   },
                   "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#cd7f32",
+                    borderColor: "var(--accent-primary)",
                   },
                   "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#cd7f32",
+                    borderColor: "var(--accent-primary)",
                   },
                 },
                 "& .MuiInputLabel-root": {
-                  color: "#999",
+                  color: "var(--text-secondary)",
                 },
                 "& .MuiInputLabel-root.Mui-focused": {
-                  color: "#cd7f32",
+                  color: "var(--accent-primary)",
                 },
               }}
             />
@@ -639,32 +668,32 @@ export default function Settings() {
               onChange={(e) => setEmailForm(prev => ({ ...prev, confirmEmail: e.target.value }))}
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  color: "white",
+                  color: "var(--text-primary)",
                   "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#333",
+                    borderColor: "var(--border-secondary)",
                   },
                   "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#cd7f32",
+                    borderColor: "var(--accent-primary)",
                   },
                   "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#cd7f32",
+                    borderColor: "var(--accent-primary)",
                   },
                 },
                 "& .MuiInputLabel-root": {
-                  color: "#999",
+                  color: "var(--text-secondary)",
                 },
                 "& .MuiInputLabel-root.Mui-focused": {
-                  color: "#cd7f32",
+                  color: "var(--accent-primary)",
                 },
               }}
             />
           </div>
         </DialogContent>
 
-        <DialogActions sx={{ bgcolor: "#121212", px: 3, py: 2 }}>
+        <DialogActions sx={{ px: 3, py: 2, borderColor: 'var(--border-primary)' }}>
           <Button
             onClick={() => setUpdateEmailOpen(false)}
-            sx={{ color: "#999" }}
+            sx={{ color: "var(--text-secondary)" }}
           >
             Cancel
           </Button>
@@ -672,7 +701,7 @@ export default function Settings() {
             onClick={handleEmailUpdate}
             variant="contained"
             startIcon={<SaveIcon />}
-            sx={{ backgroundColor: "#cd7f32" }}
+            sx={{ backgroundColor: "var(--accent-primary)", "&:hover": { backgroundColor: "var(--accent-secondary)" } }}
           >
             Update Email
           </Button>

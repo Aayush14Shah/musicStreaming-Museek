@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import Logo from '../Images/LogoFinalDarkModeFrameResized.png';
+import LogoDark from '../Images/LogoFinalDarkModeFrameResized.png';
+import LogoLight from '../Images/LogoFinalLightModeFrameResized.png';
 import loginSideImage from '../Images/login_side_image.jpg';
 
 const languageOptions = [
@@ -29,6 +30,7 @@ const Preferences = () => {
   const [selectedLanguages, setSelectedLanguages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [theme] = useState(localStorage.getItem('theme') || 'dark');
 
   useEffect(() => {
     const fetchArtists = async () => {
@@ -110,8 +112,8 @@ const Preferences = () => {
       {/* Header Section */}
       <div className="bg-gradient-to-r from-[#0f0f0f] via-[#1a1a1a] to-[#0f0f0f] border-b border-[#333] py-6">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-center mb-4">
-            <img src={Logo} alt="Brand Logo" className="w-40" />
+          <div className="flex items-center justify-center mb-4"> 
+            <img src={theme === 'dark' ? LogoDark : LogoLight} alt="Brand Logo" className="w-40" />
           </div>
           <div className="text-center">
             <h1 className="text-3xl md:text-4xl font-bold text-[#F5F5F5] mb-3 bg-gradient-to-r from-[#F5F5F5] to-[#cd7f32] bg-clip-text text-transparent">

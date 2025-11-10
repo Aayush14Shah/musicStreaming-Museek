@@ -19,12 +19,12 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
   if (!currentTrack) {
     return (
       <div
-        className={`fixed top-[60px] bottom-16 right-0 bg-transparent text-[#F5F5F5] z-40 transition-transform duration-300 ease-in-out ${
+        className={`fixed top-[60px] bottom-16 right-0 bg-transparent text-[var(--text-primary)] z-40 transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         } w-[18rem] md:w-[20rem] lg:w-[22rem]`}
       >
-        <div className="m-1.5 w-full h-[calc(100%-12px)] rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.45)] bg-[#0e0e0e] p-2">
-          <div className="w-full h-full rounded-2xl bg-[#181818] overflow-y-auto p-4 group scrollbar-thin scrollbar-thumb-transparent hover:scrollbar-thumb-[#CD7F32] scrollbar-track-transparent scrollbar-thumb-rounded-full">
+        <div className="m-1.5 w-full h-[calc(100%-12px)] rounded-2xl shadow-[var(--shadow-primary)] bg-[var(--bg-secondary)] border border-[var(--border-tertiary)] p-2">
+          <div className="w-full h-full rounded-2xl bg-[var(--bg-primary)] border border-[var(--card-border)] overflow-y-auto p-4 group scrollbar-thin scrollbar-thumb-transparent hover:scrollbar-thumb-[var(--accent-primary)] scrollbar-track-transparent scrollbar-thumb-rounded-full">
             <div className="flex justify-between items-center mb-3">
               <h2 className="text-base font-semibold">{playlistName}</h2>
               <button
@@ -32,7 +32,7 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
                   e.stopPropagation();
                   onClose(); // This now only controls sidebar visibility
                 }}
-                className="bg-[#CD7F32] text-white px-2 py-1 rounded-md hover:bg-[#CD7F32]/90 transition-colors"
+                className="bg-[var(--accent-primary)] text-white px-2 py-1 rounded-md hover:bg-[var(--accent-secondary)] transition-colors"
                 aria-label="Close sidebar"
               >
                 <svg
@@ -51,10 +51,10 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
                 </svg>
               </button>
             </div>
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="w-16 h-16 mx-auto mb-3 bg-[#1a1a1a] rounded-full flex items-center justify-center">
+            <div className="flex flex-col items-center justify-center h-full text-center"> 
+              <div className="w-16 h-16 mx-auto mb-3 bg-[var(--bg-tertiary)] rounded-full flex items-center justify-center">
                 <svg
-                  className="w-8 h-8 text-[#CD7F32]"
+                  className="w-8 h-8 text-[var(--accent-primary)]"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -62,7 +62,7 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
                 </svg>
               </div>
               <h3 className="text-base font-semibold mb-2">No track playing</h3>
-              <p className="text-sm text-[#CD7F32] leading-tight">
+              <p className="text-sm text-[var(--accent-primary)] leading-tight">
                 Select a track to start listening
               </p>
             </div>
@@ -109,12 +109,12 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
 
   return (
     <div
-      className={`fixed top-[60px] bottom-20 right-0 bg-transparent text-[#F5F5F5] z-40 transition-transform duration-300 ease-in-out ${
+      className={`fixed top-[60px] bottom-20 right-0 bg-transparent text-[var(--text-primary)] z-40 transition-transform duration-300 ease-in-out ${
         isOpen ? "translate-x-0" : "translate-x-full"
       } w-[18rem] md:w-[20rem] lg:w-[22rem]`}
     >
-      <div className="m-1.5 h-[calc(100%-12px)] rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.45)] bg-[#0e0e0e] p-2">
-        <div className="w-full h-full rounded-2xl bg-[#181818] overflow-y-auto p-4 group scrollbar-thin scrollbar-thumb-transparent hover:scrollbar-thumb-[#CD7F32] scrollbar-track-transparent scrollbar-thumb-rounded-full">
+      <div className="m-1.5 h-[calc(100%-12px)] rounded-2xl shadow-[var(--shadow-primary)] bg-[var(--bg-secondary)] border border-[var(--border-tertiary)] p-2">
+        <div className="w-full h-full rounded-2xl bg-[var(--bg-primary)] border border-[var(--card-border)] overflow-y-auto p-4 group scrollbar-thin scrollbar-thumb-transparent hover:scrollbar-thumb-[var(--accent-primary)] scrollbar-track-transparent scrollbar-thumb-rounded-full">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-base font-semibold line-clamp-1">
               {dynamicPlaylistName}
@@ -124,7 +124,7 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
                 e.stopPropagation();
                 onClose(); // this will call setIsSidebarOpen(false)
               }}
-              className="bg-[#CD7F32] text-white px-2 py-1 rounded-md hover:bg-[#CD7F32]/90 transition-colors"
+              className="bg-[var(--accent-primary)] text-white px-2 py-1 rounded-md hover:bg-[var(--accent-secondary)] transition-colors"
               aria-label="Close sidebar"
             >
               <svg
@@ -143,20 +143,20 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
             </button>
           </div>
           <div className="flex flex-col gap-4">
-            <div className="bg-gradient-to-b from-transparent to-[#181818]/50 rounded-lg p-4 shadow-sm border border-[#fff5]/10">
-              <div className="w-full aspect-square mb-3">
+            <div className="bg-gradient-to-b from-[var(--bg-tertiary)]/50 to-[var(--bg-primary)]/30 rounded-lg p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)]">
+              <div className="w-full aspect-square mb-3 rounded-lg overflow-hidden bg-[var(--bg-tertiary)]">
                 <img
                   src={currentTrack.image}
                   alt={currentTrack.title}
-                  className="w-full h-full object-contain rounded-lg"
+                  className="w-full h-full object-contain"
                 />
-                <h2 className="text-lg font-semibold mb-2 mt-4">
-                  {currentTrack.title}
-                </h2>
-                <p className="text-sm text-[#CD7F32] mb-3 font-normal">
-                  {currentTrack.artist}
-                </p>
               </div>
+              <h2 className="text-lg font-semibold mb-2 mt-4 text-[var(--text-primary)]">
+                {currentTrack.title}
+              </h2>
+              <p className="text-sm text-[var(--accent-primary)] mb-3 font-normal">
+                {currentTrack.artist}
+              </p>
               <div className="flex items-center gap-3">
                 <Tooltip title={isLiked(currentTrack?.id, 'spotify') ? 'Remove from Liked Songs' : 'Add to Liked Songs'} arrow>
                   <button
@@ -165,8 +165,8 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
                     aria-label="Toggle like"
                     className={`w-7 h-7 flex items-center justify-center p-1.5 rounded-full transition-colors ${
                       isLiked(currentTrack?.id, 'spotify') 
-                        ? 'bg-[#CD7F32] text-[#121212]' 
-                        : 'bg-[#242424] text-[#F5F5F5] hover:bg-[#CD7F32] hover:text-[#121212]'
+                        ? 'bg-[var(--accent-primary)] text-[var(--bg-primary)]' 
+                        : 'bg-[var(--bg-tertiary)] text-[var(--text-primary)] hover:bg-[var(--accent-primary)] hover:text-[var(--bg-primary)]'
                     } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {isLiked(currentTrack?.id, 'spotify') ? <FavoriteIcon fontSize="small" /> : <FavoriteBorderIcon fontSize="small" />}
@@ -176,7 +176,7 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
                   <button
                     onClick={shareSong}
                     aria-label="Share song"
-                    className="w-7 h-7 flex items-center justify-center p-1.5 rounded-full bg-[#242424] text-[#F5F5F5] hover:bg-[#CD7F32] hover:text-white transition-colors"
+                    className="w-7 h-7 flex items-center justify-center p-1.5 rounded-full bg-[var(--bg-tertiary)] text-[var(--text-primary)] hover:bg-[var(--accent-primary)] hover:text-white transition-colors"
                   >
                     <ShareIcon fontSize="small" />
                   </button>
@@ -185,32 +185,32 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
                   <button
                     onClick={addToPlaylist}
                     aria-label="Add to playlist"
-                    className="w-7 h-7 flex items-center justify-center p-1.5 rounded-full bg-[#242424] text-[#F5F5F5] hover:bg-[#CD7F32] hover:text-white transition-colors"
+                    className="w-7 h-7 flex items-center justify-center p-1.5 rounded-full bg-[var(--bg-tertiary)] text-[var(--text-primary)] hover:bg-[var(--accent-primary)] hover:text-white transition-colors"
                   >
                     <PlaylistAddIcon fontSize="small" />
                   </button>
                 </Tooltip>
               </div>
             </div>
-            <div className="bg-gradient-to-b from-transparent to-[#181818]/50 rounded-lg p-4 shadow-sm border border-[#CD7F32]/35">
-              <h3 className="text-base font-semibold mb-2">About the artist</h3>
-              <p className="text-sm leading-tight">{artistInfo.description}</p>
+            <div className="bg-gradient-to-b from-[var(--bg-tertiary)]/50 to-[var(--bg-primary)]/30 rounded-lg p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)]">
+              <h3 className="text-base font-semibold mb-2 text-[var(--text-primary)]">About the artist</h3>
+              <p className="text-sm leading-tight text-[var(--text-secondary)]">{artistInfo.description}</p>
             </div>
-            <div className="bg-gradient-to-b from-transparent to-[#181818]/50 rounded-lg p-4 shadow-sm border border-[#CD7F32]/35">
-              <h3 className="text-base font-semibold mb-2">Credits</h3>
+            <div className="bg-gradient-to-b from-[var(--bg-tertiary)]/50 to-[var(--bg-primary)]/30 rounded-lg p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)]">
+              <h3 className="text-base font-semibold mb-2 text-[var(--text-primary)]">Credits</h3>
               <ul className="list-disc pl-5 space-y-1">
                 {artistInfo.credits.map((credit, index) => (
-                  <li key={index} className="text-sm leading-tight">
+                  <li key={index} className="text-sm leading-tight text-[var(--text-secondary)]">
                     {credit.role}: {credit.name}
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="bg-gradient-to-b from-transparent to-[#181818]/50 rounded-lg p-4 shadow-sm border border-[#CD7F32]/35">
-              <h3 className="text-base font-semibold mb-2">Next in Queue</h3>
-              <div className="bg-[#171717] p-3 rounded-lg">
-                <p className="text-sm font-medium">{artistInfo.queue.title}</p>
-                <p className="text-sm text-[#CD7F32] leading-tight">
+            <div className="bg-gradient-to-b from-[var(--bg-tertiary)]/50 to-[var(--bg-primary)]/30 rounded-lg p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)]">
+              <h3 className="text-base font-semibold mb-2 text-[var(--text-primary)]">Next in Queue</h3>
+              <div className="bg-[var(--bg-secondary)] border border-[var(--border-tertiary)] p-3 rounded-lg">
+                <p className="text-sm font-medium text-[var(--text-primary)]">{artistInfo.queue.title}</p>
+                <p className="text-sm text-[var(--accent-primary)] leading-tight">
                   {artistInfo.queue.artist}
                 </p>
               </div>
