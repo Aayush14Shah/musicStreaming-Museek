@@ -34,6 +34,7 @@ const Home = () => {
   const [searchResults, setSearchResults] = useState(null);
   const [recentlyPlayed, setRecentlyPlayed] = useState([]);
   const [artistPlaylists, setArtistPlaylists] = useState([]); // Spotify playlists based on favourite artists
+  const [userPlaylists, setUserPlaylists] = useState([]); // temp state to satisfy eslint
   const [userDbPlaylists, setUserDbPlaylists] = useState([]); // Playlists created by user
   const [heroFeatured] = useState({
     id: "hero1",
@@ -844,69 +845,64 @@ const Home = () => {
   };
 
   return (
-    <div
-      className="relative flex size-full min-h-screen flex-col bg-gradient-to-br from-[var(--bg-secondary)] via-[var(--bg-primary)] to-[var(--bg-secondary)] dark group/design-root overflow-x-hidden"
-      style={{ fontFamily: 'Inter, "Noto Sans", sans-serif' }}
-    >
-      <Navbar />
-      <div className="relative flex size-full min-h-screen flex-col bg-gradient-to-br from-[#121212] via-[#1a1a1a] to-[#0e0e0e] dark group/design-root overflow-x-hidden" style={{ fontFamily: 'Inter, "Noto Sans", sans-serif' }}>
-        <Navbar onSearch={async (q) => {
-          if (!q) return;
-          try {
-            const res = await fetch(`http://localhost:5000/api/spotify/search-tracks?query=${encodeURIComponent(q)}&limit=12`);
-            if (res.ok) {
-              const data = await res.json();
-              setSearchResults((data.tracks || []).slice(0, 12));
-            }
-          } catch (err) { console.error('search error', err); }
-        }} />
-        <LeftSidebar onLikedSongsClick={handleLikedSongsClick} onPlaylistClick={handleUserPlaylistClick} />
-        <div
-          className="layout-container flex h-full grow flex-col min-h-screen w-full transition-all duration-300 ease-in-out pt-[60px] pb-16 md:pb-20 md:pl-[16.5rem] lg:pl-[18rem]"
-          style={{
-            paddingRight: isSidebarVisible ? '360px' : '0px',
-            transition: 'padding-right 0.3s ease-in-out'
-          }}
-        >
-          <div className="m-1.5 md:mx-2 rounded-2xl shadow-[var(--shadow-primary)] bg-[var(--bg-secondary)] border border-[var(--border-tertiary)] p-2">
-            <div className="rounded-2xl bg-[var(--bg-primary)] border border-[var(--card-border)] p-4 md:p-6">
-              {/* CONDITIONAL RENDER */}
-              {currentView === 'liked-songs' ? (
-                <LikedSongs
-                  onBack={() => setCurrentView('home')}
-                  onTrackClick={handleTrackClick}
-                  currentTrack={currentTrack}
-                  isPlaying={isPlaying}
-                />
-              ) : currentView === 'user-playlist' && selectedUserPlaylist ? (
-                <UserPlaylistView
-                  playlist={selectedUserPlaylist}
-                  onBack={() => setCurrentView('home')}
-                  onTrackClick={handleTrackClick}
-                  currentTrack={currentTrack}
-                  isPlaying={isPlaying}
-                />
-              ) : selectedPlaylist ? (
-                <PlaylistView
-                  playlist={selectedPlaylist}
-                  tracks={playlistTracks}
-                  onTrackClick={handleTrackClick}
-                  onBack={() => {
-                    setSelectedPlaylist(null);
-                  }}
-                />
-              ) : (
-                <>
-                  {isLoading && (
-                    <p className="text-[var(--text-primary)] text-center py-8 text-lg">
-                      Loading...
-                    </p>
-                  )}
-                  {error && (
-                    <p className="text-red-500 text-center py-8 text-lg">
-                      {error}
-                    </p>
-                  )}
+    <div className="relative flex size-full min-h-screen flex-col bg-gradient-to-br from-[#121212] via-[#1a1a1a] to-[#0e0e0e] dark group/design-root overflow-x-hidden" style={{ fontFamily: 'Inter, \"Noto Sans\", sans-serif' }}>
+      <Navbar onSearch={async (q)=>{
+        if(!q) return;
+        try{
+          const res=await fetch(`http://localhost:5000/api/spotify/search-tracks?query=${encodeURIComponent(q)}&limit=12`);
+          if(res.ok){
+            const data=await res.json();
+            setSearchResults((data.tracks||[]).slice(0,12));
+          }
+        }catch(err){console.error('search error',err);}
+      }} />
+      <LeftSidebar onLikedSongsClick={handleLikedSongsClick} onPlaylistClick={handleUserPlaylistClick} />
+      <div 
+        className="layout-container flex h-full grow flex-col min-h-screen w-full transition-all duration-300 ease-in-out pt-[60px] pb-16 md:pb-20 md:pl-[16.5rem] lg:pl-[18rem]"
+        style={{ 
+          paddingRight: isSidebarVisible ? '360px' : '0px',
+          transition: 'padding-right 0.3s ease-in-out'
+        }}
+      > 
+        <div className="m-1.5 md:mx-2 rounded-2xl shadow-[var(--shadow-primary)] bg-[var(--bg-secondary)] border border-[var(--border-tertiary)] p-2">
+          <div className="rounded-2xl bg-[var(--bg-primary)] border border-[var(--card-border)] p-4 md:p-6">
+            {/* CONDITIONAL RENDER */}
+            {currentView === 'liked-songs' ? (
+              <LikedSongs 
+                onBack={() => setCurrentView('home')}
+                onTrackClick={handleTrackClick}
+                currentTrack={currentTrack}
+                isPlaying={isPlaying}
+              />
+            ) : currentView === 'user-playlist' && selectedUserPlaylist ? (
+              <UserPlaylistView
+                playlist={selectedUserPlaylist}
+                onBack={() => setCurrentView('home')}
+                onTrackClick={handleTrackClick}
+                currentTrack={currentTrack}
+                isPlaying={isPlaying}
+              />
+            ) : selectedPlaylist ? (
+              <PlaylistView
+                playlist={selectedPlaylist}
+                tracks={playlistTracks}
+                onTrackClick={handleTrackClick}
+                onBack={() => {
+                  setSelectedPlaylist(null);
+                }}
+              />
+            ) : (
+              <>
+                {isLoading && (
+                  <p className="text-[var(--text-primary)] text-center py-8 text-lg">
+                    Loading...
+                  </p>
+                )}
+                {error && (
+                  <p className="text-red-500 text-center py-8 text-lg">
+                    {error}
+                  </p>
+                )}
 
                   <HeroBanner featured={heroFeatured} forceWhiteText={true} />
 

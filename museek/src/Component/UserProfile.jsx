@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./homePage/Navbar";
+import usePlaylists from "../hooks/usePlaylists";
 import MusicPlayer from "./homePage/MusicPlayer";
 import NowPlayingSidebar from "./homePage/NowPlayingSidebar";
 
@@ -178,6 +179,20 @@ export default function UserProfile() {
 
   // favorite artists (array of strings per your schema)
   const [favoriteArtists, setFavoriteArtists] = useState([]);
+  const [artistDetails, setArtistDetails] = useState([]); // [{name, image}]
+  // playlist create form state for profile page
+  const [showCreatePl, setShowCreatePl] = useState(false);
+  const [plName, setPlName] = useState("");
+  const [plDesc, setPlDesc] = useState("");
+
+  // playlists hook
+  const { playlists: dbPlaylists, loading: playlistsLoading, createPlaylist } = usePlaylists(userId);
+  // merge hook playlists with previously loaded
+  useEffect(()=>{
+    if(dbPlaylists&&dbPlaylists.length){
+      setPlaylists(dbPlaylists);
+    }
+  },[dbPlaylists]);
 
   // recently played (exactly from localStorage.recentlyPlayed using your format)
   const [recentlyPlayed, setRecentlyPlayed] = useState([]);
@@ -265,7 +280,11 @@ export default function UserProfile() {
       if (!mounted) return;
       setUser(fetched);
       setNameInput(fetched?.name || localStorage.getItem("userName") || "");
-      setFavoriteArtists(fetched?.favoriteArtists || fetched?.favorite_artists || []);
+      const fav=fetched?.favoriteArtists||fetched?.favorite_artists||[];
+      if(fav&&fav.length){setFavoriteArtists(fav);}else{
+        const localFav=safeParse(localStorage.getItem('favoriteArtists'),[]);
+        if(Array.isArray(localFav)&&localFav.length){setFavoriteArtists(localFav);}
+      }
       // if server returned avatar index, use it (clamp to valid range 0-11 for 12 avatars)
       const av = Number(fetched?.avatarIndex ?? fetched?.avatar ?? localStorage.getItem("avatarIndex") ?? 0);
       if (!Number.isNaN(av)) {
@@ -281,6 +300,28 @@ export default function UserProfile() {
       mounted = false;
     };
   }, [userId]);
+
+  /* ---------- Fetch Spotify data for favorite artists  ---------- */
+  useEffect(()=>{
+    const run=async()=>{
+      if(!favoriteArtists||!favoriteArtists.length) {setArtistDetails([]);return;}
+      const results=[];
+      for(const name of favoriteArtists){
+        try{
+          const res=await fetch(`${API_BASE}/api/spotify/artist?query=${encodeURIComponent(name)}`);
+          if(res.ok){
+            const d=await res.json();
+            const img=d?.artist?.images?.[0]?.url||d?.images?.[0]?.url||`https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=128`;
+            results.push({name,image:img});
+          }else{
+            results.push({name,image:`https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=128`});
+          }
+        }catch{results.push({name,image:`https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=128`});}
+      }
+      setArtistDetails(results);
+    };
+    run();
+  },[favoriteArtists]);
 
   /* ---------- Load playlists (user-created) ---------- */
   useEffect(() => {
@@ -449,7 +490,7 @@ export default function UserProfile() {
   /* ---------- Helper small components ---------- */
   const FriendlyJoined = ({ u }) => {
     const ds = u?.createdAt || u?.created_at || u?.created || u?.joined;
-    if (!ds) return <span className="text-xs text-[var(--text-secondary)]">Joined: —</span>;
+    if (!ds) return ;
     try {
       const txt = new Date(ds).toLocaleDateString();
       return <span className="text-xs text-[var(--text-secondary)]">Joined: {txt}</span>;
@@ -575,22 +616,11 @@ export default function UserProfile() {
 
                       <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6 mb-4">
                         <div className="text-base text-[var(--text-secondary)] truncate">{user?.email || localStorage.getItem("userEmail") || "—"}</div>
-                        <FriendlyJoined u={user} />
-                      </div>
+                                              </div>
 
                       <p className="text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed">
                         Welcome back. Manage your profile, favorites, and recent activity here.
                       </p>
-                    </div>
-
-                    {/* Active summary (only total hours) */}
-                    <div className="flex-shrink-0">
-                      <div className="bg-[var(--bg-primary)] px-6 py-5 rounded-xl text-center min-w-[160px] border border-[var(--border-primary)] shadow-[var(--shadow-card)]">
-                        <div className="text-sm text-[var(--text-secondary)] mb-2">Total Listening</div>
-                        <div className="text-3xl md:text-4xl font-bold" style={{ color: "var(--accent-primary)" }}>
-                          {totalListeningHours}h
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -610,10 +640,10 @@ export default function UserProfile() {
 
                   {loadingUser ? (
                     <div className="py-8"><CircularProgress color="inherit" size={24} /></div>
-                  ) : (favoriteArtists && favoriteArtists.length) ? (
+                  ) : artistDetails && artistDetails.length ? (
                     <div className="flex gap-4 overflow-x-auto py-2">
-                      {favoriteArtists.map((name, idx) => {
-                        const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1a1a1a&color=ffffff&rounded=true&size=64`;
+                      {artistDetails.map((art, idx) => { const {name, image}=art;
+                        const avatarUrl=image;
                         return (
                           <div
                             key={`${name}-${idx}`}
@@ -642,9 +672,28 @@ export default function UserProfile() {
                     <div className="w-1 h-8 bg-[var(--accent-primary)] rounded-full mr-4"></div>
                     <h2 className="text-xl font-semibold text-[var(--text-primary)]">Your Playlists</h2>
                     <span className="ml-auto text-sm px-3 py-1 rounded-full bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border border-[var(--border-tertiary)]">
+                      
                       {(playlists || []).length} created
                     </span>
+                    <button
+  onClick={() => setShowCreatePl(v => !v)}
+  className="ml-4 bg-[var(--accent-primary)] text-[var(--bg-primary)] text-sm font-medium px-3 py-1 rounded-md transition-colors hover:bg-[var(--accent-secondary)]"
+>
+  + New
+</button>
                   </div>
+
+                  {showCreatePl && (
+                    <div className="bg-[var(--bg-tertiary)] rounded-lg p-4 border border-[var(--border-primary)] shadow-sm mb-6 w-full max-w-md">
+                      <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">Create New Playlist</h3>
+                      <input className="w-full bg-[var(--bg-secondary)] border border-[var(--input-border)] rounded-md px-3 py-2 mb-3 outline-none text-sm placeholder-[var(--text-tertiary)] focus:border-[var(--input-border-focus)] focus:ring-2 focus:ring-[var(--accent-primary)]/10 transition-all" placeholder="Playlist name" value={plName} onChange={e=>setPlName(e.target.value)} />
+                      <textarea className="w-full bg-[var(--bg-secondary)] border border-[var(--input-border)] rounded-md px-3 py-2 mb-4 outline-none text-sm placeholder-[var(--text-tertiary)] focus:border-[var(--input-border-focus)] focus:ring-2 focus:ring-[var(--accent-primary)]/10 transition-all resize-none" rows={2} placeholder="Description (optional)" value={plDesc} onChange={e=>setPlDesc(e.target.value)} />
+                      <div className="flex gap-2">
+                        <button disabled={!plName.trim()||playlistsLoading} onClick={async()=>{const ok=await createPlaylist({name:plName.trim(),description:plDesc.trim(),isPublic:false});if(ok?.success){setPlName("");setPlDesc("");setShowCreatePl(false);}}} className="px-4 py-2 text-sm bg-[var(--accent-primary)] text-[var(--bg-primary)] rounded-md hover:bg-[var(--accent-secondary)] transition-colors disabled:opacity-60">{playlistsLoading?'Creating...':'Create'}</button>
+                        <button onClick={()=>{setShowCreatePl(false);setPlName('');setPlDesc('');}} className="px-4 py-2 text-sm bg-transparent border border-[var(--accent-primary)]/40 text-[var(--text-primary)] rounded-md hover:bg-[var(--accent-primary)]/10 transition-colors">Cancel</button>
+                      </div>
+                    </div>
+                  )}
 
                   {playlists && playlists.length ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -652,7 +701,7 @@ export default function UserProfile() {
                         const id = pl.id || pl._id || `local-${i}`;
                         const cover = (pl.images && pl.images[0] && pl.images[0].url) || pl.cover || `https://placehold.co/300x170?text=${encodeURIComponent(pl.name || "Playlist")}`;
                         return (
-                          <div key={id} className="bg-[var(--bg-primary)] rounded-lg p-4 hover:bg-[var(--bg-tertiary)] border border-[var(--border-primary)] hover:border-[var(--accent-primary)]/30 transition-all group shadow-[var(--shadow-card)]">
+                          <div key={id} onClick={()=>navigate(`/playlist/${id}`)} className="cursor-pointer bg-[var(--bg-primary)] rounded-lg p-4 hover:bg-[var(--bg-tertiary)] border border-[var(--border-primary)] hover:border-[var(--accent-primary)]/30 transition-all group shadow-[var(--shadow-card)]">
                             <div className="w-full h-40 rounded-md overflow-hidden bg-[var(--bg-secondary)] mb-3">
                               <img src={cover} alt={pl.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                             </div>
