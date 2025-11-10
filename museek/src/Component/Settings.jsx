@@ -2,8 +2,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./homePage/Navbar";
+import { Link } from "react-router-dom";
 import MusicPlayer from "./homePage/MusicPlayer";
 import NowPlayingSidebar from "./homePage/NowPlayingSidebar";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import {
   Button,
   Switch,
@@ -16,6 +18,7 @@ import {
   TextField,
   IconButton,
   Tooltip,
+  Box
 } from "@mui/material";
 import {
   Lock as LockIcon,
@@ -33,6 +36,8 @@ const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
 const SIDEBAR_WIDTH_PX = 360;
 
 export default function Settings() {
+  const [showPassword, setShowPassword] = useState(false);
+  // Removed showPassword state
   const navigate = useNavigate();
   // user id set at login
   const userId = localStorage.getItem("userId");
@@ -157,32 +162,44 @@ export default function Settings() {
     localStorage.setItem("language", newLanguage);
   };
 
-  /* ---------- Password change ---------- */
+  // Password validation function
+  const validatePassword = (password) => {
+    const warnings = [];
+    if (password.length < 8) warnings.push('At least 8 characters');
+    if (!/[a-z]/.test(password)) warnings.push('At least one lowercase letter');
+    if (!/[A-Z]/.test(password)) warnings.push('At least one uppercase letter');
+    if (!/[0-9]/.test(password)) warnings.push('At least one digit');
+    if (!/[^A-Za-z0-9]/.test(password)) warnings.push('At least one special character');
+    return warnings;
+  };
+
+  const [passwordWarnings, setPasswordWarnings] = useState([]);
+
+  const [showPasswordPopup, setShowPasswordPopup] = useState(false);
   const handlePasswordChange = async () => {
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       alert("New passwords don't match");
       return;
     }
-    if (passwordForm.newPassword.length < 6) {
-      alert("Password must be at least 6 characters");
+    const warnings = validatePassword(passwordForm.newPassword);
+    setPasswordWarnings(warnings);
+    if (warnings.length > 0) {
+      alert("Password does not meet requirements.");
       return;
     }
 
     try {
-      const res = await fetch(`${API_BASE}/api/user/${userId}/password`, {
-        method: "PATCH",
-        credentials: "include",
+      const res = await fetch(`${API_BASE}/auth/reset-password`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          currentPassword: passwordForm.currentPassword,
-          newPassword: passwordForm.newPassword
-        }),
+        body: JSON.stringify({ email: user?.email, password: passwordForm.newPassword }),
       });
 
       if (res.ok) {
-        alert("Password updated successfully");
+        setShowPasswordPopup(true);
         setChangePasswordOpen(false);
         setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+        setPasswordWarnings([]);
       } else {
         const error = await res.json();
         alert(error.message || "Failed to update password");
@@ -191,6 +208,29 @@ export default function Settings() {
       alert("Failed to update password. Please try again.");
     }
   };
+      {/* Password Changed Success Popup */}
+      {showPasswordPopup && (
+        <div className="absolute inset-0 flex items-center justify-center z-50">
+          {/* Blurred background overlay */}
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+          {/* Popup box */}
+          <div className="relative bg-[#282828]/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center border border-[#CD7F32]/30">
+            <div className="flex justify-center mb-6">
+              <div className="bg-green-500/20 rounded-full p-4">
+                <CheckCircleIcon style={{ fontSize: "3rem" }} className="text-green-400" />
+              </div>
+            </div>
+            <h1 className="text-2xl font-bold text-[#F5F5F5] mb-2">Password Changed!</h1>
+            <p className="text-gray-300 text-lg mb-6">Your password was updated successfully.</p>
+            <button 
+              onClick={() => setShowPasswordPopup(false)}
+              className="w-full bg-gradient-to-r from-[#CD7F32] to-[#b06f2d] text-white font-bold py-3 px-6 rounded-lg hover:from-[#b06f2d] hover:to-[#CD7F32] transition-colors duration-300"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
   /* ---------- Email update ---------- */
   const handleEmailUpdate = async () => {
@@ -296,31 +336,6 @@ export default function Settings() {
                         }}
                       >
                         Change Password
-                      </Button>
-                    </div>
-
-                    {/* Update Email */}
-                    <div className="flex items-center justify-between py-4 px-6 bg-[#181818] rounded-lg border border-[#333] hover:border-[#cd7f32]/30 transition-colors">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <EmailIcon sx={{ color: "#cd7f32", fontSize: 20 }} />
-                          <h3 className="text-lg font-semibold">Update Email</h3>
-                        </div>
-                        <p className="text-gray-400 text-sm">Change the email address associated with your account.</p>
-                      </div>
-                      <Button
-                        variant="contained"
-                        onClick={() => setUpdateEmailOpen(true)}
-                        startIcon={<ArrowIcon />}
-                        sx={{
-                          backgroundColor: "#cd7f32",
-                          "&:hover": { backgroundColor: "#b06f2d" },
-                          borderRadius: "12px",
-                          px: 3,
-                          py: 1
-                        }}
-                      >
-                        Update Email
                       </Button>
                     </div>
                   </div>
@@ -458,91 +473,103 @@ export default function Settings() {
           </IconButton>
         </DialogTitle>
 
-        <DialogContent dividers sx={{ bgcolor: "#0b0b0b" }}>
-          <div className="space-y-4">
-            <TextField
-              fullWidth
-              type="password"
-              label="Current Password"
-              value={passwordForm.currentPassword}
-              onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  color: "white",
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#333",
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#cd7f32",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#cd7f32",
-                  },
+        <DialogContent dividers sx={{ bgcolor: "#0b0b0b", display: "flex", flexDirection: "column" }}>
+        <div className="space-y-4">
+          <TextField
+            fullWidth
+            type="password"
+            label="Current Password"
+            value={passwordForm.currentPassword}
+            onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                color: "white",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#333",
                 },
-                "& .MuiInputLabel-root": {
-                  color: "#999",
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#cd7f32",
                 },
-                "& .MuiInputLabel-root.Mui-focused": {
-                  color: "#cd7f32",
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#cd7f32",
                 },
-              }}
-            />
-            <TextField
-              fullWidth
-              type="password"
-              label="New Password"
-              value={passwordForm.newPassword}
-              onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  color: "white",
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#333",
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#cd7f32",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#cd7f32",
-                  },
+              },
+              "& .MuiInputLabel-root": {
+                color: "#999",
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "#cd7f32",
+              },
+            }}
+          />
+          
+          <TextField
+            fullWidth
+            type="password"
+            label="New Password"
+            value={passwordForm.newPassword}
+            onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                color: "white",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#333",
                 },
-                "& .MuiInputLabel-root": {
-                  color: "#999",
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#cd7f32",
                 },
-                "& .MuiInputLabel-root.Mui-focused": {
-                  color: "#cd7f32",
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#cd7f32",
                 },
-              }}
-            />
-            <TextField
-              fullWidth
-              type="password"
-              label="Confirm New Password"
-              value={passwordForm.confirmPassword}
-              onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  color: "white",
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#333",
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#cd7f32",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#cd7f32",
-                  },
+              },
+              "& .MuiInputLabel-root": {
+                color: "#999",
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "#cd7f32",
+              },
+            }}
+          />
+          
+          <TextField
+            fullWidth
+            type="password"
+            label="Confirm New Password"
+            value={passwordForm.confirmPassword}
+            onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                color: "white",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#333",
                 },
-                "& .MuiInputLabel-root": {
-                  color: "#999",
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#cd7f32",
                 },
-                "& .MuiInputLabel-root.Mui-focused": {
-                  color: "#cd7f32",
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#cd7f32",
                 },
-              }}
-            />
-          </div>
-        </DialogContent>
+              },
+              "& .MuiInputLabel-root": {
+                color: "#999",
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "#cd7f32",
+              },
+            }}
+          />
+          
+        </div>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+          <Button
+            onClick={() => navigate('/forgot')}
+            variant="contained"
+            sx={{ backgroundColor: "#cd7f32", }}
+          >
+            Forgot Password?
+          </Button>
+        </Box>
+      </DialogContent>
 
         <DialogActions sx={{ bgcolor: "#121212", px: 3, py: 2 }}>
           <Button

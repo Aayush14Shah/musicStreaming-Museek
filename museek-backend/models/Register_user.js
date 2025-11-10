@@ -8,6 +8,8 @@ const UserSchema = new mongoose.Schema(
     mobile: { type: String },
     favoriteArtists: [{ type: String }],
     languages: [{ type: String }],
+    is_active: { type: Number, default: 1 }, 
+    listeningHours: { type: Number, default: 0 }, 
   },
   { timestamps: true }
 );

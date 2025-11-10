@@ -1,41 +1,35 @@
 import React, { useEffect, useState } from 'react';
+import usePlaylists from '../../hooks/usePlaylists';
 
-const LeftSidebar = () => {
-  const [playlists, setPlaylists] = useState([]);
+const LeftSidebar = ({ onLikedSongsClick, onPlaylistClick }) => {
+  const userId = localStorage.getItem('userId');
+  const { playlists, loading, createPlaylist, deletePlaylist } = usePlaylists(userId);
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
+  const [newDescription, setNewDescription] = useState('');
 
-  useEffect(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('museek.playlists') || '[]');
-      setPlaylists(Array.isArray(stored) ? stored : []);
-    } catch {
-      setPlaylists([]);
-    }
-  }, []);
-
-  const persistPlaylists = (next) => {
-    setPlaylists(next);
-    try {
-      localStorage.setItem('museek.playlists', JSON.stringify(next));
-    } catch {}
-  };
-
-  const addPlaylist = () => {
+  const addPlaylist = async () => {
     const name = newName.trim();
-    if (!name) return;
-    const next = [
-      ...playlists,
-      { id: Date.now().toString(), name }
-    ];
-    persistPlaylists(next);
-    setNewName('');
-    setShowCreate(false);
+    if (!name || !userId) return;
+    
+    const result = await createPlaylist({
+      name,
+      description: newDescription.trim(),
+      isPublic: false
+    });
+    
+    if (result.success) {
+      setNewName('');
+      setNewDescription('');
+      setShowCreate(false);
+    }
   };
 
-  const removePlaylist = (id) => {
-    const next = playlists.filter(p => p.id !== id);
-    persistPlaylists(next);
+  const removePlaylist = async (playlistId) => {
+    const result = await deletePlaylist(playlistId);
+    if (result.success) {
+      console.log('Playlist deleted successfully');
+    }
   };
 
   return (
@@ -64,19 +58,26 @@ const LeftSidebar = () => {
                     placeholder="Playlist name"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && addPlaylist()}
+                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && addPlaylist()}
                     autoFocus
+                  />
+                  <textarea
+                    className="w-full bg-[#242424] border border-[#CD7F32]/40 rounded-md px-3 py-2 outline-none text-sm placeholder-[#8ea5a8] focus:border-[#CD7F32]/60 transition-colors resize-none"
+                    placeholder="Description (optional)"
+                    value={newDescription}
+                    onChange={(e) => setNewDescription(e.target.value)}
+                    rows={2}
                   />
                   <div className="flex gap-2">
                     <button 
                       onClick={addPlaylist} 
                       className="px-4 py-2 text-sm bg-[#CD7F32] text-[#121212] rounded-md hover:bg-[#CD7F32]/90 transition-colors font-medium disabled:opacity-60"
-                      disabled={!newName.trim()}
+                      disabled={!newName.trim() || loading}
                     >
-                      Create
+                      {loading ? 'Creating...' : 'Create'}
                     </button>
                     <button 
-                      onClick={() => {setShowCreate(false); setNewName('');}} 
+                      onClick={() => {setShowCreate(false); setNewName(''); setNewDescription('');}} 
                       className="px-4 py-2 text-sm bg-transparent border border-[#CD7F32]/40 text-[#F5F5F5] rounded-md hover:bg-[#CD7F32]/10 transition-colors"
                     >
                       Cancel
@@ -94,25 +95,50 @@ const LeftSidebar = () => {
               <div className="px-3 pb-2 text-xs uppercase tracking-wide text-[#8ea5a8]">Your Playlists</div>
               <ul className="space-y-1">
                 <li key="liked">
-                  <div className="px-3 py-2 rounded-md hover:bg-[#242424] text-sm cursor-pointer transition-colors">Liked Songs</div>
+                  <div 
+                    className="px-3 py-2 rounded-md hover:bg-[#242424] text-sm cursor-pointer transition-colors flex items-center gap-2"
+                    onClick={onLikedSongsClick}
+                  >
+                    <span className="text-[#CD7F32]">❤️</span>
+                    Liked Songs
+                  </div>
                 </li>
-                {playlists.map((p) => (
-                  <li key={p.id} className="group">
-                    <div className="flex items-center justify-between px-3 py-2 rounded-md hover:bg-[#242424] transition-colors">
-                      <span className="text-sm truncate">{p.name}</span>
-                      <button onClick={() => removePlaylist(p.id)} className="opacity-0 group-hover:opacity-100 text-xs text-[#8ea5a8] hover:text-[#F5F5F5] transition-opacity">Remove</button>
-                    </div>
+                {loading ? (
+                  <li className="px-3 py-2 text-xs text-[#8ea5a8]">Loading playlists...</li>
+                ) : playlists.length > 0 ? (
+                  playlists.map((playlist) => (
+                    <li key={playlist._id} className="group">
+                      <div className="flex items-center justify-between px-3 py-2 rounded-md hover:bg-[#242424] transition-colors">
+                        <div 
+                          className="flex-1 cursor-pointer"
+                          onClick={() => onPlaylistClick && onPlaylistClick(playlist)}
+                        >
+                          <div className="text-sm truncate">{playlist.name}</div>
+                          <div className="text-xs text-[#8ea5a8]">{playlist.songCount} songs</div>
+                        </div>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removePlaylist(playlist._id);
+                          }} 
+                          className="opacity-0 group-hover:opacity-100 text-xs text-[#8ea5a8] hover:text-[#F5F5F5] transition-opacity ml-2"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </li>
+                  ))
+                ) : (
+                  <li className="px-3 py-2 text-xs text-[#8ea5a8]">
+                    {userId ? 'No playlists yet. Click New to create one.' : 'Please log in to see your playlists.'}
                   </li>
-                ))}
-                {playlists.length === 0 && (
-                  <li className="px-3 py-2 text-xs text-[#8ea5a8]">No playlists yet. Click New to create one.</li>
                 )}
               </ul>
             </div>
 
             <div className="mt-auto">
               <div className="bg-[#1f1f1f] rounded-lg p-3 text-xs text-[#8ea5a8] border border-[#CD7F32]/20">
-                Tip: Playlists are saved locally on this device.
+                {userId ? 'Tip: Your playlists are synced to your account.' : 'Tip: Log in to create and sync playlists.'}
               </div>
             </div>
           </div>

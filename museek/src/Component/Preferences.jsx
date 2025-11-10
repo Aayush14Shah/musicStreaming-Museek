@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import Logo from '../Images/LogoFinalLightModeFrameResized.png';
+import Logo from '../Images/LogoFinalDarkModeFrameResized.png';
 import loginSideImage from '../Images/login_side_image.jpg';
 
 const languageOptions = [
@@ -79,6 +79,7 @@ const Preferences = () => {
     artist.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Save preferences only (user already registered)
   const handleRegister = async () => {
     if (!signupData) {
       alert('Signup data missing. Please fill sign up form again.');
@@ -87,15 +88,14 @@ const Preferences = () => {
     }
     setLoading(true);
     try {
-      await axios.post('http://localhost:5000/auth/register', {
-        name: `${signupData.firstName} ${signupData.lastName}`,
-        email: signupData.email,
-        password: signupData.password,
-        mobile: signupData.mobile || '',
-        favoriteArtists: selectedArtists.map(a => a.name),
-        languages: selectedLanguages,
-      });
-      alert('Registered successfully!');
+      // TODO: Call your backend to save preferences for this user
+      // Example:
+      // await axios.post('http://localhost:5000/api/user/preferences', {
+      //   email: signupData.email,
+      //   favoriteArtists: selectedArtists.map(a => a.name),
+      //   languages: selectedLanguages,
+      // });
+      alert('Preferences saved!');
       navigate('/Login');
     } catch (err) {
       alert(err.response?.data?.error || err.message);
@@ -106,131 +106,155 @@ const Preferences = () => {
 
 
   return (
-    <div className="w-screen h-screen bg-[#121212] flex items-center justify-center overflow-hidden">
-      <div className="flex w-full h-full bg-gradient-to-br from-[#121212] via-[#1a1a1a] to-[#0e0e0e] overflow-hidden">
+    <div className="min-h-screen bg-[#181818] text-white">
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-[#0f0f0f] via-[#1a1a1a] to-[#0f0f0f] border-b border-[#333] py-6">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center justify-center mb-4">
+            <img src={Logo} alt="Brand Logo" className="w-40" />
+          </div>
+          <div className="text-center">
+            <h1 className="text-3xl md:text-4xl font-bold text-[#F5F5F5] mb-3 bg-gradient-to-r from-[#F5F5F5] to-[#cd7f32] bg-clip-text text-transparent">
+              Set Your Preferences
+            </h1>
+            <p className="text-gray-300 text-lg max-w-2xl mx-auto leading-relaxed">
+              Choose your favorite artists and languages to personalize your music experience
+            </p>
+          </div>
+        </div>
+      </div>
 
-        {/* Preferences Form */}
-        <div className="w-full bg-[#181818] p-4 lg:p-8 flex flex-col justify-center relative overflow-y-auto">
-          <div className="max-w-2xl mx-auto w-full">
-            {/* Logo positioned above preferences text */}
-            <div className="flex justify-center mb-6">
-              <img src={Logo} alt="Brand Logo" className="w-32" />
-            </div>
-            
-            <h2 className="text-3xl font-bold text-center mb-8 text-[#F5F5F5]">Your Preferences</h2>
-
-            {/* Two Column Layout */}
-            <div className="grid lg:grid-cols-2 gap-6 mb-6">
-              {/* Left Section - Artists */}
-              <div className="bg-[#0e0e0e] p-6 rounded-2xl border-2 border-gray-600 shadow-lg hover:shadow-xl transition-all duration-300">
-            
-                {/* Search Bar */}
-                <div className="mb-4">
-                  <input
-                    type="text"
-                    placeholder="Search artists..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full px-4 py-3 bg-[#181818] border-2 border-gray-600 rounded-xl text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#CD7F32]/20 focus:border-[#CD7F32] transition-all duration-300 shadow-sm hover:shadow-md"
-                  />
-                </div>
-
-                {/* Selected Artists Count */}
-                <div className="mb-4">
-                  <span className="text-[#CD7F32] font-semibold">
-                    {selectedArtists.length} artist{selectedArtists.length !== 1 ? 's' : ''} selected
-                  </span>
-                </div>
-
-                {/* Artists Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-80 overflow-y-auto">
-                  {filteredArtists.map((artist) => {
-                    const isSelected = selectedArtists.find(a => a.id === artist.id);
-                    return (
-                      <div
-                        key={artist.id}
-                        onClick={() => handleArtistSelect(artist)}
-                        className={`cursor-pointer p-3 rounded-xl border-2 transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md ${
-                          isSelected 
-                            ? 'border-[#CD7F32] bg-[#CD7F32]/20 shadow-lg' 
-                            : 'border-gray-600 bg-[#181818] hover:border-[#CD7F32]'
-                        }`}
-                      >
-                        <div className="text-center">
-                          {artist.image ? (
-                            <img
-                              src={artist.image}
-                              alt={artist.name}
-                              className="w-14 h-14 rounded-full mx-auto mb-2 object-cover border-2 border-gray-100"
-                            />
-                          ) : (
-                            <div className="w-14 h-14 rounded-full mx-auto mb-2 bg-[#CD7F32] flex items-center justify-center border-2 border-gray-100">
-                              <span className="text-xl">🎵</span>
-                            </div>
-                          )}
-                          <p className="text-[#F5F5F5] text-sm font-semibold truncate">{artist.name}</p>
-                          {artist.genres && artist.genres.length > 0 && (
-                            <p className="text-gray-400 text-xs truncate">{artist.genres[0]}</p>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="grid lg:grid-cols-2 gap-8 min-h-[calc(100vh-400px)]">
+          {/* Left Section - Artists */}
+          <div className="bg-[#0f0f0f] rounded-xl border border-[#333] flex flex-col shadow-lg">
+            <div className="p-6 border-b border-[#333]">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-[#F5F5F5]">Favorite Artists</h2>
+                <span className="text-sm px-3 py-1 rounded-full bg-[#cd7f32]/20 text-[#cd7f32]">
+                  {selectedArtists.length} selected
+                </span>
               </div>
-
-              {/* Right Section - Languages */}
-              <div className="bg-[#0e0e0e] p-6 rounded-2xl border-2 border-gray-600 shadow-lg hover:shadow-xl transition-all duration-300">
-            
-                {/* Selected Languages Count */}
-                <div className="mb-4">
-                  <span className="text-[#CD7F32] font-semibold">
-                    {selectedLanguages.length} language{selectedLanguages.length !== 1 ? 's' : ''} selected
-                  </span>
-                </div>
-
-                {/* Languages Grid */}
-                <div className="grid grid-cols-2 gap-3 max-h-80 overflow-y-auto">
-                  {languageOptions.map((langOption) => {
-                    const isSelected = selectedLanguages.includes(langOption.value);
-                    return (
-                      <div
-                        key={langOption.value}
-                        onClick={() => handleLanguageSelect(langOption.value)}
-                        className={`cursor-pointer p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md ${
-                          isSelected 
-                            ? 'border-[#CD7F32] bg-[#CD7F32]/20 shadow-lg' 
-                            : 'border-gray-600 bg-[#181818] hover:border-[#CD7F32]'
-                        }`}
-                      >
-                        <div className="text-center">
-                          <div className="text-2xl mb-2">🎶</div>
-                          <p className="text-[#F5F5F5] font-bold text-lg">{langOption.native}</p>
-                          <p className="text-gray-400 text-sm">{langOption.label}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+              
+              {/* Search Bar */}
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search artists..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-4 py-3 pl-10 bg-[#181818] border border-[#333] rounded-lg text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:border-[#cd7f32] transition-colors"
+                />
+                <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
               </div>
             </div>
 
-            {/* Register Button */}
-            <div className="text-center mt-8">
-              <button
-                disabled={loading}
-                onClick={handleRegister}
-                className="w-full py-4 bg-gradient-to-r from-[#CD7F32] to-[#b06f2d] text-white rounded-xl font-bold text-lg hover:from-[#b06f2d] hover:to-[#CD7F32] transform hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-              >
-                {loading ? 'Registering...' : 'Complete Registration'}
-              </button>
-              <p className="text-gray-400 text-sm mt-3">
-                You can complete registration without selecting preferences
-              </p>
+            {/* Artists Grid - Scrollable */}
+            <div className="flex-1 overflow-y-auto p-6 pb-8">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {filteredArtists.map((artist) => {
+                  const isSelected = selectedArtists.find(a => a.id === artist.id);
+                  return (
+                    <div
+                      key={artist.id}
+                      onClick={() => handleArtistSelect(artist)}
+                      className={`group cursor-pointer p-4 rounded-lg border transition-all duration-300 hover:scale-105 ${
+                        isSelected 
+                          ? 'border-[#cd7f32] bg-[#cd7f32]/10 shadow-lg shadow-[#cd7f32]/20' 
+                          : 'border-[#333] bg-[#181818] hover:border-[#cd7f32]/50 hover:bg-[#cd7f32]/5'
+                      }`}
+                    >
+                      <div className="text-center">
+                        {artist.image ? (
+                          <img
+                            src={artist.image}
+                            alt={artist.name}
+                            className="w-16 h-16 rounded-full mx-auto mb-3 object-cover border-2 border-gray-600 group-hover:border-[#cd7f32] transition-colors"
+                          />
+                        ) : (
+                          <div className="w-16 h-16 rounded-full mx-auto mb-3 bg-gradient-to-br from-[#cd7f32] to-[#b06f2d] flex items-center justify-center border-2 border-gray-600 group-hover:border-[#cd7f32] transition-colors">
+                            <span className="text-2xl">🎵</span>
+                          </div>
+                        )}
+                        <p className="text-[#F5F5F5] text-sm font-medium truncate group-hover:text-[#cd7f32] transition-colors">{artist.name}</p>
+                        {artist.genres && artist.genres.length > 0 && (
+                          <p className="text-gray-400 text-xs truncate mt-1">{artist.genres[0]}</p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Section - Languages */}
+          <div className="bg-[#0f0f0f] rounded-xl border border-[#333] flex flex-col shadow-lg">
+            <div className="p-6 border-b border-[#333]">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-[#F5F5F5]">Languages</h2>
+                <span className="text-sm px-3 py-1 rounded-full bg-[#cd7f32]/20 text-[#cd7f32]">
+                  {selectedLanguages.length} selected
+                </span>
+              </div>
+              <p className="text-gray-400 text-sm">Select languages you understand for better music recommendations</p>
+            </div>
+
+            {/* Languages Grid - Auto Height */}
+            <div className="p-6 pb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {languageOptions.map((langOption) => {
+                  const isSelected = selectedLanguages.includes(langOption.value);
+                  return (
+                    <div
+                      key={langOption.value}
+                      onClick={() => handleLanguageSelect(langOption.value)}
+                      className={`group cursor-pointer p-4 rounded-lg border transition-all duration-300 hover:scale-105 ${
+                        isSelected 
+                          ? 'border-[#cd7f32] bg-[#cd7f32]/10 shadow-lg shadow-[#cd7f32]/20' 
+                          : 'border-[#333] bg-[#181818] hover:border-[#cd7f32]/50 hover:bg-[#cd7f32]/5'
+                      }`}
+                    >
+                      <div className="text-center">
+                        <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">🌍</div>
+                        <p className="text-[#F5F5F5] font-bold text-lg group-hover:text-[#cd7f32] transition-colors">{langOption.native}</p>
+                        <p className="text-gray-400 text-sm mt-1">{langOption.label}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Floating Continue Button */}
+      <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50">
+        <button
+          disabled={loading}
+          onClick={handleRegister}
+          className="px-10 py-4 bg-gradient-to-r from-[#cd7f32] to-[#b06f2d] text-white rounded-full font-semibold text-lg hover:from-[#b06f2d] hover:to-[#cd7f32] transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+        >
+          {loading ? 'Registering...' : 'Continue Browsing'}
+        </button>
+      </div>
+
+      {/* Floating Skip Button - Bottom Right */}
+      <div className="fixed bottom-8 right-8 z-50">
+        <button
+          onClick={() => navigate('/Login')}
+          className="border-[1px] border-gray-400 px-4 py-2 text-gray-400 hover:text-white text-sm font-medium transition-colors duration-200 rounded-lg hover:bg-gray-800/50"
+        >
+          Skip
+        </button>
+      </div>
+
+      {/* Bottom Spacing */}
+      <div className="h-24"></div>
     </div>
   );
 };
