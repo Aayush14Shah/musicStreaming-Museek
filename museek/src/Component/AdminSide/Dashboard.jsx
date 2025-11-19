@@ -109,11 +109,11 @@ const Dashboard = () => {
                     value: loading ? "..." : stats.totalCustomSongs.toLocaleString(),
                     icon: <MusicIcon />
                   },
-                  { 
-                    title: "Listening Hours", 
-                    value: loading ? "..." : stats.listeningHours.toLocaleString(),
-                    icon: <HomeIcon />
-                  },
+                  // { 
+                  //   title: "Listening Hours", 
+                  //   value: loading ? "..." : stats.listeningHours.toLocaleString(),
+                  //   icon: <HomeIcon />
+                  // },
                 ].map((stat, i) => (
                   <div
                     key={i}
