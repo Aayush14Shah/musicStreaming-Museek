@@ -12,8 +12,14 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
   const { isLiked, toggleLike, loading } = useLikes(userId);
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
   
-  // Dynamic playlist name from album
-  const dynamicPlaylistName = currentTrack?.album || playlistName;
+  // Dynamic playlist name from album (handle both string and object)
+  const dynamicPlaylistName = (() => {
+    if (!currentTrack) return playlistName;
+    const alb = currentTrack.album;
+    if (typeof alb === 'string') return alb;
+    if (alb && typeof alb === 'object') return alb.name || playlistName;
+    return playlistName;
+  })();
 
   // Empty state when no track is loaded
   if (!currentTrack) {
@@ -74,14 +80,8 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
 
   const artistInfo = {
     name: currentTrack.artist || "Unknown Artist",
-    description: "Artist information will be displayed here when available.",
-    credits: [
-      { role: "Main Artist", name: currentTrack.artist || "Unknown Artist" },
-    ],
-    queue: {
-      title: "No tracks in queue",
-      artist: "Add tracks to start building your queue",
-    },
+    description: currentTrack.artistDescription || "",
+    credits: currentTrack.credits || [],
   };
 
   const handleLikeToggle = async () => {
@@ -104,7 +104,23 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
     }
   };
   
-  const shareSong = () => console.log('Share song');
+  const shareSong = async () => {
+    if (!currentTrack) return;
+    const shareUrl = `${window.location.origin}?track=${encodeURIComponent(currentTrack.id || '')}`;
+    const shareText = `Check out ${currentTrack.title} by ${currentTrack.artist} on Museek!`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: currentTrack.title, text: shareText, url: shareUrl });
+        return;
+      } catch (err) { /* user cancelled */ }
+    }
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      alert('Track link copied to clipboard!');
+    } catch {
+      prompt('Copy this track link:', shareUrl);
+    }
+  };
   const addToPlaylist = () => setShowPlaylistModal(true);
 
   return (
@@ -181,6 +197,23 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
                     <ShareIcon fontSize="small" />
                   </button>
                 </Tooltip>
+                <Tooltip title="Download" arrow>
+                  <button
+                    onClick={() => {
+                      if(currentTrack?.audioUrl){
+                        const link=document.createElement('a');
+                        link.href=currentTrack.audioUrl;
+                        link.download=(currentTrack.title||'track')+'.mp3';
+                        link.click();
+                      }
+                    }}
+                    aria-label="Download song"
+                    className="w-7 h-7 flex items-center justify-center p-1.5 rounded-full bg-[var(--bg-tertiary)] text-[var(--text-primary)] hover:bg-[var(--accent-primary)] hover:text-white transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l4-5h-3V4h-2v7H8l4 5zm-7 2h14v2H5v-2z"/></svg>
+                  </button>
+                </Tooltip>
+
                 <Tooltip title="Add to Playlist" arrow>
                   <button
                     onClick={addToPlaylist}
@@ -192,29 +225,27 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
                 </Tooltip>
               </div>
             </div>
-            <div className="bg-gradient-to-b from-[var(--bg-tertiary)]/50 to-[var(--bg-primary)]/30 rounded-lg p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)]">
-              <h3 className="text-base font-semibold mb-2 text-[var(--text-primary)]">About the artist</h3>
-              <p className="text-sm leading-tight text-[var(--text-secondary)]">{artistInfo.description}</p>
-            </div>
-            <div className="bg-gradient-to-b from-[var(--bg-tertiary)]/50 to-[var(--bg-primary)]/30 rounded-lg p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)]">
-              <h3 className="text-base font-semibold mb-2 text-[var(--text-primary)]">Credits</h3>
-              <ul className="list-disc pl-5 space-y-1">
-                {artistInfo.credits.map((credit, index) => (
-                  <li key={index} className="text-sm leading-tight text-[var(--text-secondary)]">
-                    {credit.role}: {credit.name}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="bg-gradient-to-b from-[var(--bg-tertiary)]/50 to-[var(--bg-primary)]/30 rounded-lg p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)]">
-              <h3 className="text-base font-semibold mb-2 text-[var(--text-primary)]">Next in Queue</h3>
-              <div className="bg-[var(--bg-secondary)] border border-[var(--border-tertiary)] p-3 rounded-lg">
-                <p className="text-sm font-medium text-[var(--text-primary)]">{artistInfo.queue.title}</p>
-                <p className="text-sm text-[var(--accent-primary)] leading-tight">
-                  {artistInfo.queue.artist}
-                </p>
-              </div>
-            </div>
+            {artistInfo.description && (
+              <div className="bg-gradient-to-b from-[var(--bg-tertiary)]/50 to-[var(--bg-primary)]/30 rounded-lg p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)]">
+                <h3 className="text-base font-semibold mb-2 text-[var(--text-primary)]">About the artist</h3>
+                <p className="text-sm leading-tight text-[var(--text-secondary)]">{artistInfo.description}</p>
+              </div>) }
+            {artistInfo.credits && artistInfo.credits.length>0 && (
+              <div className="bg-gradient-to-b from-[var(--bg-tertiary)]/50 to-[var(--bg-primary)]/30 rounded-lg p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)]">
+                <h3 className="text-base font-semibold mb-2 text-[var(--text-primary)]">Credits</h3>
+                <ul className="list-disc pl-5 space-y-1">
+                  {artistInfo.credits.map((credit, index) => (
+                    <li key={index} className="text-sm leading-tight text-[var(--text-secondary)]">
+                      {credit.role}: {credit.name}
+                    </li>
+                  ))}
+                </ul>
+              </div>) }
+            {currentTrack?.lyrics && (
+              <div className="bg-gradient-to-b from-[var(--bg-tertiary)]/50 to-[var(--bg-primary)]/30 rounded-lg p-4 shadow-[var(--shadow-card)] border border-[var(--card-border)] whitespace-pre-wrap">
+                <h3 className="text-base font-semibold mb-2 text-[var(--text-primary)]">Lyrics</h3>
+                <p className="text-sm leading-tight text-[var(--text-secondary)]">{currentTrack.lyrics}</p>
+              </div>) }
           </div>
         </div>
       </div>

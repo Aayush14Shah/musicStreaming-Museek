@@ -21,7 +21,7 @@ import VolumeUp from '@mui/icons-material/VolumeUp';
 // generic mm:ss formatter
 const formatTime = (sec = 0) => `${Math.floor(sec / 60)}:${Math.floor(sec % 60).toString().padStart(2, '0')}`;
 
-const MusicPlayer = ({ currentTrack, isPlaying, onPlay, onPause }) => {
+const MusicPlayer = ({ currentTrack, isPlaying, onPlay, onPause, onPrev, onNext, onShuffle }) => {
   const [isShuffling, setIsShuffling] = useState(false);
   const [isRepeating, setIsRepeating] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -187,13 +187,13 @@ const MusicPlayer = ({ currentTrack, isPlaying, onPlay, onPause }) => {
       <div className="flex flex-col items-center flex-1 max-w-[600px]">
         <div className="flex items-center space-x-2 md:space-x-4 mb-2 md:mb-3">
           <Tooltip title="Shuffle" arrow>
-            <button onClick={(e)=>{e.stopPropagation(); setIsShuffling((s) => !s);}} className={`${currentTrack ? "text-[var(--text-primary)] hover:text-[var(--accent-primary)]" : "text-[var(--text-tertiary)]"}`}>
+            <button onClick={(e)=>{e.stopPropagation(); setIsShuffling((s) => !s); onShuffle && onShuffle();}} className={`${currentTrack ? "text-[var(--text-primary)] hover:text-[var(--accent-primary)]" : "text-[var(--text-tertiary)]"}`}>
               <ShuffleIcon fontSize="small" />
             </button>
           </Tooltip>
 
           <Tooltip title="Previous" arrow>
-            <button onClick={(e)=>{e.stopPropagation();}} className={`${currentTrack ? "text-[var(--text-primary)] hover:text-[var(--accent-primary)]" : "text-[var(--text-tertiary)]"}`} disabled={!currentTrack}>
+            <button onClick={(e)=>{e.stopPropagation(); onPrev && onPrev();}} className={`${onPrev ? "text-[var(--text-primary)] hover:text-[var(--accent-primary)]" : "text-[var(--text-tertiary)] cursor-not-allowed"}`} disabled={!onPrev}>
               <SkipPreviousIcon fontSize="small" />
             </button>
           </Tooltip>
@@ -209,13 +209,13 @@ const MusicPlayer = ({ currentTrack, isPlaying, onPlay, onPause }) => {
           </Tooltip>
 
           <Tooltip title="Next" arrow>
-            <button onClick={(e)=>{e.stopPropagation();}} className={`${currentTrack ? 'text-[var(--text-primary)] hover:text-[var(--accent-primary)]' : 'text-[var(--text-tertiary)] cursor-not-allowed'}`} disabled={!currentTrack}>
+            <button onClick={(e)=>{e.stopPropagation(); onNext && onNext();}} className={`${onNext ? 'text-[var(--text-primary)] hover:text-[var(--accent-primary)]' : 'text-[var(--text-tertiary)] cursor-not-allowed'}`} disabled={!onNext}>
               <SkipNextIcon fontSize="small" />
             </button>
           </Tooltip>
 
-          <Tooltip title="Repeat" arrow>
-            <button onClick={(e)=>{e.stopPropagation(); setIsRepeating((r) => !r);}} className={`${isRepeating ? "text-[var(--accent-primary)]" : "text-[var(--text-primary)]"}`}>
+          <Tooltip title="Restart / Toggle Repeat" arrow>
+            <button onClick={(e)=>{e.stopPropagation(); if(audioRef.current){audioRef.current.currentTime=0; audioRef.current.play().catch(()=>{});} setIsRepeating((r)=>!r);}} className={`${isRepeating ? "text-[var(--accent-primary)]" : "text-[var(--text-primary)]"}`}>
               <RepeatIcon fontSize="small" />
             </button>
           </Tooltip>
@@ -245,16 +245,6 @@ const MusicPlayer = ({ currentTrack, isPlaying, onPlay, onPause }) => {
 
       {/* Right */}
       <div className="flex items-center space-x-1 md:space-x-3 justify-end min-w-[200px] md:min-w-[300px]">
-        <Tooltip title="Queue" arrow>
-          <button onClick={(e)=>{e.stopPropagation();}} className={`${currentTrack ? "text-[var(--text-primary)]" : "text-[var(--text-tertiary)]"}`}>
-            <QueueMusicIcon fontSize="small" />
-          </button>
-        </Tooltip>
-        <Tooltip title="Lyrics" arrow>
-          <button onClick={(e)=>{e.stopPropagation();}} className={`${currentTrack ? "text-[var(--text-primary)]" : "text-[var(--text-tertiary)]"}`}>
-            <LyricsIcon fontSize="small" />
-          </button>
-        </Tooltip>
         <div className="flex items-center space-x-1 md:space-x-2">
           <Tooltip title="Volume" arrow>
             <button onClick={(e)=>{e.stopPropagation();}} className={`${currentTrack ? "text-[var(--text-primary)]" : "text-[var(--text-tertiary)]"}`}>

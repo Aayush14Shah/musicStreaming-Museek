@@ -16,6 +16,9 @@ import CustomSongsSection from '../CustomSongs/CustomSongsSection';
 import CustomAudioPlayer from '../CustomSongs/CustomAudioPlayer';
 
 const Home = () => {
+  // 🌏 content mode from Navbar toggle
+  const [contentMode, setContentMode] = useState(() => localStorage.getItem('contentMode') || 'india');
+  const [jamendoTracks, setJamendoTracks] = useState([]);
   const userId = localStorage.getItem("userId");
   console.log("Home.jsx userId from localStorage:", userId);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -43,6 +46,43 @@ const Home = () => {
     images: [{ url: "https://placehold.co/800x400?text=Welcome+to+Museek" }],
   });
   const [isLoading, setIsLoading] = useState(true);
+
+  // Listen for mode changes from Navbar
+  useEffect(() => {
+    const handler = (e) => {
+      const mode = e?.detail || localStorage.getItem('contentMode') || 'india';
+      setContentMode(mode);
+    };
+    window.addEventListener('contentModeChanged', handler);
+    return () => window.removeEventListener('contentModeChanged', handler);
+  }, []);
+
+  // Fetch Jamendo tracks when entering International mode
+  useEffect(() => {
+    if (contentMode !== 'international') return;
+    const fetchJamendo = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/jamendo/tracks?limit=12');
+        const { tracks = [] } = await res.json();
+        const mapped = tracks
+          .filter(t => t.audio_url)
+          .map(t => ({
+            id: t.id,
+            name: t.name,
+            artists: [{ name: t.artist }],
+            album: { name: t.album, images: [{ url: t.image }] },
+            duration_ms: (t.duration || 30) * 1000,
+            preview_url: t.audio_url,
+            images: [{ url: t.image }]
+          }));
+        setJamendoTracks(mapped);
+      } catch(err) {
+        console.error('Jamendo fetch failed', err);
+        setJamendoTracks([]);
+      }
+    };
+    fetchJamendo();
+  }, [contentMode]);
   const [error, setError] = useState(null);
   const [currentView, setCurrentView] = useState('home'); // 'home', 'playlist', 'genre', 'custom-songs', 'liked-songs'
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
@@ -65,6 +105,9 @@ const Home = () => {
   const [playlistTracks, setPlaylistTracks] = useState([]);
   const [currentCustomSong, setCurrentCustomSong] = useState(null);
   const [isCustomSongPlaying, setIsCustomSongPlaying] = useState(false);
+  // queue state for prev/next navigation
+  const [queue, setQueue] = useState([]);
+  const [queueIndex, setQueueIndex] = useState(-1);
 
   useEffect(() => {
     const savedRecentlyPlayed = localStorage.getItem("recentlyPlayed");
@@ -588,6 +631,29 @@ const Home = () => {
     buildRecommended();
   }, [userId, userDbPlaylists]);
 
+  const handleShuffle = () => {
+    if (recommendedTracks.length) {
+      const random = recommendedTracks[Math.floor(Math.random()*recommendedTracks.length)];
+      handleTrackClick(random, recommendedTracks);
+    }
+  };
+
+  const handlePrev = () => {
+    if (queueIndex > 0) {
+      const newIdx = queueIndex - 1;
+      setQueueIndex(newIdx);
+      handleTrackClick(queue[newIdx], queue);
+    }
+  };
+
+  const handleNext = () => {
+    if (queueIndex >= 0 && queueIndex < queue.length - 1) {
+      const newIdx = queueIndex + 1;
+      setQueueIndex(newIdx);
+      handleTrackClick(queue[newIdx], queue);
+    }
+  };
+
   // Helper function to show notifications
   const showNotification = (title, message, type = "error") => {
     const notification = document.createElement("div");
@@ -625,7 +691,12 @@ const Home = () => {
     }, 4000);
   };
 
-  const handleTrackClick = async (item = null) => {
+  const handleTrackClick = async (item = null, list = []) => {
+    if (Array.isArray(list) && list.length) {
+      setQueue(list);
+      const idx = list.findIndex((t) => (t.id || t.songId) === (item?.id || item?.songId));
+      setQueueIndex(idx >= 0 ? idx : -1);
+    }
     if (item) {
       console.log("🎵 Track clicked:", {
         id: item.id,
@@ -747,6 +818,10 @@ const Home = () => {
         }
 
       }
+
+      // update current track state
+      setCurrentTrack(playableTrack);
+      setIsPlaying(true);
 
       // Final check - show message instead of playing sample
       if (!playableTrack.audioUrl) {
@@ -920,6 +995,11 @@ const Home = () => {
                 <CarouselPlaylistRow title="Recently Played" items={recentlyPlayed} onPlaylistClick={handlePlaylistClick} />
                 <CarouselPlaylistRow title="Popular Playlists" items={popularPlaylists} onPlaylistClick={handlePlaylistClick} />
                 <CarouselPlaylistRow title="Mood Booster" items={moodBooster} onPlaylistClick={handlePlaylistClick} />
+
+                {/* Jamendo section visible only in International mode */}
+                {contentMode === 'international' && (
+                  <CarouselTrackRow title="Indie International Picks" items={jamendoTracks} onTrackClick={handleTrackClick} />
+                )}
                 {searchResults && (
                   <TrackList title="Search Results" items={searchResults} onTrackClick={handleTrackClick} />
                 )}
@@ -930,10 +1010,16 @@ const Home = () => {
         </div>
       </div>
       {/* Spotify Music Player */}
-      <MusicPlayer
+      <MusicPlayer 
         currentTrack={currentTrack}
         isPlaying={isPlaying}
-        onTogglePlay={() => setIsPlaying(prev => !prev)}
+        onPrev={queueIndex>0 ? handlePrev : undefined}
+        onNext={queueIndex>=0 && queueIndex<queue.length-1 ? handleNext : undefined}
+        onShuffle={recommendedTracks.length? handleShuffle: undefined}
+        onTogglePlay={() => setIsPlaying(prev => !prev)} 
+        currentTrack={currentTrack} 
+        isPlaying={isPlaying} 
+        onTogglePlay={() => setIsPlaying(prev => !prev)} 
       />
 
       {/* Now Playing Sidebar */}
