@@ -24,7 +24,7 @@ function App() {
     // Added 'min-h-screen' and 'flex items-center justify-center'
     // bg-[#121212]
     // flex items-center justify-center
-    <div className='bg-[#1c2b2d] min-h-screen'>
+    <div className='bg-[var(--bg-primary)] min-h-screen'>
         <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/Login" element={<Login />} />
