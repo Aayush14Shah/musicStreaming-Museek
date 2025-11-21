@@ -1,5 +1,6 @@
 // Updated Navbar.jsx (minor improvements for responsiveness)
 import React, { useEffect, useState, useMemo } from 'react';
+import Switch from '@mui/material/Switch';
 import { Tooltip } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import PersonIcon from '@mui/icons-material/Person';
@@ -29,6 +30,10 @@ const GRADIENT_AVATARS = [
 ];
 
 const Navbar = ({ onSearch }) => {
+  // 🌏 Content mode state ('india' | 'international')
+  const [contentMode, setContentMode] = useState(() => {
+    return localStorage.getItem('contentMode') || 'india';
+  });
   const [userInitial, setUserInitial] = useState(null);
   const [userEmail, setUserEmail] = useState(null);
   const [open, setOpen] = useState(false);
@@ -97,6 +102,15 @@ const Navbar = ({ onSearch }) => {
     navigate('/Login');
   };
 
+  // Toggle between India and International modes
+  const handleToggleContentMode = () => {
+    const newMode = contentMode === 'india' ? 'international' : 'india';
+    setContentMode(newMode);
+    localStorage.setItem('contentMode', newMode);
+    // Dispatch custom event so other components can react immediately
+    window.dispatchEvent(new CustomEvent('contentModeChanged', { detail: newMode }));
+  };
+
   const handleLogout = () => {
     // Clear all user-related data from localStorage
     localStorage.removeItem('userName');
@@ -159,6 +173,20 @@ const Navbar = ({ onSearch }) => {
       </div>
 
 
+      {/* Content mode toggle (desktop) */}
+      <div className="hidden lg:flex items-center gap-2 mr-4 select-none">
+        <span className="text-xs font-semibold tracking-wide text-[var(--text-secondary)]">
+          {contentMode === 'india' ? 'INDIA' : 'INTL'}
+        </span>
+        <Switch
+          checked={contentMode === 'international'}
+          onChange={handleToggleContentMode}
+          size="small"
+          color="default"
+          inputProps={{ 'aria-label': 'content mode toggle' }}
+        />
+      </div>
+
       {/* Right - Profile */}
       <div className="flex-shrink-0">
         {userInitial ? (
@@ -216,18 +244,17 @@ const Navbar = ({ onSearch }) => {
     </div>
   </div>
 )}
-        </div>
-        ) : (
-          <button
-            onClick={handleRedirect}
-            className="px-4 py-2 bg-[var(--accent-primary)] hover:bg-[var(--accent-secondary)] text-white rounded-md font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg"
-          >
-            Login
-          </button>
-        )}
-      </div>
-    </div>
-  );
-};
 
+        </div>
+      ) : (
+        <button
+          onClick={handleRedirect}
+          className="px-4 py-2 bg-[var(--accent-primary)] hover:bg-[var(--accent-secondary)] text-white rounded-md font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg"
+        >
+          Login
+        </button>
+      )}
+    </div>
+  </div>
+);}
 export default Navbar;

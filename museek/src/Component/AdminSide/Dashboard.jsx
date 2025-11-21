@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Avatar, Button } from "@mui/material";
 import {
+  
+  
   Home as HomeIcon,
   People as PeopleIcon,
   AdminPanelSettings as AdminIcon,
@@ -107,11 +109,11 @@ const Dashboard = () => {
                     value: loading ? "..." : stats.totalCustomSongs.toLocaleString(),
                     icon: <MusicIcon />
                   },
-                  { 
-                    title: "Listening Hours", 
-                    value: loading ? "..." : stats.listeningHours.toLocaleString(),
-                    icon: <HomeIcon />
-                  },
+                  // { 
+                  //   title: "Listening Hours", 
+                  //   value: loading ? "..." : stats.listeningHours.toLocaleString(),
+                  //   icon: <HomeIcon />
+                  // },
                 ].map((stat, i) => (
                   <div
                     key={i}

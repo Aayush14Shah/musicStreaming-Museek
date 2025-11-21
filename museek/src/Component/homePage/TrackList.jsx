@@ -25,14 +25,14 @@ const TrackList = ({ title = 'Recommended Tracks', items = [], onTrackClick }) =
   const handleTrackPlay = (track) => {
     console.log('Playing track from list:', track);
     if (onTrackClick) {
-      onTrackClick(track);
+      onTrackClick(track, tracks);
     }
   };
 
   return (
     <section className="w-full py-8 md:py-12 bg-[var(--bg-secondary)]">
       <div className="px-4 md:px-8 flex items-end justify-between mb-6">
-        <h2 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)]">Recommended Tracks</h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)]">{title}</h2>
       </div>
 
       {/* Mobile-first: card list */}
