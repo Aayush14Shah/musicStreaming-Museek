@@ -25,7 +25,7 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
   if (!currentTrack) {
     return (
       <div
-        className={`fixed top-[60px] bottom-16 right-0 bg-transparent text-[var(--text-primary)] z-40 transition-transform duration-300 ease-in-out ${
+        className={`fixed top-[60px] bottom-16 right-0 bg-[var(--bg-primary)] text-[var(--text-primary)] z-40 transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         } w-[18rem] md:w-[20rem] lg:w-[22rem]`}
       >
@@ -125,7 +125,7 @@ const NowPlayingSidebar = ({ currentTrack, onClose, isOpen, playlistName = "Now 
 
   return (
     <div
-      className={`fixed top-[60px] bottom-20 right-0 bg-transparent text-[var(--text-primary)] z-40 transition-transform duration-300 ease-in-out ${
+      className={`fixed top-[60px] bottom-20 right-0 bg-[var(--bg-primary)] text-[var(--text-primary)] z-40 transition-transform duration-300 ease-in-out ${
         isOpen ? "translate-x-0" : "translate-x-full"
       } w-[18rem] md:w-[20rem] lg:w-[22rem]`}
     >
