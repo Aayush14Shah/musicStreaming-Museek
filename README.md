@@ -1,4 +1,4 @@
-# TuneIn
+# Museek
 A music streaming website
 
 
