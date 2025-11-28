@@ -41,7 +41,14 @@ const Login = () => {
       localStorage.setItem('userId', data.user._id);
       localStorage.setItem('userEmail', data.user.email);
 
-      // show popup
+      // check role
+      const role = data.user.role || data.user.userType || '';
+      if (role.toLowerCase() === 'admin') {
+        navigate('/admin/dashboard');
+        return;
+      }
+
+      // show popup for regular users
       setShowPopup(true);
 
     } catch (err) {

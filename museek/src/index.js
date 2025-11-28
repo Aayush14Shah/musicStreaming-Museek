@@ -9,12 +9,15 @@ const setTheme = (theme) => {
   document.documentElement.setAttribute('data-theme', theme);
 };
 
-const theme = localStorage.getItem('theme') || 'dark';
-setTheme(theme);
+const isAdminRoute = window.location.pathname.startsWith('/admin');
+if (!isAdminRoute) {
+  const theme = localStorage.getItem('theme') || 'dark';
+  setTheme(theme);
 
-window.addEventListener('storage', (e) => {
-  if (e.key === 'theme') setTheme(e.newValue || 'dark');
-});
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'theme') setTheme(e.newValue || 'dark');
+  });
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
