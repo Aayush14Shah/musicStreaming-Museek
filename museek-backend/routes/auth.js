@@ -97,11 +97,34 @@ router.post("/verify-otp", async (req, res) => {
   if (!record) return res.status(400).json({ message: "No OTP requested" });
   if (record.otp !== otp) return res.status(400).json({ message: "Invalid OTP" });
   if (Date.now() > record.otpExpiry) return res.status(400).json({ message: "OTP expired" });
-  otpStore.delete(email);
+  // Don't delete the OTP here. It will be validated and deleted upon password reset.
   res.json({ message: "OTP verified" });
 });
 
 // Reset Password (only if OTP was verified)
+router.post("/reset-password", async (req, res) => {
+  const { email, password, otp } = req.body;
+  if (!email || !password || !otp) return res.status(400).json({ message: "Email, new password, and OTP required" });
+  try {
+    // Re-verify OTP before resetting password
+    const record = otpStore.get(email);
+    if (!record) return res.status(400).json({ message: "No OTP requested or it has expired. Please try again." });
+    if (record.otp !== otp) return res.status(400).json({ message: "Invalid OTP." });
+    if (Date.now() > record.otpExpiry) return res.status(400).json({ message: "OTP expired. Please try again." });
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
+    user.password = password;
+    await user.save();
+    otpStore.delete(email); // Clean up OTP after successful reset
+    res.json({ message: "Password reset successful" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }});
+
+  // }
+// });
+
 router.post("/reset-password", async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ message: "Email and new password required" });
@@ -116,8 +139,6 @@ router.post("/reset-password", async (req, res) => {
     res.status(500).json({ message: err.message });
   }});
 
-  // }
-// });
 
 
 router.post("/dashboard", async (req, res) => {

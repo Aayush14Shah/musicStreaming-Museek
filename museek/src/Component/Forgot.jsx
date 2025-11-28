@@ -32,7 +32,7 @@ const Forgot = () => {
     setLoading(true);
     setError('');
     try {
-      await axios.post('http://localhost:5000/auth/send-otp', { email, purpose: 'forgot' });
+      await axios.post('http://localhost:5000/auth/forgot-password', { email });
       setEmailSent(true);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to send OTP.');
@@ -115,7 +115,8 @@ const Forgot = () => {
       return;
     }
     try {
-      await axios.post('http://localhost:5000/auth/reset-password', { email, password: resetPassword });
+      const otpValue = otp.join('');
+      await axios.post('http://localhost:5000/auth/reset-password', { email, password: resetPassword, otp: otpValue });
       setShowPopup(true);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to reset password.');
