@@ -43,7 +43,6 @@ const Navbar = ({ onSearch }) => {
     return Math.max(0, Math.min(index, GRADIENT_AVATARS.length - 1));
   });
   const navigate = useNavigate();
-  const [query, setQuery] = useState("");
 
   // Get current avatar style
   const avatarStyle = useMemo(() => {
@@ -61,6 +60,7 @@ const Navbar = ({ onSearch }) => {
       flexShrink: 0
     };
   }, [avatarIndex]);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     const name = localStorage.getItem('userName');

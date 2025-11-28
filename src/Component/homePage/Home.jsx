@@ -920,14 +920,14 @@ const Home = () => {
   };
 
   return (
-    <div className="relative flex size-full min-h-screen flex-col bg-gradient-to-br from-[#121212] via-[#1a1a1a] to-[#0e0e0e] dark group/design-root overflow-x-hidden" style={{ fontFamily: 'Inter, \"Noto Sans\", sans-serif' }}>
-      <Navbar onSearch={async (q) => {
-        if (!q) return;
-        try {
-          const res = await fetch(`http://localhost:5000/api/spotify/search-tracks?query=${encodeURIComponent(q)}&limit=12`);
-          if (res.ok) {
-            const data = await res.json();
-            setSearchResults((data.tracks || []).slice(0, 12));
+    <div className="relative flex size-full min-h-screen flex-col bg-gradient-to-br from-[var(--bg-secondary)] via-[var(--bg-primary)] to-[var(--bg-secondary)] dark group/design-root overflow-x-hidden" style={{ fontFamily: 'Inter, \"Noto Sans\", sans-serif' }}>
+      <Navbar onSearch={async (q)=>{
+        if(!q) return;
+        try{
+          const res=await fetch(`http://localhost:5000/api/spotify/search-tracks?query=${encodeURIComponent(q)}&limit=12`);
+          if(res.ok){
+            const data=await res.json();
+            setSearchResults((data.tracks||[]).slice(0,12));
           }
         } catch (err) { console.error('search error', err); }
       }} />
