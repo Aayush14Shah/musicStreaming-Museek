@@ -2,6 +2,7 @@
   "name": "museek",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://aayush14shah.github.io/musicStreaming-Museek/",
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
@@ -57,6 +58,5 @@
     "eslint-config-react-app": "^7.0.1",
     "gh-pages": "^6.3.0",
     "tailwindcss": "^3.4.17"
-  },
-  "homepage": "https://aayush14shah.github.io/musicStreaming-Museek"
+  }
 }
