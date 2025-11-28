@@ -1017,9 +1017,6 @@ const Home = () => {
         onNext={queueIndex>=0 && queueIndex<queue.length-1 ? handleNext : undefined}
         onShuffle={recommendedTracks.length? handleShuffle: undefined}
         onTogglePlay={() => setIsPlaying(prev => !prev)} 
-        currentTrack={currentTrack} 
-        isPlaying={isPlaying} 
-        onTogglePlay={() => setIsPlaying(prev => !prev)} 
       />
 
       {/* Now Playing Sidebar */}
