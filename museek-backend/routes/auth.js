@@ -67,6 +67,46 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Send OTP
+router.post("/send-otp", async (req, res) => {
+  const { email, purpose } = req.body;
+  if (!email) return res.status(400).json({ message: "Email required" });
+
+  try {
+    if (purpose === 'signup') {
+      const user = await User.findOne({ email });
+      if (user) return res.status(400).json({ message: "User already exists with this email" });
+    }
+
+    const otp = generateOTP();
+    const otpExpiry = Date.now() + 5 * 60 * 1000;
+    otpStore.set(email, { otp, otpExpiry });
+
+    let subject = "Museek OTP";
+    let text = `Your OTP is: ${otp}. It is valid for 5 minutes.`;
+
+    if (purpose === 'signup') {
+      subject = "Museek Registration OTP";
+      text = `Your OTP for account registration is: ${otp}. It is valid for 5 minutes.`;
+    }
+
+    if (transporter) {
+      await transporter.sendMail({
+        from: "ankbizzcorp@gmail.com",
+        to: email,
+        subject,
+        text
+      });
+    } else {
+      console.error("[Museek ERROR] Transporter not configured. OTP:", otp);
+    }
+
+    res.json({ message: "OTP sent successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 
 // Forgot Password - send OTP (real email logic)
 router.post("/forgot-password", async (req, res) => {
