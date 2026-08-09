@@ -166,12 +166,12 @@ const Home = () => {
           },
           ...(userId
             ? [
-                {
-                  url: `http://localhost:5000/api/user-playlists?userId=${userId}`,
-                  setter: setUserPlaylists,
-                  path: "playlists",
-                },
-              ]
+              {
+                url: `http://localhost:5000/api/user-playlists?userId=${userId}`,
+                setter: setUserPlaylists,
+                path: "playlists",
+              },
+            ]
             : []),
           {
             url: "http://localhost:5000/api/recommended-tracks?seed_genres=pop,rock&limit=12&market=US",
@@ -516,23 +516,23 @@ const Home = () => {
                   item.images && item.images.length > 0
                     ? item.images
                     : [
-                        {
-                          url: `https://placehold.co/300x300?text=${encodeURIComponent(
-                            item.name || "Placeholder"
-                          )}`,
-                        },
-                      ],
+                      {
+                        url: `https://placehold.co/300x300?text=${encodeURIComponent(
+                          item.name || "Placeholder"
+                        )}`,
+                      },
+                    ],
                 album: item.album
                   ? {
-                      ...item.album,
-                      images: item.album.images || [
-                        {
-                          url: `https://placehold.co/300x300?text=${encodeURIComponent(
-                            item.album?.name || "Album"
-                          )}`,
-                        },
-                      ],
-                    }
+                    ...item.album,
+                    images: item.album.images || [
+                      {
+                        url: `https://placehold.co/300x300?text=${encodeURIComponent(
+                          item.album?.name || "Album"
+                        )}`,
+                      },
+                    ],
+                  }
                   : item.album,
               }));
             // Don't filter out tracks - let backend and fallback system handle previews
@@ -661,10 +661,10 @@ const Home = () => {
       type === "error"
         ? "from-red-500 to-red-600"
         : type === "info"
-        ? "from-blue-500 to-blue-600"
-        : type === "success"
-        ? "from-green-500 to-green-600"
-        : "from-gray-500 to-gray-600";
+          ? "from-blue-500 to-blue-600"
+          : type === "success"
+            ? "from-green-500 to-green-600"
+            : "from-gray-500 to-gray-600";
 
     notification.className = `fixed top-20 right-4 bg-gradient-to-r ${bgColor} text-white px-6 py-3 rounded-lg shadow-xl z-50 transition-all duration-300 max-w-sm`;
     notification.innerHTML = `
@@ -738,7 +738,7 @@ const Home = () => {
           console.log('🔍 Searching YouTube...');
           const ytResponse = await fetch(`http://localhost:5000/api/youtube/preview?trackName=${encodeURIComponent(playableTrack.title)}&artistName=${encodeURIComponent(playableTrack.artist)}`);
           const ytResult = await ytResponse.json();
-          
+
           if (ytResult.found && ytResult.preview_url) {
             console.log('✅ YouTube SUCCESS:', ytResult.title || playableTrack.title);
             playableTrack.audioUrl = ytResult.preview_url;
@@ -906,10 +906,10 @@ const Home = () => {
         setCurrentTrack(null);
         setIsPlaying(false);
       }
-      
+
       setCurrentCustomSong(song);
       setIsCustomSongPlaying(shouldPlay);
-      
+
       // Save to localStorage
       localStorage.setItem('lastPlayedCustomSong', JSON.stringify(song));
     } else {
@@ -929,21 +929,21 @@ const Home = () => {
             const data=await res.json();
             setSearchResults((data.tracks||[]).slice(0,12));
           }
-        }catch(err){console.error('search error',err);}
+        } catch (err) { console.error('search error', err); }
       }} />
       <LeftSidebar onLikedSongsClick={handleLikedSongsClick} onPlaylistClick={handleUserPlaylistClick} />
-      <div 
+      <div
         className="layout-container flex h-full grow flex-col min-h-screen w-full transition-all duration-300 ease-in-out pt-[60px] pb-16 md:pb-20 md:pl-[16.5rem] lg:pl-[18rem]"
-        style={{ 
+        style={{
           paddingRight: isSidebarVisible ? '360px' : '0px',
           transition: 'padding-right 0.3s ease-in-out'
         }}
-      > 
+      >
         <div className="m-1.5 md:mx-2 rounded-2xl shadow-[var(--shadow-primary)] bg-[var(--bg-secondary)] border border-[var(--border-tertiary)] p-2">
           <div className="rounded-2xl bg-[var(--bg-primary)] border border-[var(--card-border)] p-4 md:p-6">
             {/* CONDITIONAL RENDER */}
             {currentView === 'liked-songs' ? (
-              <LikedSongs 
+              <LikedSongs
                 onBack={() => setCurrentView('home')}
                 onTrackClick={handleTrackClick}
                 currentTrack={currentTrack}
@@ -980,9 +980,9 @@ const Home = () => {
                 )}
 
                 <HeroBanner featured={heroFeatured} forceWhiteText={true} />
-                
+
                 {/* Custom Songs Section - Your Offline Library */}
-                <CustomSongsSection 
+                <CustomSongsSection
                   onSongPlay={handleCustomSongPlay}
                   currentPlayingSong={currentCustomSong}
                   isPlaying={isCustomSongPlaying}
@@ -1017,21 +1017,18 @@ const Home = () => {
         onNext={queueIndex>=0 && queueIndex<queue.length-1 ? handleNext : undefined}
         onShuffle={recommendedTracks.length? handleShuffle: undefined}
         onTogglePlay={() => setIsPlaying(prev => !prev)} 
-        currentTrack={currentTrack} 
-        isPlaying={isPlaying} 
-        onTogglePlay={() => setIsPlaying(prev => !prev)} 
       />
-      
+
       {/* Now Playing Sidebar */}
-      <NowPlayingSidebar 
-        currentTrack={currentTrack} 
-        onClose={() => toggleSidebar(false)} 
-        isOpen={isSidebarVisible} 
+      <NowPlayingSidebar
+        currentTrack={currentTrack}
+        onClose={() => toggleSidebar(false)}
+        isOpen={isSidebarVisible}
       />
-      
+
       {/* Custom Songs Audio Player */}
       {currentCustomSong && (
-        <CustomAudioPlayer 
+        <CustomAudioPlayer
           currentSong={currentCustomSong}
           isPlaying={isCustomSongPlaying}
           onPlayPause={handleCustomSongPlay}
@@ -1052,6 +1049,7 @@ const Home = () => {
         </div>
       )}
     </div>
+    // </div >
   );
 };
 

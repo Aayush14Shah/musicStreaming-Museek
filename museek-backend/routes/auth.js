@@ -67,6 +67,46 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Send OTP
+router.post("/send-otp", async (req, res) => {
+  const { email, purpose } = req.body;
+  if (!email) return res.status(400).json({ message: "Email required" });
+
+  try {
+    if (purpose === 'signup') {
+      const user = await User.findOne({ email });
+      if (user) return res.status(400).json({ message: "User already exists with this email" });
+    }
+
+    const otp = generateOTP();
+    const otpExpiry = Date.now() + 5 * 60 * 1000;
+    otpStore.set(email, { otp, otpExpiry });
+
+    let subject = "Museek OTP";
+    let text = `Your OTP is: ${otp}. It is valid for 5 minutes.`;
+
+    if (purpose === 'signup') {
+      subject = "Museek Registration OTP";
+      text = `Your OTP for account registration is: ${otp}. It is valid for 5 minutes.`;
+    }
+
+    if (transporter) {
+      await transporter.sendMail({
+        from: "ankbizzcorp@gmail.com",
+        to: email,
+        subject,
+        text
+      });
+    } else {
+      console.error("[Museek ERROR] Transporter not configured. OTP:", otp);
+    }
+
+    res.json({ message: "OTP sent successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 
 // Forgot Password - send OTP (real email logic)
 router.post("/forgot-password", async (req, res) => {
@@ -102,11 +142,34 @@ router.post("/verify-otp", async (req, res) => {
   if (!record) return res.status(400).json({ message: "No OTP requested" });
   if (record.otp !== otp) return res.status(400).json({ message: "Invalid OTP" });
   if (Date.now() > record.otpExpiry) return res.status(400).json({ message: "OTP expired" });
-  otpStore.delete(email);
+  // Don't delete the OTP here. It will be validated and deleted upon password reset.
   res.json({ message: "OTP verified" });
 });
 
 // Reset Password (only if OTP was verified)
+router.post("/reset-password", async (req, res) => {
+  const { email, password, otp } = req.body;
+  if (!email || !password || !otp) return res.status(400).json({ message: "Email, new password, and OTP required" });
+  try {
+    // Re-verify OTP before resetting password
+    const record = otpStore.get(email);
+    if (!record) return res.status(400).json({ message: "No OTP requested or it has expired. Please try again." });
+    if (record.otp !== otp) return res.status(400).json({ message: "Invalid OTP." });
+    if (Date.now() > record.otpExpiry) return res.status(400).json({ message: "OTP expired. Please try again." });
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
+    user.password = password;
+    await user.save();
+    otpStore.delete(email); // Clean up OTP after successful reset
+    res.json({ message: "Password reset successful" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }});
+
+  // }
+// });
+
 router.post("/reset-password", async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ message: "Email and new password required" });
@@ -121,8 +184,6 @@ router.post("/reset-password", async (req, res) => {
     res.status(500).json({ message: err.message });
   }});
 
-  // }
-// });
 
 
 router.post("/dashboard", async (req, res) => {

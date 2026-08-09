@@ -1,0 +1,21 @@
+{
+  "files": {
+    "main.css": "/musicStreaming-Museek/static/css/main.b4b6f906.css",
+    "main.js": "/musicStreaming-Museek/static/js/main.03834444.js",
+    "static/js/453.79130ff4.chunk.js": "/musicStreaming-Museek/static/js/453.79130ff4.chunk.js",
+    "static/media/LogoFinalDarkModeFrameResized.png": "/musicStreaming-Museek/static/media/LogoFinalDarkModeFrameResized.a322d7416bd7ea429444.png",
+    "static/media/loginPageImage.jpg": "/musicStreaming-Museek/static/media/loginPageImage.3f90127811f20a6d5b40.jpg",
+    "static/media/LogoFinalLightModeFrameResized.png": "/musicStreaming-Museek/static/media/LogoFinalLightModeFrameResized.052eb996db30038ef190.png",
+    "static/media/ForgotPageImage.jpg": "/musicStreaming-Museek/static/media/ForgotPageImage.4a7c2749b54fc4cdbe65.jpg",
+    "static/media/CircularLogoFinalDarkMode.png": "/musicStreaming-Museek/static/media/CircularLogoFinalDarkMode.7fd077347e974bd80ec2.png",
+    "static/media/login_side_image.jpg": "/musicStreaming-Museek/static/media/login_side_image.b966121c9e5424a24845.jpg",
+    "index.html": "/musicStreaming-Museek/index.html",
+    "main.b4b6f906.css.map": "/musicStreaming-Museek/static/css/main.b4b6f906.css.map",
+    "main.03834444.js.map": "/musicStreaming-Museek/static/js/main.03834444.js.map",
+    "453.79130ff4.chunk.js.map": "/musicStreaming-Museek/static/js/453.79130ff4.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.b4b6f906.css",
+    "static/js/main.03834444.js"
+  ]
+}
