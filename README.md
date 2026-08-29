@@ -83,6 +83,7 @@ The platform is backed by a Node.js/Express REST API with MongoDB Atlas for data
 | **React 19** | UI framework |
 | **React Router DOM v7** | Client-side routing |
 | **Tailwind CSS 3** | Utility-first styling |
+| **Lightswind** | UI components / specific tailored styling |
 | **Material UI (MUI) v7** | UI component library |
 | **Lucide React** | Icon set |
 | **Axios** | HTTP client |
@@ -93,13 +94,12 @@ The platform is backed by a Node.js/Express REST API with MongoDB Atlas for data
 
 | Technology | Purpose |
 |---|---|
-| **Node.js + Express 5** | REST API server |
+| **Node.js + Express 5** | REST API server (ES Modules) |
 | **MongoDB Atlas + Mongoose** | Database and ODM |
 | **Multer** | Audio and image file upload handling |
 | **Nodemailer** | OTP email delivery |
 | **Spotify Web API Node** | Spotify API integration |
-| **yt-dlp-exec** | YouTube audio extraction |
-| **yt-search / ytmusic-api** | YouTube Music search |
+| **yt-dlp-exec & yt-search** | YouTube audio extraction and search |
 | **Jamendo API** | Royalty-free music streaming |
 | **dotenv** | Environment variable management |
 | **nodemon** | Development auto-restart |
@@ -222,7 +222,7 @@ Create a `.env` file inside the `museek-backend/` directory with the following c
 
 ```env
 # MongoDB
-MONGO_URI=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/Museek?retryWrites=true&w=majority
+MONGO_URI=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/Museek?retryWrites=true&w=majority&appName=Cluster0
 
 # Spotify API
 SPOTIFY_CLIENT_ID=your_spotify_client_id
@@ -347,18 +347,6 @@ This automatically runs `npm run build` first, then pushes the `build/` folder t
 **Live application:** [https://aayush14shah.github.io/musicStreaming-Museek/](https://aayush14shah.github.io/musicStreaming-Museek/)
 
 > For production backend deployment, platforms such as **Railway**, **Render**, or **Heroku** are recommended. Ensure all environment variables are configured in the hosting platform's settings dashboard.
-
----
-
-## Contributing
-
-Contributions, issues, and feature requests are welcome!
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature-name`
-3. Commit your changes: `git commit -m 'Add: your feature description'`
-4. Push to the branch: `git push origin feature/your-feature-name`
-5. Open a Pull Request
 
 ---
 
