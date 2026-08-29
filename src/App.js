@@ -17,6 +17,7 @@ import AddSong from './Component/AdminSide/AddSong';
 import PageNotFound from './Component/AdminSide/PageNotFound';
 import Analytics from './Component/AdminSide/Analytics';
 import AdminSettings from './Component/AdminSide/Settings';
+import AdminProfile from './Component/AdminSide/AdminProfile';
 
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
             <Route path="*" element={<PageNotFound />} />
             <Route path="/admin/analytics" element={<Analytics />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
+            <Route path="/admin/profile" element={<AdminProfile />} />
         </Routes>
     </div>
   ); 

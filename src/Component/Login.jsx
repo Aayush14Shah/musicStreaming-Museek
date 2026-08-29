@@ -41,8 +41,10 @@ const Login = () => {
       localStorage.setItem('userId', data.user._id);
       localStorage.setItem('userEmail', data.user.email);
 
-      // check role
-      const role = data.user.role || data.user.userType || '';
+      // check role — backend returns { user, role } so role is at top level
+      const role = data.role || data.user.role || data.user.userType || '';
+      localStorage.setItem('userRole', role.toLowerCase());
+
       if (role.toLowerCase() === 'admin') {
         navigate('/admin/dashboard');
         return;

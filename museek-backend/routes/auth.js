@@ -2,6 +2,7 @@ import express from "express";
 import User from "../models/Register_user.js";
 import nodemailer from "nodemailer";
 import Admin from "../models/admin.js";
+import bcrypt from "bcryptjs";
 
 const router = express.Router();
 const otpStore = new Map();
@@ -40,7 +41,8 @@ router.post("/register", async (req, res) => {
       console.log('Settings check failed, allowing registration by default');
     }
     
-    const user = new User(req.body);
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const user = new User({ ...req.body, password: hashedPassword });
     await user.save();
     res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
@@ -59,7 +61,8 @@ router.post("/login", async (req, res) => {
       accountType = 'admin';
     }
     if (!account) return res.status(404).json({ message: "User not found" });
-    if (account.password !== password)
+    const isMatch = await bcrypt.compare(password, account.password);
+    if (!isMatch)
       return res.status(401).json({ message: "Invalid password" });
     res.json({ message: "Login successful", user: account, role: accountType });
   } catch (err) {
@@ -159,7 +162,8 @@ router.post("/reset-password", async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
-    user.password = password;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
     await user.save();
     otpStore.delete(email); // Clean up OTP after successful reset
     res.json({ message: "Password reset successful" });
@@ -170,25 +174,12 @@ router.post("/reset-password", async (req, res) => {
   // }
 // });
 
-router.post("/reset-password", async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ message: "Email and new password required" });
-  try {
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
-    // Optionally: check if OTP was verified recently (or use a flag)
-    user.password = password;
-    await user.save();
-    res.json({ message: "Password reset successful" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }});
-
 
 
 router.post("/dashboard", async (req, res) => {
   try {
-    const admin = new Admin(req.body);
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const admin = new Admin({ ...req.body, password: hashedPassword });
     await admin.save();
     res.status(201).json({ message: "Admin registered" });
   } catch (err) {

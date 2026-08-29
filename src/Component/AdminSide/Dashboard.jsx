@@ -29,10 +29,6 @@ const Dashboard = () => {
 
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    console.log("Logout clicked");
-    // TODO: Add real logout logic
-  };
 
   // Fetch dashboard statistics
   const fetchDashboardStats = async () => {
