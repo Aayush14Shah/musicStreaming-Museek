@@ -1,0 +1,10 @@
+exclude:
+  - museek-backend/
+  - node_modules/
+  - vendor/
+  - package.json
+  - package-lock.json
+  - yarn.lock
+  - README.md
+  - Gemfile
+  - Gemfile.lock
